@@ -1,0 +1,1311 @@
+/* ============================================================
+   Additional layouts for the new pages
+   ============================================================ */
+
+/* Generic content page wrapper (centers content with breathing room) */
+.page {
+  padding: 56px 60px 100px;
+  background: var(--ink-deep);
+  max-width: 1280px;
+}
+
+/* ============================================================
+   Recent additions — feed
+   ============================================================ */
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+.feed-day {
+  margin-bottom: 36px;
+}
+.feed-day-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink-line-soft);
+}
+.feed-day-date {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold-bright);
+  letter-spacing: 0.08em;
+}
+.feed-day-relative {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+}
+.feed-day-count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--foam-dim);
+}
+
+.feed-entry {
+  display: grid;
+  grid-template-columns: 130px 80px 1fr auto;
+  gap: 20px;
+  padding: 14px 0;
+  align-items: baseline;
+  border-bottom: 1px solid var(--ink-line-soft);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.feed-entry:hover {
+  background: var(--ink-slate);
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 2px;
+}
+.feed-entry:last-child { border-bottom: none; }
+
+.feed-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  text-align: center;
+  color: var(--foam-dim);
+}
+.feed-type.new { color: var(--necro); border-color: var(--necro); }
+.feed-type.edit { color: var(--gold); border-color: var(--gold-dim); }
+.feed-type.danger { color: var(--wine-bright); border-color: var(--wine); }
+.feed-type.minor { opacity: 0.6; }
+
+.feed-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--foam-dim);
+}
+
+.feed-title {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  color: var(--foam);
+  margin: 0 0 3px;
+  letter-spacing: 0.04em;
+}
+.feed-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: var(--foam-dim);
+  font-style: italic;
+  margin: 0;
+}
+
+.feed-author {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--foam-dim);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Planes — cosmology diagram
+   ============================================================ */
+.cosmo-stage {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 48px;
+  margin-top: 32px;
+}
+
+.cosmo-diagram {
+  position: relative;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(184,153,104,0.05) 0%, transparent 60%),
+    var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  padding: 32px;
+}
+.cosmo-svg { width: 100%; height: 100%; display: block; }
+.cosmo-node {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.cosmo-node:hover { filter: brightness(1.4); }
+.cosmo-node-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  fill: var(--foam);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.cosmo-info {
+  display: flex;
+  flex-direction: column;
+}
+.cosmo-info-card {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  padding: 24px 26px 26px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cosmo-info-card:hover { border-color: var(--gold-dim); }
+.cosmo-info-card.selected {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(184,153,104,0.08) 0%, var(--ink-slate) 100%);
+}
+.cosmo-info-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.cosmo-info-dot {
+  width: 10px; height: 10px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.cosmo-info-title {
+  font-family: 'Cinzel', serif;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 8px;
+}
+.cosmo-info-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--foam-dim);
+  margin: 0;
+}
+
+/* ============================================================
+   Kingdoms — encyclopedia cards
+   ============================================================ */
+.kingdom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 32px;
+}
+.kingdom-card {
+  display: grid;
+  grid-template-columns: 180px 1fr 240px;
+  gap: 0;
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.kingdom-card:hover {
+  border-color: var(--gold-dim);
+  transform: translateY(-1px);
+}
+
+.kingdom-crest {
+  background: linear-gradient(135deg, var(--ink-slate-2) 0%, var(--ink-deep) 100%);
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  border-right: 1px solid var(--ink-line);
+  position: relative;
+}
+.kingdom-crest::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, transparent 0, transparent 8px, rgba(184,153,104,0.03) 8px, rgba(184,153,104,0.03) 9px);
+}
+.kingdom-crest svg {
+  position: relative;
+  width: 80px; height: 80px;
+  color: var(--gold);
+}
+
+.kingdom-body {
+  padding: 28px 32px 28px;
+}
+.kingdom-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.kingdom-name {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 6px;
+}
+.kingdom-motto {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold-bright);
+  margin: 0 0 14px;
+}
+.kingdom-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--foam-dim);
+  margin: 0;
+}
+
+.kingdom-stats {
+  border-left: 1px solid var(--ink-line);
+  padding: 20px 24px;
+  background: var(--ink-deep);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.kingdom-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--ink-line-soft);
+  font-size: 13px;
+}
+.kingdom-stat:last-child { border-bottom: none; }
+.kingdom-stat-k {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+}
+.kingdom-stat-v {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  color: var(--foam);
+}
+.kingdom-stat-v.danger { color: var(--wine-bright); }
+
+/* ============================================================
+   Factions — dossier / classified style
+   ============================================================ */
+.dossier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+.dossier {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  padding: 28px 30px 26px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+.dossier::before {
+  /* corner triangle */
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border: 24px solid transparent;
+  border-top-color: var(--wine);
+  border-right-color: var(--wine);
+}
+.dossier-stamp {
+  position: absolute;
+  top: 24px; right: -32px;
+  transform: rotate(18deg);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  color: var(--wine-bright);
+  border: 2px solid var(--wine-bright);
+  padding: 4px 12px;
+  opacity: 0.88;
+  z-index: 2;
+  background: rgba(14,13,16,0.8);
+  pointer-events: none;
+}
+.dossier-stamp.green {
+  color: var(--necro);
+  border-color: var(--necro);
+}
+
+.dossier-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.dossier-name {
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+  color: var(--foam);
+  margin: 0 0 4px;
+}
+.dossier-alias {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--foam-dim);
+  margin: 0 0 20px;
+}
+
+.dossier-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--ink-line-soft);
+  border-bottom: 1px solid var(--ink-line-soft);
+  gap: 6px;
+}
+.dossier-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 13px;
+}
+.dossier-row dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  margin: 0;
+}
+.dossier-row dd {
+  margin: 0;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: var(--foam);
+}
+.dossier-row dd.redacted {
+  background: var(--foam);
+  color: var(--foam);
+  user-select: none;
+  padding: 0 4px;
+}
+.dossier-row dd.redacted::selection { background: transparent; }
+
+.dossier-summary {
+  font-family: 'EB Garamond', serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--foam-dim);
+  margin: 0;
+}
+
+/* ============================================================
+   Events — filterable list
+   ============================================================ */
+.events-controls {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0 28px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--foam-dim);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip:hover { color: var(--foam); border-color: var(--gold-dim); }
+.chip.active {
+  background: rgba(184,153,104,0.15);
+  color: var(--gold-bright);
+  border-color: var(--gold);
+}
+
+.events-table {
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.events-row {
+  display: grid;
+  grid-template-columns: 120px 110px 1fr 140px;
+  align-items: center;
+  padding: 14px 22px;
+  gap: 20px;
+  background: var(--ink-slate);
+  border-bottom: 1px solid var(--ink-line);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.events-row:last-child { border-bottom: none; }
+.events-row:hover { background: var(--ink-slate-2); }
+.events-row.header {
+  background: var(--ink-deep);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  cursor: default;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.events-year {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--gold-bright);
+  letter-spacing: 0.08em;
+}
+.events-cat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+}
+.events-cat.cata { color: var(--wine-bright); }
+.events-cat.div { color: var(--gold); }
+.events-cat.pol { color: var(--planar); }
+.events-cat.arc { color: #6aa8d4; }
+.events-title {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  color: var(--foam);
+  letter-spacing: 0.04em;
+  margin: 0 0 3px;
+}
+.events-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--foam-dim);
+  margin: 0;
+}
+.events-region {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--foam-dim);
+  text-align: right;
+}
+
+/* ============================================================
+   Characters — dramatis personae gallery
+   ============================================================ */
+.cast-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+.cast-card {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cast-card:hover {
+  border-color: var(--gold-dim);
+  transform: translateY(-2px);
+}
+.cast-portrait {
+  aspect-ratio: 1;
+  background:
+    repeating-linear-gradient(45deg, transparent 0px, transparent 14px, rgba(184,153,104,0.04) 14px, rgba(184,153,104,0.04) 15px),
+    radial-gradient(ellipse at 50% 35%, rgba(184,153,104,0.1) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ink-slate-2) 0%, var(--ink-deep) 100%);
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--ink-line);
+}
+.cast-portrait-initial {
+  font-family: 'Cinzel', serif;
+  font-size: 100px;
+  color: var(--gold);
+  opacity: 0.5;
+  letter-spacing: 0;
+}
+.cast-portrait-tag {
+  position: absolute;
+  bottom: 12px; left: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  padding: 3px 8px;
+  background: rgba(14,13,16,0.85);
+  border: 1px solid var(--ink-line);
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.cast-portrait-tag.ally { color: var(--necro); border-color: var(--necro); }
+.cast-portrait-tag.foe { color: var(--wine-bright); border-color: var(--wine); }
+.cast-portrait-tag.pc { color: var(--gold-bright); border-color: var(--gold); }
+
+.cast-body {
+  padding: 22px 24px 22px;
+}
+.cast-name {
+  font-family: 'Cinzel', serif;
+  font-size: 19px;
+  color: var(--foam);
+  margin: 0 0 4px;
+  letter-spacing: 0.04em;
+}
+.cast-role {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--foam-dim);
+  margin: 0 0 14px;
+}
+.cast-meta {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink-line-soft);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+}
+.cast-meta .faction { color: var(--gold); }
+
+/* ============================================================
+   Sessions — journal
+   ============================================================ */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 32px;
+}
+.session {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 32px;
+  padding: 24px 0 28px;
+  border-bottom: 1px solid var(--ink-line);
+}
+.session:last-child { border-bottom: none; }
+.session-num {
+  font-family: 'Cinzel', serif;
+  text-align: right;
+}
+.session-num-big {
+  font-size: 56px;
+  color: var(--gold-bright);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.session-num-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 6px;
+}
+.session-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  margin-top: 10px;
+}
+
+.session-title {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 6px;
+}
+.session-location {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold-bright);
+  margin: 0 0 16px;
+}
+.session-summary {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--foam-dim);
+  margin: 0 0 20px;
+  max-width: 64ch;
+}
+
+.session-keypoints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+.session-keypoints li {
+  padding: 4px 0 4px 22px;
+  position: relative;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: var(--foam);
+  line-height: 1.45;
+}
+.session-keypoints li::before {
+  content: "✦";
+  position: absolute;
+  left: 0; top: 4px;
+  color: var(--gold);
+  font-size: 12px;
+}
+.session-keypoints li.danger::before { content: "†"; color: var(--wine-bright); }
+
+/* ============================================================
+   House rules — documentation
+   ============================================================ */
+.docs {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 56px;
+  margin-top: 24px;
+}
+.docs-toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+.docs-toc-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ink-line-soft);
+}
+.docs-toc ol {
+  list-style: none;
+  margin: 0; padding: 0;
+  counter-reset: docs;
+}
+.docs-toc li {
+  counter-increment: docs;
+  padding: 6px 0 6px 32px;
+  position: relative;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: var(--foam);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.docs-toc li::before {
+  content: counter(docs, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--gold-dim);
+  letter-spacing: 0.08em;
+}
+.docs-toc li:hover, .docs-toc li.active { color: var(--gold-bright); }
+
+.docs-content {
+  max-width: 720px;
+}
+.docs-rule {
+  margin-bottom: 48px;
+}
+.docs-rule-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.docs-rule h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-line);
+  position: relative;
+}
+.docs-rule h2::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+}
+.docs-rule p {
+  font-family: 'EB Garamond', serif;
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--foam);
+  margin: 0 0 14px;
+}
+.docs-rule code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 2px 6px;
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  color: var(--gold-bright);
+}
+.docs-callout {
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: rgba(184,153,104,0.06);
+  border-left: 3px solid var(--gold);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--foam-dim);
+}
+.docs-callout strong {
+  font-style: normal;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   Session cards (new — replaces session-list)
+   ============================================================ */
+.session-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.session-card {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  padding: 28px 30px 26px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.session-card:hover {
+  border-color: var(--gold-dim);
+  background: var(--ink-slate-2);
+  transform: translateY(-1px);
+}
+.session-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--gold);
+  opacity: 0.6;
+}
+.session-card.latest::before { background: linear-gradient(180deg, var(--gold) 0%, var(--gold-bright) 100%); opacity: 1; }
+
+.session-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-line-soft);
+}
+.session-card-num {
+  font-family: 'Cinzel', serif;
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--gold-bright);
+  line-height: 1;
+}
+.session-card-num-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 4px;
+}
+.session-card-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  text-align: right;
+}
+.session-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  border-radius: 2px;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.session-card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+.session-card-location {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold-bright);
+  margin: 0 0 16px;
+}
+
+.session-card-summary {
+  font-family: 'EB Garamond', serif;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--foam-dim);
+  margin: 0 0 20px;
+}
+
+.session-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ink-line-soft);
+  margin-bottom: 4px;
+}
+.session-card-meta-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.session-card-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+}
+.session-card-meta-value {
+  font-family: 'EB Garamond', serif;
+  font-size: 13.5px;
+  color: var(--foam);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip-mini {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  background: var(--ink-deep);
+  border: 1px solid var(--ink-line);
+  color: var(--foam);
+  border-radius: 2px;
+}
+.chip-mini.npc { color: var(--gold-dim); }
+.chip-mini.place { color: var(--planar); border-color: rgba(122,90,168,0.4); }
+
+.session-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ============================================================
+   Back button (used on detail pages)
+   ============================================================ */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: var(--gold-bright); }
+.back-btn::before { content: "←"; font-size: 14px; }
+
+/* On parchment context */
+.parchment .back-btn { color: var(--parchment-text-soft); }
+.parchment .back-btn:hover { color: var(--wine); }
+
+/* ============================================================
+   Session detail page
+   ============================================================ */
+.session-detail {
+  padding: 56px 64px 100px;
+  max-width: 920px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.session-detail-head {
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--ink-line);
+  position: relative;
+}
+.session-detail-head::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 100px;
+  height: 1px;
+  background: var(--gold);
+}
+.session-detail-num {
+  font-family: 'Cinzel', serif;
+  font-size: 88px;
+  line-height: 1;
+  color: var(--gold-bright);
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+}
+.session-detail-num-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 24px;
+}
+.session-detail-title {
+  font-family: 'Cinzel', serif;
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+.session-detail-location {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--gold-bright);
+  margin: 0 0 4px;
+}
+.session-detail-location-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  margin: 0;
+}
+
+.session-meta-strip {
+  display: flex;
+  gap: 40px;
+  margin: 24px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--ink-line-soft);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.session-meta-strip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.session-meta-strip .label { color: var(--foam-dim); }
+.session-meta-strip .value { color: var(--gold-bright); font-family: 'Cinzel', serif; letter-spacing: 0.08em; font-size: 14px; }
+
+.session-detail-block {
+  margin-bottom: 36px;
+}
+.session-detail-block h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink-line-soft);
+}
+.session-detail-block p {
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--foam);
+  margin: 0 0 16px;
+}
+.session-detail-block p:first-of-type::first-letter {
+  font-family: 'Cinzel', serif;
+  font-size: 3.4em;
+  float: left;
+  line-height: 0.85;
+  margin: 4px 10px 0 0;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.session-detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-keylist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+.session-keylist li {
+  padding: 6px 0 6px 24px;
+  position: relative;
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  color: var(--foam);
+  line-height: 1.45;
+}
+.session-keylist li::before {
+  content: "✦";
+  position: absolute;
+  left: 0; top: 6px;
+  color: var(--gold);
+  font-size: 12px;
+}
+.session-keylist li.danger::before { content: "†"; color: var(--wine-bright); }
+
+.session-loot {
+  background: var(--ink-deep);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  padding: 18px 22px;
+  list-style: none;
+  margin: 0;
+}
+.session-loot li {
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--ink-line-soft);
+  font-family: 'EB Garamond', serif;
+  font-size: 14.5px;
+  color: var(--foam);
+}
+.session-loot li:last-child { border-bottom: none; }
+.session-loot li::before {
+  content: "▸ ";
+  color: var(--gold-dim);
+}
+
+.gm-note {
+  background: rgba(184,153,104,0.06);
+  border-left: 3px solid var(--gold);
+  padding: 18px 22px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--foam-dim);
+}
+.gm-note::before {
+  content: "Notas do Mestre";
+  display: block;
+  font-style: normal;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   Character detail — portrait variant of article
+   ============================================================ */
+.infobox-portrait-wrap {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 200px;
+  margin: 0 auto 14px;
+  background:
+    repeating-linear-gradient(45deg, transparent 0px, transparent 12px, rgba(184,153,104,0.05) 12px, rgba(184,153,104,0.05) 13px),
+    radial-gradient(ellipse at 50% 35%, rgba(184,153,104,0.12) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ink-slate-2) 0%, var(--ink-deep) 100%);
+  border: 1px solid var(--gold-dim);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.infobox-portrait-initial {
+  font-family: 'Cinzel', serif;
+  font-size: 96px;
+  color: var(--gold-bright);
+  opacity: 0.65;
+  line-height: 1;
+}
+.infobox-portrait-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  padding: 3px 9px;
+  background: rgba(14,13,16,0.92);
+  border: 1px solid var(--ink-line);
+  color: var(--gold);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.infobox-portrait-tag.pc   { color: var(--gold-bright); border-color: var(--gold); }
+.infobox-portrait-tag.ally { color: var(--necro); border-color: var(--necro); }
+.infobox-portrait-tag.foe  { color: var(--wine-bright); border-color: var(--wine); }
+
+/* Hero quote at top of detail body */
+.detail-hero {
+  margin: 0 0 32px;
+  padding: 22px 28px;
+  background: rgba(120, 90, 50, 0.08);
+  border-left: 3px solid var(--wine);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--parchment-text);
+}
+
+/* Placeholder banner for incomplete entries */
+.placeholder-banner {
+  margin-top: 32px;
+  padding: 28px 32px;
+  background: var(--ink-slate);
+  border: 1px dashed var(--gold-dim);
+  border-radius: 2px;
+  text-align: center;
+}
+.placeholder-banner-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.placeholder-banner h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 8px;
+}
+.placeholder-banner p {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--foam-dim);
+  margin: 0;
+}
+
+/* ============================================================
+   Deity hero image (parchment article)
+   ============================================================ */
+.deity-hero-image {
+  margin: 0 0 36px;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  position: relative;
+  border: 1px solid var(--parchment-rule);
+  background: rgba(120, 90, 50, 0.06);
+}
+.deity-hero-image image-slot {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* image-slot in cast portrait — make sure layered tag stays on top */
+.cast-portrait image-slot {
+  display: block;
+  z-index: 1;
+}
+.cast-portrait .cast-portrait-tag { z-index: 2; }
+
+/* image-slot in infobox portrait */
+.infobox-portrait-wrap image-slot {
+  display: block;
+  z-index: 1;
+}
+.infobox-portrait-wrap .infobox-portrait-tag { z-index: 2; }
+
