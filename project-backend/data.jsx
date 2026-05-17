@@ -28,46 +28,8 @@ const Data = {
     ]},
   ],
 
-  // ===== Latest entries (portal) =====
-  latest: [
-    {
-      tag: "Divindade · Anjo Aprisionado",
-      title: "Ayael, o que Sangra Luz",
-      excerpt: "Filho do Titã Lamidriel, aprisionado em sofrimento eterno no Plano de Energia Negativa. A dor que vaza de seu cárcere se manifesta como necromância nos planos materiais.",
-      meta: "Atualizado · 3ª Era, 1281",
-      author: "Arquivista Cael",
-      target: "article",
-    },
-    {
-      tag: "Evento · Catástrofe",
-      title: "A Queda de Lancaster",
-      excerpt: "Quando o selo da Tumba dos Hereges foi rompido, sombras tomaram o reino sagrado em uma única noite. O Rei Vaglies Lihleran I deu sua vida — em vão.",
-      meta: "Cronologia · 1276",
-      author: "Compilação coletiva",
-      target: "timeline",
-    },
-    {
-      tag: "Reino · Monarquia",
-      title: "Oshain & a Rainha Branca",
-      excerpt: "Annabella Whiteflame não envelhece há mais de um século. Sob seu reinado, o reino se expandiu — e a organização Blackflame foi tecida nas sombras de cada conquista.",
-      meta: "Atualizado · 1281",
-      author: "Mestre Volgren",
-    },
-    {
-      tag: "Personagem · Antagonista",
-      title: "Noel Braent, o Agente do Selo",
-      excerpt: "Um nome falso, um rosto a mais nas multidões. Foi ele quem entrou na Tumba dos Hereges e rompeu o selo milenar que mantinha o Abismo afastado.",
-      meta: "Adicionado · sessão 14",
-      author: "Mestre",
-    },
-    {
-      tag: "Tecnologia · Arcano",
-      title: "Warforged: Coração de Cristal",
-      excerpt: "A magocracia de Lorean Treaz domina a arte de selar consciências em corpos de aço e cristal. Suas legiões nunca dormem.",
-      meta: "Atualizado · 1280",
-      author: "Arquivista Cael",
-    },
-  ],
+  // ===== Latest entries (portal + feed — populated from DB) =====
+  latest: [],
 
   // ===== Article: Ayael =====
   article: {
