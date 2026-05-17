@@ -53,28 +53,27 @@ function Portal({ onNav }) {
           <a className="section-link" onClick={() => onNav('recent')}>Ver todas →</a>
         </div>
 
-        {/* Featured */}
-        <div className="card card-featured" onClick={() => onNav('article')}>
-          <div className="card-featured-image" />
-          <div className="card-featured-body">
-            <div className="card-tag">Divindade · Anjo Aprisionado</div>
-            <h3 className="card-title">Ayael, o que Sangra Luz</h3>
-            <p className="card-excerpt">
-              Filho do Titã Lamidriel, aprisionado em sofrimento eterno no Plano
-              de Energia Negativa. A dor que vaza de seu cárcere se manifesta
-              como necromância nos planos materiais — toda terra podre, todo
-              morto-vivo, toda corrupção que arrasa Valiran tem nele sua fonte
-              última.
-            </p>
-            <div className="card-footer">
-              <span>Atualizado por Arquivista Cael</span>
-              <span>3ª Era · 1281</span>
+        {/* Featured — first feed entry */}
+        {(Data.feed || []).length > 0 && (() => {
+          const f = Data.feed[0];
+          return (
+            <div className="card card-featured" onClick={() => f.target && onNav(f.target)} style={f.target ? {cursor:'pointer'} : undefined}>
+              <div className="card-featured-image" />
+              <div className="card-featured-body">
+                <div className="card-tag">{f.type_label}</div>
+                <h3 className="card-title">{f.title}</h3>
+                <p className="card-excerpt">{f.subtitle || '—'}</p>
+                <div className="card-footer">
+                  <span>{f.action}</span>
+                  <span>{f.date_label}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Regular cards */}
-        {(Data.feed || []).slice(0, 4).map((c, i) => (
+        {(Data.feed || []).slice(1, 4).map((c, i) => (
           <div
             key={i}
             className="card"
