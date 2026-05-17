@@ -7,9 +7,10 @@
   async function loadAll() {
     if (!window.sb) return;
 
-    const [sessRes, charRes, tlRes, evRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
+      window.sb.from('deities').select('*'),
       window.sb.from('timeline_events').select('*').order('sort_order'),
       window.sb.from('events').select('*').order('sort_order'),
     ]);
@@ -56,6 +57,22 @@
         };
       });
       Data.charIds = charRes.data.map(c => c.id);
+    }
+
+    if (deityRes.data && deityRes.data.length > 0) {
+      deityRes.data.forEach(d => {
+        Entities.deities[d.id] = {
+          id: d.id,
+          name: d.name,
+          epithet: d.epithet || null,
+          sigil: d.sigil || null,
+          infobox: d.infobox || { rows: [] },
+          hero: d.hero || null,
+          sections: d.sections || [],
+          related: d.related || [],
+          placeholder: d.placeholder || false,
+        };
+      });
     }
 
     if (tlRes.data && tlRes.data.length > 0) {

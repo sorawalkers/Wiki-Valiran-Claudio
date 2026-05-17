@@ -9,17 +9,7 @@ function DeityDetail({ id, onNav }) {
     return <Article onNav={onNav} />;
   }
 
-  let d = Entities.deities[id];
-
-  if (!d) {
-    // Try resolving from pantheon list
-    let found = null;
-    for (const tier of Data.pantheon) {
-      const g = tier.gods.find(g => g.name.toLowerCase() === id.toLowerCase());
-      if (g) { found = g; break; }
-    }
-    if (found) d = Entities.deities._placeholder(id, found);
-  }
+  const d = Entities.deities[id];
 
   if (!d) {
     return (

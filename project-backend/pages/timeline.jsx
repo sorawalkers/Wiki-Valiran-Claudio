@@ -139,7 +139,7 @@ function Timeline({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
 
-  const events = Data.timeline;
+  const events = Data.timeline || [];
 
   return (
     <div className="timeline-page" data-screen-label="04 Linha do Tempo">
@@ -177,6 +177,12 @@ function Timeline({ onNav }) {
           }}>{f}</button>
         ))}
       </div>
+
+      {events.length === 0 && (
+        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
+          Nenhum evento na linha do tempo ainda. Use o botão acima para adicionar.
+        </div>
+      )}
 
       <div className="timeline">
         {events.map((e, i) => {

@@ -8,20 +8,6 @@ const CAT_OPTIONS = [
   { id: 'arc',  label: 'Arcano' },
 ];
 
-const STATIC_EVENTS = [
-  { year: 'T-???',    cat: 'div',  catLabel: 'Divino',     title: 'Cerigane tece a Trama', desc: 'O primeiro ato consciente do mundo.', region: 'Pré-Valiran' },
-  { year: '1ªE 489',  cat: 'div',  catLabel: 'Divino',     title: 'Esmir ascende', desc: 'Um mortal compra com sua morte a era seguinte.', region: 'Lancaster' },
-  { year: '2ªE 023',  cat: 'pol',  catLabel: 'Político',   title: 'República Prateada é fundada', desc: 'Dragões metálicos pousam sobre o continente sul.', region: 'Aerithys' },
-  { year: '2ªE 314',  cat: 'arc',  catLabel: 'Arcano',     title: 'Primeiro Warforged desperta', desc: 'Ven Sothiel transfere uma consciência para o aço.', region: 'Lorean Treaz' },
-  { year: '2ªE 798',  cat: 'pol',  catLabel: 'Político',   title: 'Annabella é coroada', desc: 'Uma rainha jovem que jamais envelheceu um dia.', region: 'Oshain' },
-  { year: '3ªE 1276', cat: 'cata', catLabel: 'Catástrofe', title: 'A Queda de Lancaster', desc: 'O selo é rompido. O reino sagrado cai em uma noite.', region: 'Lancaster', target: 'article' },
-  { year: '3ªE 1276', cat: 'div',  catLabel: 'Divino',     title: 'Vaglies Lihleran I se sacrifica', desc: 'O Rei oferece a própria vida para retardar a fenda.', region: 'Lancaster' },
-  { year: '3ªE 1278', cat: 'pol',  catLabel: 'Político',   title: 'Blackflame parcialmente revelada', desc: 'Documentos vazam, e Oshain mente sobre vinte coisas em vez de uma.', region: 'Halensgard' },
-  { year: '3ªE 1279', cat: 'cata', catLabel: 'Catástrofe', title: 'Mortvuus se mexe', desc: 'Pela primeira vez em milênios, o Silêncio Primeiro fala.', region: 'Indeterminado' },
-  { year: '3ªE 1280', cat: 'arc',  catLabel: 'Arcano',     title: 'A décima primeira ruptura', desc: 'O Concílio mapeia mais uma cicatriz na Trama.', region: 'Lorean Treaz' },
-  { year: '3ªE 1281', cat: 'pol',  catLabel: 'Político',   title: 'A campanha começa', desc: 'Sete heróis improváveis se cruzam numa estalagem.', region: 'Tarvane', target: 'sessions' },
-];
-
 // ============================================================
 // Event modal (create / edit)
 // ============================================================
@@ -142,7 +128,7 @@ function Events({ onNav }) {
   const [filter, setFilter] = React.useState('todos');
   const [modal, setModal] = React.useState(null);
 
-  const events = Data.events || STATIC_EVENTS;
+  const events = Data.events || [];
 
   const filters = [
     { id: 'todos', label: 'Tudo' },
@@ -190,6 +176,12 @@ function Events({ onNav }) {
           color:'var(--foam-dim)',
         }}>{filtered.length} de {events.length} eventos</span>
       </div>
+
+      {events.length === 0 && (
+        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
+          Nenhum evento catalogado ainda. Use o botão acima para adicionar.
+        </div>
+      )}
 
       <div className="events-table">
         <div className="events-row header">

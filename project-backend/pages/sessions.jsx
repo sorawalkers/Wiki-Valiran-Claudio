@@ -178,7 +178,7 @@ function Sessions({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
 
-  const sessionIds = Data.sessionIds || ['23', '22', '21'];
+  const sessionIds = Data.sessionIds || [];
 
   return (
     <div className="page" data-screen-label="13 Diário de Sessões">
@@ -201,6 +201,12 @@ function Sessions({ onNav }) {
           pelo escriba da mesa logo após o jogo.
         </p>
       </header>
+
+      {sessionIds.length === 0 && (
+        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
+          Nenhuma sessão registrada ainda. Use o botão acima para adicionar.
+        </div>
+      )}
 
       <div className="session-card-grid">
         {sessionIds.map((id, i) => {
