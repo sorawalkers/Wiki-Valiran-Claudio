@@ -172,11 +172,10 @@ function Pantheon({ onNav }) {
 
           <div className="deity-grid">
             {tier.gods.map(g => {
-              const Icon = Sigil[g.sigil];
               return (
                 <article key={g.id} className="deity" onClick={() => onNav('deity:' + g.id)}>
                   <div className="deity-sigil">
-                    {Icon && <Icon style={{width:'100%', height:'100%'}} />}
+                    <DeitySigilImage deity={g} size="card" />
                   </div>
                   <h3 className="deity-name">{g.name}</h3>
                   <p className="deity-epithet">{g.epithet}</p>

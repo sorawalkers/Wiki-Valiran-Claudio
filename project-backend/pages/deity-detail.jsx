@@ -20,8 +20,6 @@ function DeityDetail({ id, onNav }) {
     );
   }
 
-  const SigilIcon = Sigil[d.sigil];
-
   return (
     <div className="article" data-screen-label={"Divindade · " + d.name}>
       <div className="parchment" style={{minWidth: 0}}>
@@ -110,7 +108,7 @@ function DeityDetail({ id, onNav }) {
         <div className="infobox">
           <div className="infobox-head">
             <div className="infobox-sigil-wrap">
-              {SigilIcon && <SigilIcon />}
+              <DeitySigilImage deity={d} size="infobox" interactive />
             </div>
             <h3 className="infobox-name">{d.name}</h3>
             <p className="infobox-sub">{d.epithet}</p>
