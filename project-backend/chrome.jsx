@@ -131,6 +131,17 @@ function Topbar({ onNav }) {
   );
 }
 
+function navBadge(id) {
+  switch (id) {
+    case 'pantheon':   { const n = Object.values(Entities.deities || {}).filter(d => d && d.name).length; return n || null; }
+    case 'characters': { const n = (Data.charIds || []).length; return n || null; }
+    case 'sessions':   { const n = (Data.sessionIds || []).length; return n || null; }
+    case 'events':     { const n = (Data.events || []).length; return n || null; }
+    case 'timeline':   { const n = (Data.timeline || []).filter(e => e.title).length; return n || null; }
+    default:           return null;
+  }
+}
+
 function Sidebar({ active, onNav }) {
   // Composite IDs like "character:kathryn" map to their root ("characters")
   const rootMap = { character: 'characters', deity: 'pantheon', session: 'sessions' };
@@ -146,6 +157,7 @@ function Sidebar({ active, onNav }) {
             {sec.items.map(item => {
               const Icon = Sigil[item.icon];
               const isActive = activeRoot === item.id;
+              const badge = navBadge(item.id);
               return (
                 <li
                   key={item.id}
@@ -156,7 +168,7 @@ function Sidebar({ active, onNav }) {
                     {Icon && <Icon />}
                   </span>
                   <span>{item.label}</span>
-                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                  {badge && <span className="nav-badge">{badge}</span>}
                 </li>
               );
             })}

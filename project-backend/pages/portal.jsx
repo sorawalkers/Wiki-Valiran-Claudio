@@ -1,6 +1,13 @@
 // Portal — homepage of the wiki
 
 function Portal({ onNav }) {
+  const deityCount   = Object.values(Entities.deities || {}).filter(d => d && d.name).length;
+  const charCount    = (Data.charIds || []).length;
+  const sessionCount = (Data.sessionIds || []).length;
+  const eventCount   = (Data.events || []).length;
+  const tlCount      = (Data.timeline || []).filter(e => e.title).length;
+  const totalCount   = deityCount + charCount + sessionCount + eventCount + tlCount;
+
   return (
     <div className="portal" data-screen-label="01 Portal">
       <section className="hero" style={{'--sigil-watermark': `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%23b89968' stroke-width='0.8'><circle cx='100' cy='100' r='96'/><circle cx='100' cy='100' r='56'/><path d='M100 8 L108 100 L100 192 L92 100 Z' fill='%23b89968' fill-opacity='0.4'/><path d='M34 34 L100 96 L166 34 L104 100 L166 166 L100 104 L34 166 L96 100 Z' stroke-width='0.5'/></svg>")`}}>
@@ -19,19 +26,19 @@ function Portal({ onNav }) {
         <div className="hero-meta">
           <div className="hero-meta-item">
             <span>Entradas</span>
-            <span className="v">1.247</span>
+            <span className="v">{totalCount || '—'}</span>
           </div>
           <div className="hero-meta-item">
             <span>Divindades</span>
-            <span className="v">23</span>
+            <span className="v">{deityCount || '—'}</span>
           </div>
           <div className="hero-meta-item">
             <span>Personagens</span>
-            <span className="v">147</span>
+            <span className="v">{charCount || '—'}</span>
           </div>
           <div className="hero-meta-item">
             <span>Sessões</span>
-            <span className="v">23</span>
+            <span className="v">{sessionCount || '—'}</span>
           </div>
           <div className="hero-meta-item">
             <span>Era</span>

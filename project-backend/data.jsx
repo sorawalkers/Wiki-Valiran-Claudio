@@ -5,25 +5,25 @@ const Data = {
   nav: [
     { section: "Portal", items: [
       { id: "home", label: "Início", icon: "navHome" },
-      { id: "recent", label: "Adições recentes", icon: "navScroll", badge: "12" },
+      { id: "recent", label: "Adições recentes", icon: "navScroll" },
     ]},
     { section: "Cosmologia", items: [
-      { id: "pantheon", label: "Panteão", icon: "navDeity", badge: "23" },
+      { id: "pantheon", label: "Panteão", icon: "navDeity" },
       { id: "planes", label: "Planos de Existência", icon: "navTime" },
       { id: "weave", label: "A Trama Mágica", icon: "navBook" },
     ]},
     { section: "Geopolítica", items: [
       { id: "map", label: "Mapa de Valiran", icon: "navMap" },
-      { id: "kingdoms", label: "Reinos & Potências", icon: "navSword", badge: "8" },
-      { id: "factions", label: "Facções", icon: "navBook", badge: "5" },
+      { id: "kingdoms", label: "Reinos & Potências", icon: "navSword" },
+      { id: "factions", label: "Facções", icon: "navBook" },
     ]},
     { section: "Crônicas", items: [
       { id: "timeline", label: "Linha do Tempo", icon: "navTime" },
-      { id: "events", label: "Eventos da Era", icon: "navBook", badge: "31" },
-      { id: "characters", label: "Dramatis Personae", icon: "navScroll", badge: "47" },
+      { id: "events", label: "Eventos da Era", icon: "navBook" },
+      { id: "characters", label: "Dramatis Personae", icon: "navScroll" },
     ]},
     { section: "Mesa", items: [
-      { id: "sessions", label: "Diário de sessões", icon: "navScroll", badge: "16" },
+      { id: "sessions", label: "Diário de sessões", icon: "navScroll" },
       { id: "house-rules", label: "Regras da casa", icon: "navBook" },
     ]},
   ],
