@@ -184,6 +184,12 @@
     await loadAll();
   }
 
+  async function deleteDeity(id) {
+    const res = await window.sb.from('deities').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   async function saveTimelineEvent(data) {
     const payload = {
       era: data.era || null,
@@ -243,7 +249,7 @@
     loadAll,
     saveSession, deleteSession,
     saveCharacter, deleteCharacter,
-    saveDeity,
+    saveDeity, deleteDeity,
     saveTimelineEvent, deleteTimelineEvent,
     saveEvent, deleteEvent,
   };

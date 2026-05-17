@@ -26,6 +26,7 @@ function ArticleEditor({ type, entity, onClose }) {
   const imgInputRef = React.useRef(null);
   const [busy, setBusy] = React.useState(false);
   const [err, setErr] = React.useState('');
+  const [confirmDel, setConfirmDel] = React.useState(false);
 
   function handleImgChange(e) {
     const f = e.target.files && e.target.files[0];
@@ -73,6 +74,19 @@ function ArticleEditor({ type, entity, onClose }) {
   }
 
   // ── Save ─────────────────────────────────────────────────────
+  async function handleDelete() {
+    if (!confirmDel) { setConfirmDel(true); setTimeout(() => setConfirmDel(false), 3000); return; }
+    setBusy(true);
+    try {
+      if (type === 'character') await window.DB.deleteCharacter(entity.id);
+      else if (type === 'deity') await window.DB.deleteDeity(entity.id);
+      onClose();
+    } catch(e) {
+      setErr(e.message || 'Erro ao apagar');
+      setBusy(false);
+    }
+  }
+
   async function handleSave() {
     setErr('');
     setBusy(true);
@@ -332,6 +346,9 @@ function ArticleEditor({ type, entity, onClose }) {
           <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
           <button type="button" className="btn-save" disabled={busy} onClick={handleSave}>
             {busy ? 'Salvando…' : 'Salvar Artigo'}
+          </button>
+          <button type="button" className={`btn-delete${confirmDel ? ' confirm' : ''}`} disabled={busy} onClick={handleDelete}>
+            {confirmDel ? 'Confirmar exclusão' : 'Apagar'}
           </button>
         </div>
       </div>
