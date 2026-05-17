@@ -1,6 +1,9 @@
 // Article editor — modal for editing hero, sections, infobox, related
 
 function ArticleEditor({ type, entity, onClose }) {
+  const slotId = type === 'character' ? `char-portrait-${entity.id}` : `deity-hero-${entity.id}`;
+  const currentSlot = window._imageSlotGet ? window._imageSlotGet(slotId) : null;
+
   const [hero, setHero] = React.useState(entity.hero || '');
   const [epithet, setEpithet] = React.useState(entity.epithet || '');
   const [sigil, setSigil] = React.useState(entity.sigil || '');
@@ -18,8 +21,19 @@ function ArticleEditor({ type, entity, onClose }) {
     (entity.related || []).map(r => ({ ...r }))
   );
   const [placeholder, setPlaceholder] = React.useState(entity.placeholder || false);
+  const [imgFile, setImgFile] = React.useState(null);
+  const [imgPreview, setImgPreview] = React.useState(currentSlot?.u || null);
+  const imgInputRef = React.useRef(null);
   const [busy, setBusy] = React.useState(false);
   const [err, setErr] = React.useState('');
+
+  function handleImgChange(e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    setImgFile(f);
+    setImgPreview(URL.createObjectURL(f));
+    e.target.value = '';
+  }
 
   // ── Sections ────────────────────────────────────────────────
   function addSection() { setSections(s => [...s, { title: '', paras: '' }]); }
@@ -80,6 +94,11 @@ function ArticleEditor({ type, entity, onClose }) {
         related: related.filter(r => r.title),
         placeholder,
       };
+
+      if (imgFile && window.ImageUpload) {
+        const cloudUrl = await window.ImageUpload.uploadImage(imgFile, slotId);
+        window._imageSlotSet(slotId, { u: cloudUrl, s: 1, x: 0, y: 0 });
+      }
 
       if (type === 'character') await window.DB.saveCharacter(updated);
       else if (type === 'deity') await window.DB.saveDeity(updated);
@@ -165,6 +184,45 @@ function ArticleEditor({ type, entity, onClose }) {
               </div>
             </div>
           )}
+
+          {/* Image */}
+          <div className="modal-field">
+            <label className="modal-label">
+              {type === 'character' ? 'Retrato' : 'Imagem de destaque'}
+            </label>
+            <div style={{ display:'flex', alignItems:'center', gap:16, marginTop:8 }}>
+              {imgPreview && (
+                <img
+                  src={imgPreview}
+                  alt=""
+                  style={{ width:72, height:72, objectFit:'cover', borderRadius:4, border:'1px solid var(--ink-line)', flexShrink:0 }}
+                />
+              )}
+              <div>
+                <button
+                  type="button"
+                  className="editor-add-btn"
+                  style={{ padding:'7px 14px', fontSize:10 }}
+                  onClick={() => imgInputRef.current && imgInputRef.current.click()}
+                >
+                  {imgPreview ? 'Trocar imagem' : 'Adicionar imagem'}
+                </button>
+                {imgPreview && (
+                  <button
+                    type="button"
+                    style={{ marginLeft:8, padding:'7px 12px', fontSize:10, background:'transparent', border:'1px solid var(--wine)', color:'var(--wine-bright)', borderRadius:2, cursor:'pointer', fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.1em' }}
+                    onClick={() => { setImgFile(null); setImgPreview(null); window._imageSlotSet(slotId, null); }}
+                  >
+                    Remover
+                  </button>
+                )}
+                <input ref={imgInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/avif" hidden onChange={handleImgChange} />
+                <div className="modal-hint" style={{ marginTop:6 }}>
+                  {imgFile ? 'Nova imagem selecionada — será enviada ao salvar.' : 'PNG, JPEG, WebP ou AVIF.'}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Hero quote */}
           <div className="modal-field">

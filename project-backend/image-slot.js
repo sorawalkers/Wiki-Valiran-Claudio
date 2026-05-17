@@ -138,6 +138,7 @@
 
   // Expose so image-upload.js can inject cloud URLs into the slot store
   window._imageSlotSet = setSlot;
+  window._imageSlotGet = (id) => getSlot(id);
 
   // ── Image downscale ─────────────────────────────────────────────────────
   // Encode through a canvas so the sidecar carries resized bytes, not the
