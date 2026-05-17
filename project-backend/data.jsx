@@ -69,38 +69,6 @@ const Data = {
     },
   ],
 
-  // ===== Pantheon =====
-  pantheon: [
-    {
-      tier: "Os Titãs",
-      tierDesc: "As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.",
-      gods: [
-        { name: "Lamidriel", epithet: "A Mão que Cria", sigil: "Hand", domain: "Bondade", alignment: "Leal-Bom", aligned: true },
-        { name: "Mortvuus", epithet: "O Silêncio Primeiro", sigil: "Raven", domain: "Fim", alignment: "Neutro" },
-        { name: "Cerigane", epithet: "A Tecelã", sigil: "Tome", domain: "Trama Mágica", alignment: "Neutro" },
-      ],
-    },
-    {
-      tier: "Deuses do Panteão",
-      tierDesc: "As nove divindades estabelecidas, veneradas em templos por todo o continente.",
-      gods: [
-        { name: "Bahamut", epithet: "Pai Platinado", sigil: "Dragon", domain: "Justiça", alignment: "Leal-Bom", aligned: true },
-        { name: "Vofureon", epithet: "Senhor do Sol", sigil: "Sun", domain: "Luz, Verdade", alignment: "Neutro-Bom", aligned: true },
-        { name: "Senhora da Rapina", epithet: "—", sigil: "Raven", domain: "Morte, Decisão", alignment: "Verdadeiro Neutro", opposed: true },
-        { name: "Vargoth", epithet: "Forja-Profunda", sigil: "Crown", domain: "Pedra, Ofício", alignment: "Leal-Neutro" },
-      ],
-    },
-    {
-      tier: "Ascendidos",
-      tierDesc: "Mortais que provaram-se diante dos planos e foram elevados ao manto divino.",
-      gods: [
-        { name: "Esmir", epithet: "A Alvorada Sacrificial", sigil: "Dawn", domain: "Sacrifício, Renovação", alignment: "Neutro-Bom", aligned: true },
-        { name: "Ayael", epithet: "O que Sangra Luz", sigil: "Chain", domain: "Sofrimento, Necromância", alignment: "Aprisionado", opposed: true },
-        { name: "Tessera", epithet: "A Voz das Cinzas", sigil: "Tome", domain: "Memória", alignment: "Caótico-Neutro" },
-      ],
-    },
-  ],
-
   // ===== Article: Ayael =====
   article: {
     breadcrumb: ["Panteão", "Ascendidos", "Ayael"],
