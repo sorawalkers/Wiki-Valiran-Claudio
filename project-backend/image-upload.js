@@ -20,7 +20,7 @@
     const { error: upErr } = await window.sb.storage
       .from('media')
       .upload(path, file, { upsert: true, contentType: file.type || 'image/webp' });
-    if (upErr) throw upErr;
+    if (upErr) throw new Error('Storage: ' + upErr.message);
 
     const { data: { publicUrl } } = window.sb.storage.from('media').getPublicUrl(path);
 
@@ -29,7 +29,7 @@
       url: publicUrl,
       updated_at: new Date().toISOString(),
     });
-    if (dbErr) throw dbErr;
+    if (dbErr) throw new Error('DB: ' + dbErr.message);
 
     return publicUrl;
   }
