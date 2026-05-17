@@ -268,7 +268,9 @@
       this._subFn = () => this._render();
       // Shadow-DOM listeners live with the shadow DOM — bound once here so
       // disconnect/reconnect (e.g. React remount) doesn't stack handlers.
-      this._empty.addEventListener('click', () => this._input.click());
+      this._empty.addEventListener('click', () => {
+        if (this.hasAttribute('data-editable')) this._input.click();
+      });
       root.addEventListener('click', (e) => {
         const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
         if (act === 'replace') { this._exitReframe(true); this._input.click(); }
@@ -447,21 +449,20 @@
     // add/remove symmetric and the depth counter correct.
     handleEvent(e) {
       if (e.type === 'dragenter' || e.type === 'dragover') {
-        // Without preventDefault the browser never fires 'drop'.
         e.preventDefault();
         e.stopPropagation();
+        if (!this.hasAttribute('data-editable')) return;
         if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
         if (e.type === 'dragenter') this._depth++;
         this.setAttribute('data-over', '');
       } else if (e.type === 'dragleave') {
-        // dragenter/leave fire for every descendant crossing — count depth
-        // so hovering the icon inside the empty state doesn't flicker.
         if (--this._depth <= 0) { this._depth = 0; this.removeAttribute('data-over'); }
       } else if (e.type === 'drop') {
         e.preventDefault();
         e.stopPropagation();
         this._depth = 0;
         this.removeAttribute('data-over');
+        if (!this.hasAttribute('data-editable')) return;
         const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (f) this._ingest(f);
       }
