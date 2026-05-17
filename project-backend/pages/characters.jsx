@@ -1,17 +1,5 @@
 // Dramatis Personae — character gallery
 
-const STATIC_CAST = [
-  { id: 'kathryn',    tag: 'PC',     tagClass: 'pc',   name: 'Käthryn Verlaine',    role: 'Paladina dissidente · Lancaster',         faction: 'Lancaster (caído)',   cls: 'Paladina · nv. 7' },
-  { id: 'halric',     tag: 'PC',     tagClass: 'pc',   name: 'Halric Stillvein',    role: 'Bardo conluiado · um conto por estalagem', faction: 'Independente',        cls: 'Bardo · nv. 7' },
-  { id: 'sothia',     tag: 'PC',     tagClass: 'pc',   name: 'Sothia das Cinzas',   role: 'Maga warforged · primeira da linhagem',    faction: 'Lorean Treaz',        cls: 'Feiticeira · nv. 7' },
-  { id: 'mavor',      tag: 'PC',     tagClass: 'pc',   name: 'Mavor Iceblood',      role: 'Mercenário de Ferro · imune à Trama',      faction: 'Império de Ferro',    cls: 'Guerreiro · nv. 7' },
-  { id: 'vensothiel', tag: 'ALIADO', tagClass: 'ally', name: 'Mestra Ven Sothiel',  role: 'Arquimaga decana · mentora arrelíquia',    faction: 'Lorean Treaz',        cls: 'Arquimaga · nv. 18' },
-  { id: 'vagliesII',  tag: 'ALIADO', tagClass: 'ally', name: 'Vaglies II',           role: 'Filho do rei mártir · em exílio',          faction: 'Lancaster (exilado)', cls: 'Clérigo · nv. 12' },
-  { id: 'annabella',  tag: 'INIMIGO',tagClass: 'foe',  name: 'Annabella Whiteflame',role: 'A Rainha Branca · não envelhece',          faction: 'Oshain',              cls: '???' },
-  { id: 'noel',       tag: 'INIMIGO',tagClass: 'foe',  name: 'Noel Braent',          role: 'O Agente do Selo · rosto na multidão',    faction: 'Blackflame',          cls: 'Ladina arcana · ???' },
-  { id: 'caedric',    tag: 'INIMIGO',tagClass: 'foe',  name: '"Irmão Caedric"',      role: 'Lacrimosi · prega libertação',            faction: 'Lacrimosi',           cls: 'Necromante · nv. 14' },
-];
-
 // ============================================================
 // Character modal (create / edit)
 // ============================================================
@@ -144,14 +132,7 @@ function Characters({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
 
-  // Merge: always show static characters + any DB-only additions
-  // For static characters saved to DB, DB data takes precedence
-  const staticIds = STATIC_CAST.map(c => c.id);
-  const dbOnlyIds = (Data.charIds || []).filter(id => !staticIds.includes(id));
-  const allIds = [...staticIds, ...dbOnlyIds];
-  const rawCast = allIds.map(id =>
-    Entities.characters[id] || STATIC_CAST.find(c => c.id === id)
-  ).filter(Boolean);
+  const rawCast = (Data.charIds || []).map(id => Entities.characters[id]).filter(Boolean);
 
   function getInfoboxRow(c, key) {
     return (c.infobox?.rows || []).find(r => r.k === key)?.v || '';
@@ -183,6 +164,12 @@ function Characters({ onNav }) {
           qualquer um para abrir a entrada completa.
         </p>
       </header>
+
+      {cast.length === 0 && (
+        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
+          Nenhum personagem cadastrado ainda. Use o botão acima para adicionar.
+        </div>
+      )}
 
       <div className="cast-grid">
         {cast.map(c => (

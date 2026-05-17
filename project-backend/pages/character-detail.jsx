@@ -4,21 +4,7 @@ function CharacterDetail({ id, onNav }) {
   const { isEditor } = useAuth();
   const [editModal, setEditModal] = React.useState(false);
 
-  // Resolve character; create placeholder for unknown ids
-  let c = Entities.characters[id];
-  if (!c || typeof c === 'function') {
-    // Try resolving by simple id from Characters page list
-    const fallbackMap = {
-      sothia: ['Sothia das Cinzas', 'Maga warforged · primeira da linhagem', 'PC', 'pc'],
-      mavor:  ['Mavor Iceblood', 'Mercenário de Ferro · imune à Trama', 'PC', 'pc'],
-      vensothiel: ['Mestra Ven Sothiel', 'Arquimaga decana · mentora arrelíquia', 'ALIADO', 'ally'],
-      vagliesII: ['Vaglies II', 'Filho do rei mártir · em exílio', 'ALIADO', 'ally'],
-      noel:   ['Noel Braent', 'O Agente do Selo · rosto na multidão', 'INIMIGO', 'foe'],
-      caedric:['"Irmão Caedric"', 'Lacrimosi · prega libertação', 'INIMIGO', 'foe'],
-    };
-    const f = fallbackMap[id];
-    if (f) c = Entities.characters._placeholder(id, f[0], f[1], f[2], f[3]);
-  }
+  const c = Entities.characters[id];
 
   if (!c) {
     return (
