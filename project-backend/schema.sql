@@ -88,17 +88,29 @@ create table if not exists events (
   sort_order integer default 0
 );
 
--- Latest entries (portal)
+-- Latest entries (feed de adições recentes)
 create table if not exists latest_entries (
   id uuid default gen_random_uuid() primary key,
-  tag text,
+  entry_type text not null default 'new',
+  type_label text not null default 'NOVO',
+  date_label text,
+  time_label text,
   title text not null,
   excerpt text,
-  meta text,
   author text,
   target text,
+  tag text,
+  meta text,
+  sort_order integer default 0,
   created_at timestamptz default now()
 );
+
+-- Migration: add new columns to existing latest_entries table
+alter table latest_entries add column if not exists entry_type text not null default 'new';
+alter table latest_entries add column if not exists type_label text not null default 'NOVO';
+alter table latest_entries add column if not exists date_label text;
+alter table latest_entries add column if not exists time_label text;
+alter table latest_entries add column if not exists sort_order integer default 0;
 
 -- Regions (mapa)
 create table if not exists regions (

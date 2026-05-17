@@ -17,8 +17,10 @@
     Data.timeline   = [];
     Data.events     = [];
     Data.houserules = [];
+    Data.latest     = [];
+    Data.kingdoms   = [];
 
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, latestRes, kingRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -26,6 +28,8 @@
       window.sb.from('events').select('*').order('sort_order'),
       window.sb.from('factions').select('*').order('sort_order'),
       window.sb.from('houserules').select('*').order('sort_order'),
+      window.sb.from('latest_entries').select('*').order('sort_order'),
+      window.sb.from('kingdoms').select('*').order('sort_order'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -140,6 +144,37 @@
         callout_label: r.callout_label || null,
         callout_text: r.callout_text || null,
         sort_order: r.sort_order || 0,
+      }));
+    }
+
+    if (latestRes.data) {
+      Data.latest = latestRes.data.map(e => ({
+        _id:        e.id,
+        entry_type: e.entry_type || 'new',
+        type_label: e.type_label || 'NOVO',
+        date_label: e.date_label || '',
+        time_label: e.time_label || '',
+        title:      e.title,
+        excerpt:    e.excerpt || '',
+        author:     e.author || '',
+        target:     e.target || null,
+        tag:        e.tag || null,
+        meta:       e.meta || null,
+        sort_order: e.sort_order || 0,
+      }));
+    }
+
+    if (kingRes.data) {
+      Data.kingdoms = kingRes.data.map(k => ({
+        _id:        k.id,
+        sigil:      k.sigil || null,
+        eyebrow:    k.eyebrow || null,
+        name:       k.name,
+        motto:      k.motto || null,
+        desc:       k.desc || null,
+        stats:      k.stats || [],
+        target:     k.target || null,
+        sort_order: k.sort_order || 0,
       }));
     }
 
@@ -328,6 +363,63 @@
     await loadAll();
   }
 
+  async function saveLatestEntry(data) {
+    const payload = {
+      entry_type: data.entry_type || 'new',
+      type_label: data.type_label || 'NOVO',
+      date_label: data.date_label || null,
+      time_label: data.time_label || null,
+      title:      data.title,
+      excerpt:    data.excerpt || null,
+      author:     data.author || null,
+      target:     data.target || null,
+      tag:        data.tag || null,
+      meta:       data.meta || null,
+      sort_order: parseInt(data.sort_order) || 0,
+    };
+    let res;
+    if (data._id) {
+      res = await window.sb.from('latest_entries').update(payload).eq('id', data._id);
+    } else {
+      res = await window.sb.from('latest_entries').insert(payload);
+    }
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteLatestEntry(dbId) {
+    const res = await window.sb.from('latest_entries').delete().eq('id', dbId);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function saveKingdom(data) {
+    const payload = {
+      sigil:      data.sigil      || null,
+      eyebrow:    data.eyebrow    || null,
+      name:       data.name,
+      motto:      data.motto      || null,
+      desc:       data.desc       || null,
+      stats:      data.stats      || [],
+      target:     data.target     || null,
+      sort_order: parseInt(data.sort_order) || 0,
+    };
+    let res;
+    if (data._id) {
+      res = await window.sb.from('kingdoms').update(payload).eq('id', data._id);
+    } else {
+      res = await window.sb.from('kingdoms').insert(payload);
+    }
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteKingdom(id) {
+    const res = await window.sb.from('kingdoms').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   window.DB = {
     loadAll,
     saveSession, deleteSession,
@@ -337,5 +429,7 @@
     saveTimelineEvent, deleteTimelineEvent,
     saveEvent, deleteEvent,
     saveHouseRule, deleteHouseRule,
+    saveLatestEntry, deleteLatestEntry,
+    saveKingdom, deleteKingdom,
   };
 })();

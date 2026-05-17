@@ -177,14 +177,26 @@ function Sidebar({ active, onNav }) {
       ))}
 
       <div className="sidebar-footer">
-        <div className="session-callout" onClick={() => onNav('sessions')} style={{cursor:'pointer'}}>
-          <div className="session-callout-eyebrow">↳ Última sessão</div>
-          <div className="session-callout-title">As Marcas no Pântano</div>
-          <div className="session-callout-meta">
-            <span>SESSÃO 23</span>
-            <span>14 · MAI</span>
-          </div>
-        </div>
+        {(() => {
+          const lastId = Data.sessionIds && Data.sessionIds[0];
+          const s = lastId ? Entities.sessions[lastId] : null;
+          return (
+            <div className="session-callout" onClick={() => onNav('sessions')} style={{cursor:'pointer'}}>
+              <div className="session-callout-eyebrow">↳ Última sessão</div>
+              <div className="session-callout-title">{s ? s.title : '—'}</div>
+              <div className="session-callout-meta">
+                {s ? (
+                  <>
+                    <span>SESSÃO {s.num}</span>
+                    <span>{s.dateShort || s.date || '—'}</span>
+                  </>
+                ) : (
+                  <span>Nenhuma sessão</span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </aside>
   );
