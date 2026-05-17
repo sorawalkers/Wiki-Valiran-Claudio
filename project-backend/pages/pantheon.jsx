@@ -26,14 +26,14 @@ function DeityModal({ onClose }) {
       const id = form.id || slugify(form.name);
       await window.DB.saveDeity({
         id,
-        name:     form.name,
-        epithet:  form.epithet || null,
-        sigil:    form.sigil   || null,
+        name:        form.name,
+        epithet:     form.epithet || null,
+        sigil:       form.sigil   || null,
         placeholder: form.placeholder,
-        infobox:  { rows: [] },
-        hero:     null,
-        sections: [],
-        related:  [],
+        infobox:     { rows: [] },
+        hero:        null,
+        sections:    [],
+        related:     [],
       });
       onClose();
     } catch(e) {
@@ -44,46 +44,56 @@ function DeityModal({ onClose }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
-        <div className="modal-header">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" style={{ maxWidth: 560 }} onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-eyebrow">Cosmologia · Panteão de Valiran</div>
           <h2 className="modal-title">Nova Divindade</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
         </div>
-        <form onSubmit={handleSave} className="modal-body">
-          <label className="field">
-            <span className="field-label">Nome *</span>
-            <input className="field-input" value={form.name} required
-              onChange={e => { set('name', e.target.value); if (!form.id) set('id', slugify(e.target.value)); }} />
-          </label>
-          <label className="field">
-            <span className="field-label">ID (slug)</span>
-            <input className="field-input" value={form.id} placeholder="auto"
-              onChange={e => set('id', e.target.value)} />
-          </label>
-          <label className="field">
-            <span className="field-label">Epíteto</span>
-            <input className="field-input" value={form.epithet}
-              onChange={e => set('epithet', e.target.value)}
-              placeholder="Ex: A Alvorada Sacrificial · O Mortal que Virou Manhã" />
-          </label>
-          <label className="field">
-            <span className="field-label">Sigilo</span>
-            <select className="field-input" value={form.sigil} onChange={e => set('sigil', e.target.value)}>
-              <option value="">— nenhum —</option>
-              {SIGIL_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </label>
-          <label className="field" style={{flexDirection:'row', alignItems:'center', gap:10}}>
-            <input type="checkbox" checked={form.placeholder}
-              onChange={e => set('placeholder', e.target.checked)} />
-            <span className="field-label" style={{marginBottom:0}}>Artigo em compilação (placeholder)</span>
-          </label>
-          {err && <p className="modal-err">{err}</p>}
-          <div className="modal-footer">
-            <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn-primary" disabled={busy}>
-              {busy ? 'Salvando…' : 'Criar Divindade'}
+        <form onSubmit={handleSave}>
+          <div className="modal-body">
+            <div className="modal-field">
+              <label className="modal-label">Nome</label>
+              <input className="modal-input" value={form.name} required autoFocus
+                placeholder="Nome da divindade"
+                onChange={e => { set('name', e.target.value); if (!form.id) set('id', slugify(e.target.value)); }} />
+            </div>
+            <div className="modal-field-row">
+              <div className="modal-field">
+                <label className="modal-label">ID (slug)</label>
+                <input className="modal-input" value={form.id}
+                  placeholder="gerado automaticamente"
+                  onChange={e => set('id', e.target.value)} />
+                <span className="modal-hint">Deixe em branco para gerar do nome.</span>
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Sigilo</label>
+                <select className="modal-select" value={form.sigil} onChange={e => set('sigil', e.target.value)}>
+                  <option value="">— nenhum —</option>
+                  {SIGIL_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="modal-field">
+              <label className="modal-label">Epíteto</label>
+              <input className="modal-input" value={form.epithet}
+                placeholder="Ex: A Alvorada Sacrificial · O Mortal que Virou Manhã"
+                onChange={e => set('epithet', e.target.value)} />
+            </div>
+            <div className="modal-field">
+              <label className="modal-label" style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <input type="checkbox" checked={form.placeholder}
+                  onChange={e => set('placeholder', e.target.checked)}
+                  style={{ width:14, height:14 }} />
+                Entrada em compilação (sem artigo completo)
+              </label>
+            </div>
+            {err && <div className="modal-error">{err}</div>}
+          </div>
+          <div className="modal-foot">
+            <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="btn-save" disabled={busy}>
+              {busy ? 'Salvando…' : 'Salvar Divindade'}
             </button>
           </div>
         </form>
