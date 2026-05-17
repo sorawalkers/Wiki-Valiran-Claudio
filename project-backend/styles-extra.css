@@ -1431,7 +1431,15 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+
+.modal-box > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-head {
