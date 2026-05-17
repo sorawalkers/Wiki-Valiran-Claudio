@@ -96,8 +96,6 @@ function App() {
       case 'timeline': return <Timeline key={dbVersion} onNav={setActive} />;
       case 'map': return <MapPage onNav={setActive} />;
       case 'recent': return <Recent onNav={setActive} />;
-      case 'planes': return <Planes onNav={setActive} />;
-      case 'weave': return <Weave onNav={setActive} />;
       case 'kingdoms': return <Kingdoms onNav={setActive} />;
       case 'factions': return <Factions onNav={setActive} />;
       case 'events': return <Events key={dbVersion} onNav={setActive} />;
@@ -157,8 +155,6 @@ function App() {
               {id:'home', label:'Portal'},
               {id:'recent', label:'Recentes'},
               {id:'pantheon', label:'Panteão'},
-              {id:'planes', label:'Planos'},
-              {id:'weave', label:'Trama'},
               {id:'article', label:'Artigo'},
               {id:'kingdoms', label:'Reinos'},
               {id:'factions', label:'Facções'},

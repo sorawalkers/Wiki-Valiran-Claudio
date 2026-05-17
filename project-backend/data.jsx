@@ -9,8 +9,6 @@ const Data = {
     ]},
     { section: "Cosmologia", items: [
       { id: "pantheon", label: "Panteão", icon: "navDeity" },
-      { id: "planes", label: "Planos de Existência", icon: "navTime" },
-      { id: "weave", label: "A Trama Mágica", icon: "navBook" },
     ]},
     { section: "Geopolítica", items: [
       { id: "map", label: "Mapa de Valiran", icon: "navMap" },
