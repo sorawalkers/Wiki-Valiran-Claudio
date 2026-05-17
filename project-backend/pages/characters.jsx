@@ -144,9 +144,14 @@ function Characters({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
 
-  const rawCast = Data.charIds
-    ? Data.charIds.map(id => Entities.characters[id]).filter(Boolean)
-    : STATIC_CAST;
+  // Merge: always show static characters + any DB-only additions
+  // For static characters saved to DB, DB data takes precedence
+  const staticIds = STATIC_CAST.map(c => c.id);
+  const dbOnlyIds = (Data.charIds || []).filter(id => !staticIds.includes(id));
+  const allIds = [...staticIds, ...dbOnlyIds];
+  const rawCast = allIds.map(id =>
+    Entities.characters[id] || STATIC_CAST.find(c => c.id === id)
+  ).filter(Boolean);
 
   function getInfoboxRow(c, key) {
     return (c.infobox?.rows || []).find(r => r.k === key)?.v || '';
