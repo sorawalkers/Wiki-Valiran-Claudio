@@ -16,14 +16,16 @@
     Data.sessionIds = [];
     Data.timeline   = [];
     Data.events     = [];
+    Data.houserules = [];
 
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
       window.sb.from('timeline_events').select('*').order('sort_order'),
       window.sb.from('events').select('*').order('sort_order'),
       window.sb.from('factions').select('*').order('sort_order'),
+      window.sb.from('houserules').select('*').order('sort_order'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -127,6 +129,18 @@
           sort_order: f.sort_order || 0,
         };
       });
+    }
+
+    if (hrRes.data) {
+      Data.houserules = hrRes.data.map(r => ({
+        _id: r.id,
+        id: r.id,
+        title: r.title,
+        paragraphs: r.paragraphs || [],
+        callout_label: r.callout_label || null,
+        callout_text: r.callout_text || null,
+        sort_order: r.sort_order || 0,
+      }));
     }
 
     dispatch();
@@ -293,6 +307,27 @@
     await loadAll();
   }
 
+  async function saveHouseRule(data) {
+    const payload = {
+      id: data.id,
+      title: data.title,
+      paragraphs: data.paragraphs || [],
+      callout_label: data.callout_label || null,
+      callout_text: data.callout_text || null,
+      sort_order: parseInt(data.sort_order) || 0,
+      updated_at: new Date().toISOString(),
+    };
+    const res = await window.sb.from('houserules').upsert(payload, { onConflict: 'id' });
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteHouseRule(id) {
+    const res = await window.sb.from('houserules').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   window.DB = {
     loadAll,
     saveSession, deleteSession,
@@ -301,5 +336,6 @@
     saveFaction, deleteFaction,
     saveTimelineEvent, deleteTimelineEvent,
     saveEvent, deleteEvent,
+    saveHouseRule, deleteHouseRule,
   };
 })();
