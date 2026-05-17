@@ -1,7 +1,7 @@
 -- SCHEMA: Tabela de facções — O Arquivo de Valiran
 -- Cole no SQL Editor do Supabase e clique em Run
--- Execute ANTES de usar a aba de Facções
 
+-- Cria a tabela se não existir
 CREATE TABLE IF NOT EXISTS factions (
   id          TEXT PRIMARY KEY,
   name        TEXT NOT NULL,
@@ -14,7 +14,20 @@ CREATE TABLE IF NOT EXISTS factions (
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Adiciona colunas que podem estar faltando (seguro rodar mesmo se já existirem)
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS alias       TEXT;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS stamp       TEXT;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS stamp_class TEXT;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS rows        JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS summary     TEXT;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS sort_order  INTEGER DEFAULT 0;
+ALTER TABLE factions ADD COLUMN IF NOT EXISTS updated_at  TIMESTAMPTZ DEFAULT NOW();
+
+-- RLS
 ALTER TABLE factions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read factions" ON factions;
+DROP POLICY IF EXISTS "Auth write factions"  ON factions;
 
 CREATE POLICY "Public read factions"
   ON factions FOR SELECT USING (true);
