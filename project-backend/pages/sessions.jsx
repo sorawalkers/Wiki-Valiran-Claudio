@@ -12,16 +12,11 @@ function SessionModal({ session, onClose }) {
     dateShort: session?.dateShort ?? '',
     location: session?.location ?? '',
     locationDetail: session?.locationDetail ?? '',
-    duration: session?.duration ?? '',
-    session_xp: session?.session_xp ?? '',
     summary: session?.summary ?? '',
-    next: session?.next ?? '',
     cast: (session?.cast ?? []).join('\n'),
     places: (session?.places ?? []).join('\n'),
     narrative: (session?.narrative ?? []).join('\n\n'),
     keypoints: (session?.keypoints ?? []).map(k => (k.danger ? '!' : '') + k.text).join('\n'),
-    loot: (session?.loot ?? []).join('\n'),
-    gmnote: session?.gmnote ?? '',
     _id: session?._id,
   });
   const [busy, setBusy] = React.useState(false);
@@ -48,7 +43,6 @@ function SessionModal({ session, onClose }) {
         places: form.places.split('\n').map(s => s.trim()).filter(Boolean),
         narrative: form.narrative.split('\n\n').map(s => s.trim()).filter(Boolean),
         keypoints: parseKeypoints(form.keypoints),
-        loot: form.loot.split('\n').map(s => s.trim()).filter(Boolean),
       });
       onClose();
     } catch (e) {
@@ -79,15 +73,9 @@ function SessionModal({ session, onClose }) {
         </div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
-            <div className="modal-field-row">
-              <div className="modal-field">
-                <label className="modal-label">Número</label>
-                <input className="modal-input" type="number" value={form.num} onChange={e => set('num', e.target.value)} required placeholder="24" />
-              </div>
-              <div className="modal-field">
-                <label className="modal-label">Duração</label>
-                <input className="modal-input" value={form.duration} onChange={e => set('duration', e.target.value)} placeholder="4h 00min" />
-              </div>
+            <div className="modal-field">
+              <label className="modal-label">Número</label>
+              <input className="modal-input" type="number" value={form.num} onChange={e => set('num', e.target.value)} required placeholder="24" />
             </div>
             <div className="modal-field">
               <label className="modal-label">Título</label>
@@ -110,16 +98,6 @@ function SessionModal({ session, onClose }) {
             <div className="modal-field">
               <label className="modal-label">Detalhe do local</label>
               <input className="modal-input" value={form.locationDetail} onChange={e => set('locationDetail', e.target.value)} placeholder="Descrição geográfica" />
-            </div>
-            <div className="modal-field-row">
-              <div className="modal-field">
-                <label className="modal-label">XP da sessão</label>
-                <input className="modal-input" value={form.session_xp} onChange={e => set('session_xp', e.target.value)} placeholder="1.500 XP" />
-              </div>
-              <div className="modal-field">
-                <label className="modal-label">Próxima sessão</label>
-                <input className="modal-input" value={form.next} onChange={e => set('next', e.target.value)} placeholder="Próxima sessão · 28 · MAI" />
-              </div>
             </div>
             <div className="modal-field">
               <label className="modal-label">Resumo</label>
@@ -144,15 +122,6 @@ function SessionModal({ session, onClose }) {
               <label className="modal-label">Pontos-chave</label>
               <textarea className="modal-textarea" rows={4} value={form.keypoints} onChange={e => set('keypoints', e.target.value)} placeholder={"Käthryn jurou silêncio\n!Tannis: corrupção grau II"} />
               <span className="modal-hint">Um por linha. Prefixe com ! para marcar como perigo.</span>
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Espólio</label>
-              <textarea className="modal-textarea" rows={2} value={form.loot} onChange={e => set('loot', e.target.value)} placeholder="1× anel de prata sem brasão" />
-              <span className="modal-hint">Um item por linha.</span>
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Nota do Mestre</label>
-              <textarea className="modal-textarea" rows={2} value={form.gmnote} onChange={e => set('gmnote', e.target.value)} placeholder="Nota interna" />
             </div>
             {err && <div className="modal-error">{err}</div>}
           </div>
@@ -319,9 +288,6 @@ function SessionDetail({ id, onNav }) {
 
         <div className="session-meta-strip">
           <div><span className="label">Data</span><span className="value">{s.date}</span></div>
-          <div><span className="label">Duração</span><span className="value">{s.duration}</span></div>
-          <div><span className="label">Experiência</span><span className="value">{s.session_xp}</span></div>
-          <div><span className="label">Próxima</span><span className="value" style={{fontSize:12,letterSpacing:'0.04em'}}>{s.next}</span></div>
         </div>
       </header>
 
@@ -368,21 +334,6 @@ function SessionDetail({ id, onNav }) {
           ))}
         </ul>
       </section>
-
-      {s.loot && s.loot.length > 0 && s.loot[0] !== "—" && (
-        <section className="session-detail-block">
-          <h2>Espólio & Descobertas</h2>
-          <ul className="session-loot">
-            {s.loot.map((l, i) => <li key={i}>{l}</li>)}
-          </ul>
-        </section>
-      )}
-
-      {s.gmnote && (
-        <section className="session-detail-block">
-          <div className="gm-note">{s.gmnote}</div>
-        </section>
-      )}
 
       {modal && <SessionModal session={s} onClose={() => setModal(false)} />}
     </div>
