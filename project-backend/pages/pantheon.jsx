@@ -1,6 +1,104 @@
 // Pantheon page — tiered grid of deities (DB-driven)
 
+const SIGIL_OPTIONS = ['Dragon','Dawn','Chain','Sun','Moon','Skull','Eye','Flame','Wave','Tree','Crown','Sword'];
+
+// ============================================================
+// Deity modal (create only — edit is via ArticleEditor)
+// ============================================================
+function DeityModal({ onClose }) {
+  const [form, setForm] = React.useState({ id:'', name:'', epithet:'', sigil:'', placeholder:true });
+  const [busy, setBusy] = React.useState(false);
+  const [err,  setErr]  = React.useState('');
+
+  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  function slugify(name) {
+    return name.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setErr('');
+    setBusy(true);
+    try {
+      const id = form.id || slugify(form.name);
+      await window.DB.saveDeity({
+        id,
+        name:     form.name,
+        epithet:  form.epithet || null,
+        sigil:    form.sigil   || null,
+        placeholder: form.placeholder,
+        infobox:  { rows: [] },
+        hero:     null,
+        sections: [],
+        related:  [],
+      });
+      onClose();
+    } catch(e) {
+      setErr(e.message || 'Erro ao salvar');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <h2 className="modal-title">Nova Divindade</h2>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={handleSave} className="modal-body">
+          <label className="field">
+            <span className="field-label">Nome *</span>
+            <input className="field-input" value={form.name} required
+              onChange={e => { set('name', e.target.value); if (!form.id) set('id', slugify(e.target.value)); }} />
+          </label>
+          <label className="field">
+            <span className="field-label">ID (slug)</span>
+            <input className="field-input" value={form.id} placeholder="auto"
+              onChange={e => set('id', e.target.value)} />
+          </label>
+          <label className="field">
+            <span className="field-label">Epíteto</span>
+            <input className="field-input" value={form.epithet}
+              onChange={e => set('epithet', e.target.value)}
+              placeholder="Ex: A Alvorada Sacrificial · O Mortal que Virou Manhã" />
+          </label>
+          <label className="field">
+            <span className="field-label">Sigilo</span>
+            <select className="field-input" value={form.sigil} onChange={e => set('sigil', e.target.value)}>
+              <option value="">— nenhum —</option>
+              {SIGIL_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+          <label className="field" style={{flexDirection:'row', alignItems:'center', gap:10}}>
+            <input type="checkbox" checked={form.placeholder}
+              onChange={e => set('placeholder', e.target.checked)} />
+            <span className="field-label" style={{marginBottom:0}}>Artigo em compilação (placeholder)</span>
+          </label>
+          {err && <p className="modal-err">{err}</p>}
+          <div className="modal-footer">
+            <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="btn-primary" disabled={busy}>
+              {busy ? 'Salvando…' : 'Criar Divindade'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Pantheon page
+// ============================================================
 function Pantheon({ onNav }) {
+  const { isEditor } = useAuth();
+  const [modal, setModal] = React.useState(false);
+
   const allDeities = Object.values(Entities.deities).filter(d => d && d.name);
 
   function getRow(d, key) {
@@ -8,8 +106,8 @@ function Pantheon({ onNav }) {
     return row ? row.v : '';
   }
 
-  const titas       = allDeities.filter(d => getRow(d,'Tipo').startsWith('Titã'));
-  const ascendidos  = allDeities.filter(d => {
+  const titas = allDeities.filter(d => getRow(d,'Tipo').startsWith('Titã'));
+  const ascendidos = allDeities.filter(d => {
     const t = getRow(d,'Tipo');
     return t.includes('Ascendido') || t.includes('Ascendida') || t.includes('Anjo') || t.includes('Pseudo');
   });
@@ -19,9 +117,9 @@ function Pantheon({ onNav }) {
   });
 
   const tiers = [
-    { tier: 'Os Titãs',           tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',                gods: titas },
-    { tier: 'Deuses do Panteão',  tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                                  gods: estabelecidos },
-    { tier: 'Ascendidos & Especiais', tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.',           gods: ascendidos },
+    { tier: 'Os Titãs',               tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',          gods: titas },
+    { tier: 'Deuses do Panteão',       tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                           gods: estabelecidos },
+    { tier: 'Ascendidos & Especiais',  tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.',        gods: ascendidos },
   ].filter(t => t.gods.length > 0);
 
   const total = tiers.length;
@@ -29,14 +127,23 @@ function Pantheon({ onNav }) {
   return (
     <div className="pantheon" data-screen-label="02 Panteão">
       <header className="page-header">
-        <div className="page-eyebrow">Cosmologia · Volume II · Os Deuses</div>
-        <h1 className="page-title">O Panteão de Valiran</h1>
-        <p className="page-lede">
-          Em Valiran, os deuses não são metáforas. Caminham, sangram, e às vezes
-          são presos. Aqui se catalogam os nomes que recebem oração — os Titãs
-          que ergueram o mundo, os Deuses do panteão estabelecido, e os Ascendidos:
-          mortais que provaram-se grandes demais para a morte.
-        </p>
+        <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16}}>
+          <div>
+            <div className="page-eyebrow">Cosmologia · Volume II · Os Deuses</div>
+            <h1 className="page-title">O Panteão de Valiran</h1>
+            <p className="page-lede">
+              Em Valiran, os deuses não são metáforas. Caminham, sangram, e às vezes
+              são presos. Aqui se catalogam os nomes que recebem oração — os Titãs
+              que ergueram o mundo, os Deuses do panteão estabelecido, e os Ascendidos:
+              mortais que provaram-se grandes demais para a morte.
+            </p>
+          </div>
+          {isEditor && (
+            <button className="editor-add-btn" style={{flexShrink:0, marginTop:4}} onClick={() => setModal(true)}>
+              + Nova Divindade
+            </button>
+          )}
+        </div>
       </header>
 
       {allDeities.length === 0 && (
@@ -75,22 +182,19 @@ function Pantheon({ onNav }) {
       ))}
 
       <div style={{
-        marginTop: 80,
-        padding: '32px 0',
+        marginTop: 80, padding: '32px 0',
         borderTop: '1px solid var(--ink-line-soft)',
-        textAlign: 'center',
-        fontFamily: 'EB Garamond, serif',
-        fontStyle: 'italic',
-        color: 'var(--foam-dim)',
-        fontSize: 15
+        textAlign: 'center', fontFamily: 'EB Garamond, serif',
+        fontStyle: 'italic', color: 'var(--foam-dim)', fontSize: 15,
       }}>
-        “Conta-se que existem outros. Aqueles cujos nomes foram apagados
-        pelos próprios crentes — para que nenhum culto pudesse jamais
-        ressurgir.”
+        "Conta-se que existem outros. Aqueles cujos nomes foram apagados
+        pelos próprios crentes — para que nenhum culto pudesse jamais ressurgir."
         <div style={{marginTop:8, fontSize:11, fontStyle:'normal', letterSpacing:'0.22em', fontFamily:'JetBrains Mono'}}>
           — ARQUIVISTA CAEL, NOTA DE RODAPÉ DESCONHECIDA
         </div>
       </div>
+
+      {modal && <DeityModal onClose={() => setModal(false)} />}
     </div>
   );
 }
