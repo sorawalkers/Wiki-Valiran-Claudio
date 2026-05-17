@@ -147,12 +147,13 @@ function KingdomModal({ kingdom, onClose }) {
             </div>
 
             <div className="modal-field">
-              <label className="modal-label">Destino (target)</label>
+              <label className="modal-label">Link para artigo</label>
               <input
                 className="modal-input" value={form.target}
-                placeholder="Ex: map, timeline, weave"
+                placeholder="Ex: deity:oshain · character:annabella · kingdoms"
                 onChange={e => set('target', e.target.value)}
               />
+              <span className="modal-hint">Rota de navegação ao clicar no card. Use deity:id, character:id, session:num…</span>
             </div>
 
             <div style={{ borderTop: '1px solid var(--ink-line)', paddingTop: 16, marginTop: 8 }}>
@@ -250,7 +251,7 @@ function Kingdoms({ onNav }) {
             <article
               key={k._id}
               className="kingdom-card"
-              style={{ position: 'relative' }}
+              style={{ position: 'relative', cursor: k.target ? 'pointer' : 'default' }}
               onClick={() => k.target && onNav(k.target)}
             >
               {isEditor && (

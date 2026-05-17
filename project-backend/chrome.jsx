@@ -143,6 +143,7 @@ function navBadge(id) {
 }
 
 function Sidebar({ active, onNav }) {
+  const { isAdmin } = useAuth();
   // Composite IDs like "character:kathryn" map to their root ("characters")
   const rootMap = { character: 'characters', deity: 'pantheon', session: 'sessions' };
   const [rootPart] = active.split(':');
@@ -154,7 +155,7 @@ function Sidebar({ active, onNav }) {
         <div key={sec.section} className="nav-section">
           <div className="nav-section-title">{sec.section}</div>
           <ul className="nav-list">
-            {sec.items.map(item => {
+            {sec.items.filter(item => !item.adminOnly || isAdmin).map(item => {
               const Icon = Sigil[item.icon];
               const isActive = activeRoot === item.id;
               const badge = navBadge(item.id);
