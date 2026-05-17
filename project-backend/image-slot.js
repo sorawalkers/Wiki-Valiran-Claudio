@@ -250,9 +250,7 @@
         '  <div class="handle" data-c="nw"></div><div class="handle" data-c="ne"></div>' +
         '  <div class="handle" data-c="sw"></div><div class="handle" data-c="se"></div>' +
         '</div>' +
-        '<div class="ctl"><button data-act="replace" title="Replace image">Replace</button>' +
-        '  <button data-act="clear" title="Remove image">Remove</button></div>' +
-        '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
+        '<div class="ctl"><button data-act="clear" title="Remove image">Remover</button></div>';
       this._frame = root.querySelector('.frame');
       this._ring = root.querySelector('.ring');
       this._img = root.querySelector('.frame img');
@@ -269,23 +267,14 @@
       this._subFn = () => this._render();
       // Shadow-DOM listeners live with the shadow DOM — bound once here so
       // disconnect/reconnect (e.g. React remount) doesn't stack handlers.
-      this._empty.addEventListener('click', () => {
-        if (this.hasAttribute('data-editable')) this._input.click();
-      });
       root.addEventListener('click', (e) => {
         const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
-        if (act === 'replace') { this._exitReframe(true); this._input.click(); }
         if (act === 'clear') {
           this._exitReframe(false);
           this._gen++;
           this._local = null;
           if (this.id) setSlot(this.id, null); else this._render();
         }
-      });
-      this._input.addEventListener('change', () => {
-        const f = this._input.files && this._input.files[0];
-        if (f) this._ingest(f);
-        this._input.value = '';
       });
       // naturalWidth/Height aren't known until load — re-apply so the cover
       // baseline is computed from real dimensions, not the 100%×100% fallback.
@@ -389,10 +378,6 @@
         ImageSlot._warned = true;
         console.warn('<image-slot> without an id will not persist its dropped image.');
       }
-      this.addEventListener('dragenter', this);
-      this.addEventListener('dragover', this);
-      this.addEventListener('dragleave', this);
-      this.addEventListener('drop', this);
       subs.add(this._subFn);
       // width%/height% in _applyView encode the frame aspect at call time —
       // a host resize (responsive grid, pane divider) would stretch the
@@ -408,10 +393,6 @@
 
     disconnectedCallback() {
       subs.delete(this._subFn);
-      this.removeEventListener('dragenter', this);
-      this.removeEventListener('dragover', this);
-      this.removeEventListener('dragleave', this);
-      this.removeEventListener('drop', this);
       if (this._ro) { this._ro.disconnect(); this._ro = null; }
       this._exitReframe(false);
     }
@@ -445,68 +426,6 @@
     }
 
     attributeChangedCallback() { if (this.shadowRoot) this._render(); }
-
-    // handleEvent — one listener object for all four drag events keeps the
-    // add/remove symmetric and the depth counter correct.
-    handleEvent(e) {
-      if (e.type === 'dragenter' || e.type === 'dragover') {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!this.hasAttribute('data-editable')) return;
-        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-        if (e.type === 'dragenter') this._depth++;
-        this.setAttribute('data-over', '');
-      } else if (e.type === 'dragleave') {
-        if (--this._depth <= 0) { this._depth = 0; this.removeAttribute('data-over'); }
-      } else if (e.type === 'drop') {
-        e.preventDefault();
-        e.stopPropagation();
-        this._depth = 0;
-        this.removeAttribute('data-over');
-        if (!this.hasAttribute('data-editable')) return;
-        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-        if (f) this._ingest(f);
-      }
-    }
-
-    async _ingest(file) {
-      this._setError(null);
-      if (!file || ACCEPT.indexOf(file.type) < 0) {
-        this._setError('Drop a PNG, JPEG, WebP, or AVIF image.');
-        return;
-      }
-      // toDataUrl can take hundreds of ms on a large photo. A Clear or a
-      // newer drop during that window would be clobbered when this await
-      // resumes — bump + capture a generation so stale encodes bail.
-      const gen = ++this._gen;
-      try {
-        const w = this.clientWidth || this.offsetWidth || MAX_DIM;
-        const url = await toDataUrl(file, w);
-        if (gen !== this._gen) return;
-        // Only exit reframe once the new image is in hand — a rejected type
-        // or decode failure leaves the in-progress crop untouched.
-        this._exitReframe(false);
-        const val = { u: url, s: 1, x: 0, y: 0 };
-        setSlot(this.id || '', val);
-        // Keep a session-local copy for id-less slots so the drop still
-        // shows, even though it cannot persist.
-        if (!this.id) { this._local = val; this._render(); }
-        // Upload to Supabase Storage in background (editors only)
-        if (window.ImageUpload && window._isEditor && this.id) {
-          fetch(url).then(r => r.blob()).then(blob => {
-            const f2 = new File([blob], file.name || 'image.webp', { type: 'image/webp' });
-            return window.ImageUpload.uploadImage(f2, this.id);
-          }).then(cloudUrl => {
-            const existing = getSlot(this.id);
-            if (existing) setSlot(this.id, Object.assign({}, existing, { u: cloudUrl }));
-          }).catch(e => console.warn('[image-slot] cloud upload failed:', e));
-        }
-      } catch (err) {
-        if (gen !== this._gen) return;
-        this._setError('Could not read that image.');
-        console.warn('<image-slot> ingest failed:', err);
-      }
-    }
 
     _setError(msg) {
       if (this._err) { this._err.remove(); this._err = null; }
