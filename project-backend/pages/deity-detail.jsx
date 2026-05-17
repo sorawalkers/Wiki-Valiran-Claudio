@@ -4,11 +4,6 @@ function DeityDetail({ id, onNav }) {
   const { isEditor } = useAuth();
   const [editModal, setEditModal] = React.useState(false);
 
-  // Resolve deity; Ayael uses Data.article shape; others use Entities.deities
-  if (id === 'ayael') {
-    return <Article onNav={onNav} />;
-  }
-
   const d = Entities.deities[id];
 
   if (!d) {
