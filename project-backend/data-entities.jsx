@@ -4,6 +4,7 @@ const Entities = {
   sessions:   {},
   characters: {},
   deities:    { ayael: null },
+  factions:   {},
 };
 
 window.Entities = Entities;

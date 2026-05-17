@@ -147,7 +147,7 @@ function DeityDetail({ id, onNav }) {
       </aside>
 
       {editModal && (
-        <ArticleEditor type="deity" entity={d} onClose={() => setEditModal(false)} />
+        <ArticleEditor type="deity" entity={d} onClose={() => setEditModal(false)} onDelete={() => onNav('pantheon')} />
       )}
     </div>
   );

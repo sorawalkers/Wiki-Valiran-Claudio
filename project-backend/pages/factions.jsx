@@ -1,100 +1,254 @@
-// Facções secretas — dossier / classified style
+// Facções — DB-driven dossier page
 
+// ============================================================
+// Faction modal (create / edit)
+// ============================================================
+function FactionModal({ faction, onClose }) {
+  const isEdit = !!faction;
+
+  function slugify(name) {
+    return name.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  const [form, setForm] = React.useState({
+    id:         faction?.id         ?? '',
+    name:       faction?.name       ?? '',
+    alias:      faction?.alias      ?? '',
+    stamp:      faction?.stamp      ?? '',
+    stampClass: faction?.stampClass ?? '',
+    summary:    faction?.summary    ?? '',
+    sort_order: faction?.sort_order ?? 0,
+  });
+  const [rows, setRows] = React.useState(
+    (faction?.rows || []).map(r => ({ ...r }))
+  );
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr]   = React.useState('');
+  const [confirmDel, setConfirmDel] = React.useState(false);
+
+  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  function addRow() { setRows(r => [...r, { k: '', v: '', redacted: false }]); }
+  function removeRow(i) { setRows(r => r.filter((_, j) => j !== i)); }
+  function updateRow(i, key, val) {
+    setRows(r => r.map((row, j) => j === i ? { ...row, [key]: val } : row));
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setErr('');
+    setBusy(true);
+    try {
+      const id = form.id || slugify(form.name);
+      await window.DB.saveFaction({
+        ...form,
+        id,
+        rows: rows.filter(r => r.k || r.v),
+      });
+      onClose();
+    } catch (e) {
+      setErr(e.message || 'Erro ao salvar');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirmDel) { setConfirmDel(true); setTimeout(() => setConfirmDel(false), 3000); return; }
+    setBusy(true);
+    try {
+      await window.DB.deleteFaction(faction.id);
+      onClose();
+    } catch (e) {
+      setErr(e.message || 'Erro ao apagar');
+      setBusy(false);
+    }
+  }
+
+  const btnRemove = {
+    background: 'transparent', border: '1px solid var(--wine)',
+    color: 'var(--wine-bright)', borderRadius: 2, padding: '5px 9px',
+    cursor: 'pointer', fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+    letterSpacing: '0.1em', flexShrink: 0,
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-eyebrow">Arquivo · Dossiês</div>
+          <h2 className="modal-title">{isEdit ? 'Editar Facção' : 'Nova Facção'}</h2>
+        </div>
+        <form onSubmit={handleSave}>
+          <div className="modal-body">
+            <div className="modal-field">
+              <label className="modal-label">Nome</label>
+              <input
+                className="modal-input" value={form.name} required autoFocus
+                placeholder="Blackflame"
+                onChange={e => { set('name', e.target.value); if (!form.id) set('id', slugify(e.target.value)); }}
+              />
+            </div>
+
+            <div className="modal-field-row">
+              <div className="modal-field">
+                <label className="modal-label">ID (slug)</label>
+                <input className="modal-input" value={form.id}
+                  placeholder="gerado automaticamente"
+                  onChange={e => set('id', e.target.value)} />
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Ordem</label>
+                <input className="modal-input" type="number" value={form.sort_order}
+                  onChange={e => set('sort_order', e.target.value)} placeholder="0" />
+              </div>
+            </div>
+
+            <div className="modal-field">
+              <label className="modal-label">Alias (subtítulo)</label>
+              <input className="modal-input" value={form.alias}
+                placeholder="A Mão Esquerda da Rainha"
+                onChange={e => set('alias', e.target.value)} />
+            </div>
+
+            <div className="modal-field-row">
+              <div className="modal-field">
+                <label className="modal-label">Carimbo</label>
+                <input className="modal-input" value={form.stamp}
+                  placeholder="CONFIDENCIAL"
+                  onChange={e => set('stamp', e.target.value)} />
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Estilo do carimbo</label>
+                <select className="modal-select" value={form.stampClass} onChange={e => set('stampClass', e.target.value)}>
+                  <option value="">Padrão (vermelho)</option>
+                  <option value="green">Verde (oficial)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--ink-line)', paddingTop: 16, marginTop: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span className="modal-label">Linhas do dossiê</span>
+                <button type="button" className="editor-add-btn" style={{ padding: '5px 14px', fontSize: 10 }} onClick={addRow}>+ Linha</button>
+              </div>
+              {rows.map((row, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                  <input className="modal-input" value={row.k} onChange={e => updateRow(i, 'k', e.target.value)} placeholder="Chave" />
+                  <input className="modal-input" value={row.v} onChange={e => updateRow(i, 'v', e.target.value)} placeholder="Valor" />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--foam-dim)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={!!row.redacted} onChange={e => updateRow(i, 'redacted', e.target.checked)} />
+                    Redigido
+                  </label>
+                  <button type="button" style={btnRemove} onClick={() => removeRow(i)}>✕</button>
+                </div>
+              ))}
+            </div>
+
+            <div className="modal-field">
+              <label className="modal-label">Resumo do dossiê</label>
+              <textarea className="modal-textarea" rows={4} value={form.summary}
+                onChange={e => set('summary', e.target.value)}
+                placeholder="Descrição/intel sobre a facção..." />
+            </div>
+
+            {err && <div className="modal-error">{err}</div>}
+          </div>
+          <div className="modal-foot">
+            <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="btn-save" disabled={busy}>{busy ? 'Salvando…' : 'Salvar'}</button>
+            {isEdit && (
+              <button type="button" className={`btn-delete${confirmDel ? ' confirm' : ''}`} disabled={busy} onClick={handleDelete}>
+                {confirmDel ? 'Confirmar exclusão' : 'Apagar'}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Factions page
+// ============================================================
 function Factions({ onNav }) {
-  const list = [
-    {
-      id: 'BF-001 / OSH',
-      name: 'Blackflame',
-      alias: 'A Mão Esquerda da Rainha',
-      stamp: 'CONFIDENCIAL',
-      rows: [
-        { k: 'Origem', v: 'Reino de Oshain · ≈ 2ªE 798' },
-        { k: 'Comando', v: 'Annabella Whiteflame (confirmado)' },
-        { k: 'Membros', v: '≈ 240 (estimado)' },
-        { k: 'Operações', v: 'Sabotagem, infiltração, ruptura planar' },
-        { k: 'Patente máx.', v: 'CHAMA NEGRA' },
-      ],
-      summary: 'Organização que oficialmente não existe. Documentos vazados em 1278 sugerem participação direta na queda de Lancaster. A Rainha negou em discurso público; a negação durou trinta segundos.',
-    },
-    {
-      id: 'LC-014 / VAL',
-      name: 'Os Lacrimosi',
-      alias: 'Os Que Choram',
-      stamp: 'HERESIA · CLASSE III',
-      rows: [
-        { k: 'Origem', v: 'Itinerante · sem base fixa' },
-        { k: 'Comando', v: '[DADO EXPURGADO]', redacted: true },
-        { k: 'Membros', v: 'Desconhecido · circulação rural' },
-        { k: 'Operações', v: 'Pregação, vigília, libertação angélica' },
-        { k: 'Patente máx.', v: 'IRMÃO DA LÁGRIMA' },
-      ],
-      summary: 'Adoram Ayael — não por crueldade, mas por piedade. Querem libertá-lo. São proibidos em quase todo o continente, e em alguns lugares queimados em praça. Em outros, infelizmente, têm razão.',
-    },
-    {
-      id: 'CM-007 / LRT',
-      name: 'Concílio Magisterial',
-      alias: 'Os Sete da Torre',
-      stamp: 'OFICIAL · LIBERADO',
-      stampClass: 'green',
-      rows: [
-        { k: 'Origem', v: 'Lorean Treaz · 2ªE 314' },
-        { k: 'Comando', v: 'Mestra Ven Sothiel (decano)' },
-        { k: 'Membros', v: '7 arquimagos eleitos' },
-        { k: 'Operações', v: 'Governo, pesquisa arcana, Warforged' },
-        { k: 'Patente máx.', v: 'DECANO' },
-      ],
-      summary: 'O conselho que governa Lorean Treaz. Únicos no continente a possuírem o direito legal de prender o próprio chefe de estado por violação ética. Já exerceram esse direito uma vez.',
-    },
-    {
-      id: 'CV-???',
-      name: '[REGISTRO SELADO]',
-      alias: 'O Pacto da Casa Velhaur',
-      stamp: 'SELADO · CONSELHO',
-      rows: [
-        { k: 'Origem', v: '[DADO EXPURGADO]', redacted: true },
-        { k: 'Comando', v: '[DADO EXPURGADO]', redacted: true },
-        { k: 'Membros', v: '[DADO EXPURGADO]', redacted: true },
-        { k: 'Operações', v: 'Conhecidas apenas pela Mesa do Conselho' },
-        { k: 'Patente máx.', v: '[DADO EXPURGADO]', redacted: true },
-      ],
-      summary: 'O conteúdo deste dossiê foi selado por ordem do Arquivo em 11 do segundo mês, 1281. Tentativas de acesso não autorizado serão registradas e respondidas.',
-    },
-  ];
+  const { isEditor } = useAuth();
+  const [modal, setModal] = React.useState(null);
+
+  const list = Object.values(Entities.factions || {})
+    .filter(f => f && f.name)
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
   return (
     <div className="page" data-screen-label="10 Facções Secretas">
       <header className="page-header">
-        <div className="page-eyebrow">Anexo do Conselho · Vol. VII · Acesso restrito</div>
-        <h1 className="page-title">Facções</h1>
-        <p className="page-lede">
-          Nem todo poder se anuncia em bandeiras. Aqui se mantêm dossiês das
-          organizações que operam nas brechas — algumas oficiais, outras
-          heréticas, uma delas literalmente apagada do registro. A consulta
-          é permitida; a transcrição, não.
-        </p>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+          <div>
+            <div className="page-eyebrow">Anexo do Conselho · Vol. VII · Acesso restrito</div>
+            <h1 className="page-title">Facções</h1>
+            <p className="page-lede">
+              Nem todo poder se anuncia em bandeiras. Aqui se mantêm dossiês das
+              organizações que operam nas brechas — algumas oficiais, outras
+              heréticas, uma delas literalmente apagada do registro. A consulta
+              é permitida; a transcrição, não.
+            </p>
+          </div>
+          {isEditor && (
+            <button className="editor-add-btn" style={{ flexShrink: 0, marginTop: 4 }} onClick={() => setModal('new')}>
+              + Nova Facção
+            </button>
+          )}
+        </div>
       </header>
+
+      {list.length === 0 && (
+        <p style={{ fontFamily: 'EB Garamond,serif', fontStyle: 'italic', color: 'var(--foam-dim)', textAlign: 'center', marginTop: 60 }}>
+          Nenhum dossiê registrado ainda.
+        </p>
+      )}
 
       <div className="dossier-grid">
         {list.map(d => (
-          <article key={d.id} className="dossier">
-            <div className={`dossier-stamp ${d.stampClass || ''}`}>{d.stamp}</div>
-            <div className="dossier-id">DOSSIÊ · {d.id}</div>
+          <article key={d.id} className="dossier" style={{ position: 'relative' }}>
+            {isEditor && (
+              <button
+                className="editor-add-btn"
+                style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', fontSize: 9 }}
+                onClick={() => setModal(d)}
+              >
+                Editar
+              </button>
+            )}
+            {d.stamp && <div className={`dossier-stamp ${d.stampClass || ''}`}>{d.stamp}</div>}
+            <div className="dossier-id">DOSSIÊ · {d.id.toUpperCase()}</div>
             <h3 className="dossier-name">{d.name}</h3>
-            <p className="dossier-alias">{d.alias}</p>
+            {d.alias && <p className="dossier-alias">{d.alias}</p>}
 
-            <dl className="dossier-rows">
-              {d.rows.map(r => (
-                <div key={r.k} className="dossier-row">
-                  <dt>{r.k}</dt>
-                  <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
-                </div>
-              ))}
-            </dl>
+            {d.rows && d.rows.length > 0 && (
+              <dl className="dossier-rows">
+                {d.rows.map((r, i) => (
+                  <div key={i} className="dossier-row">
+                    <dt>{r.k}</dt>
+                    <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
 
-            <p className="dossier-summary">{d.summary}</p>
+            {d.summary && <p className="dossier-summary">{d.summary}</p>}
           </article>
         ))}
       </div>
+
+      {modal && (
+        <FactionModal
+          faction={modal === 'new' ? null : modal}
+          onClose={() => setModal(null)}
+        />
+      )}
     </div>
   );
 }

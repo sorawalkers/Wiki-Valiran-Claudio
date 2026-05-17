@@ -118,7 +118,7 @@ function CharacterDetail({ id, onNav }) {
       </aside>
 
       {editModal && (
-        <ArticleEditor type="character" entity={c} onClose={() => setEditModal(false)} />
+        <ArticleEditor type="character" entity={c} onClose={() => setEditModal(false)} onDelete={() => onNav('characters')} />
       )}
     </div>
   );

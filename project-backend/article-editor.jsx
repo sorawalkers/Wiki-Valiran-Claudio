@@ -1,6 +1,6 @@
 // Article editor — modal for editing hero, sections, infobox, related
 
-function ArticleEditor({ type, entity, onClose }) {
+function ArticleEditor({ type, entity, onClose, onDelete }) {
   const slotId = type === 'character' ? `char-portrait-${entity.id}` : `deity-hero-${entity.id}`;
   const currentSlot = window._imageSlotGet ? window._imageSlotGet(slotId) : null;
 
@@ -80,7 +80,7 @@ function ArticleEditor({ type, entity, onClose }) {
     try {
       if (type === 'character') await window.DB.deleteCharacter(entity.id);
       else if (type === 'deity') await window.DB.deleteDeity(entity.id);
-      onClose();
+      (onDelete || onClose)();
     } catch(e) {
       setErr(e.message || 'Erro ao apagar');
       setBusy(false);

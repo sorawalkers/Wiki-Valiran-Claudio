@@ -7,12 +7,23 @@
   async function loadAll() {
     if (!window.sb) return;
 
-    const [sessRes, charRes, deityRes, tlRes, evRes] = await Promise.all([
+    // Reset entities so deletions are reflected in UI
+    Entities.sessions   = {};
+    Entities.characters = {};
+    Entities.deities    = { ayael: null };
+    Entities.factions   = {};
+    Data.charIds    = [];
+    Data.sessionIds = [];
+    Data.timeline   = [];
+    Data.events     = [];
+
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
       window.sb.from('timeline_events').select('*').order('sort_order'),
       window.sb.from('events').select('*').order('sort_order'),
+      window.sb.from('factions').select('*').order('sort_order'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -101,6 +112,21 @@
         target: e.target,
         sort_order: e.sort_order,
       }));
+    }
+
+    if (facRes.data) {
+      facRes.data.forEach(f => {
+        Entities.factions[f.id] = {
+          id: f.id,
+          name: f.name,
+          alias: f.alias || null,
+          stamp: f.stamp || null,
+          stampClass: f.stamp_class || null,
+          rows: f.rows || [],
+          summary: f.summary || null,
+          sort_order: f.sort_order || 0,
+        };
+      });
     }
 
     dispatch();
@@ -245,11 +271,34 @@
     await loadAll();
   }
 
+  async function saveFaction(data) {
+    const payload = {
+      id: data.id,
+      name: data.name,
+      alias: data.alias || null,
+      stamp: data.stamp || null,
+      stamp_class: data.stampClass || null,
+      rows: data.rows || [],
+      summary: data.summary || null,
+      sort_order: parseInt(data.sort_order) || 0,
+    };
+    const res = await window.sb.from('factions').upsert(payload, { onConflict: 'id' });
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteFaction(id) {
+    const res = await window.sb.from('factions').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   window.DB = {
     loadAll,
     saveSession, deleteSession,
     saveCharacter, deleteCharacter,
     saveDeity, deleteDeity,
+    saveFaction, deleteFaction,
     saveTimelineEvent, deleteTimelineEvent,
     saveEvent, deleteEvent,
   };
