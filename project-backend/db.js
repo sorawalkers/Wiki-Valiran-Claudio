@@ -4,6 +4,57 @@
     window.dispatchEvent(new CustomEvent('db-refresh'));
   }
 
+  function buildFeed() {
+    const items = [];
+
+    function fmtDate(ts) {
+      if (!ts) return '—';
+      const d = new Date(ts);
+      const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      return `${d.getDate()} de ${months[d.getMonth()]}`;
+    }
+    function fmtTime(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    function actionOf(created, updated) {
+      if (!created || !updated) return 'edit';
+      return Math.abs(new Date(updated) - new Date(created)) < 60000 ? 'new' : 'edit';
+    }
+    function push(entity_type, type_label, title, subtitle, target, created, updated) {
+      if (!updated) return;
+      const a = actionOf(created, updated);
+      items.push({ entity_type, type_label, entry_type: a, action: a === 'new' ? 'NOVO' : 'EDIÇÃO',
+        title, subtitle: subtitle || null, target: target || null,
+        updated_at: updated, date_label: fmtDate(updated), time_label: fmtTime(updated) });
+    }
+
+    Object.values(Entities.deities || {}).forEach(d => {
+      if (d && d.name) push('deity', 'Divindade', d.name, d.epithet, 'deity:' + d.id, d.created_at, d.updated_at);
+    });
+    (Data.charIds || []).forEach(id => {
+      const c = Entities.characters[id];
+      if (c) push('character', 'Personagem', c.name, c.role, 'character:' + c.id, c.created_at, c.updated_at);
+    });
+    (Data.sessionIds || []).forEach(num => {
+      const s = Entities.sessions[num];
+      if (s) push('session', 'Sessão', `S${s.num} · ${s.title}`, null, 'session:' + s.num, s.created_at, s.updated_at);
+    });
+    Object.values(Entities.factions || {}).forEach(f => {
+      if (f) push('faction', 'Facção', f.name, f.alias, 'factions', f.created_at, f.updated_at);
+    });
+    (Data.kingdoms || []).forEach(k => {
+      push('kingdom', 'Reino', k.name, k.eyebrow, 'kingdoms', k.created_at, k.updated_at);
+    });
+    (Data.houserules || []).forEach(r => {
+      push('houserule', 'Regra da Casa', r.title, null, 'house-rules', r.created_at, r.updated_at);
+    });
+
+    items.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    return items;
+  }
+
   async function loadAll() {
     if (!window.sb) return;
 
@@ -17,10 +68,10 @@
     Data.timeline   = [];
     Data.events     = [];
     Data.houserules = [];
-    Data.latest     = [];
+    Data.feed       = [];
     Data.kingdoms   = [];
 
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, latestRes, kingRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -28,7 +79,6 @@
       window.sb.from('events').select('*').order('sort_order'),
       window.sb.from('factions').select('*').order('sort_order'),
       window.sb.from('houserules').select('*').order('sort_order'),
-      window.sb.from('latest_entries').select('*').order('sort_order'),
       window.sb.from('kingdoms').select('*').order('sort_order'),
     ]);
 
@@ -52,6 +102,8 @@
           loot: s.loot || [],
           gmnote: s.gmnote,
           next: s.next,
+          created_at: s.created_at || null,
+          updated_at: s.updated_at || null,
         };
       });
       Data.sessionIds = sessRes.data.map(s => String(s.num));
@@ -71,6 +123,8 @@
           sections: c.sections || [],
           related: c.related || [],
           placeholder: c.placeholder || false,
+          created_at: c.created_at || null,
+          updated_at: c.updated_at || null,
         };
       });
       Data.charIds = charRes.data.map(c => c.id);
@@ -88,6 +142,8 @@
           sections: d.sections || [],
           related: d.related || [],
           placeholder: d.placeholder || false,
+          created_at: d.created_at || null,
+          updated_at: d.updated_at || null,
         };
       });
     }
@@ -131,6 +187,8 @@
           rows: f.rows || [],
           summary: f.summary || null,
           sort_order: f.sort_order || 0,
+          created_at: f.created_at || null,
+          updated_at: f.updated_at || null,
         };
       });
     }
@@ -144,23 +202,8 @@
         callout_label: r.callout_label || null,
         callout_text: r.callout_text || null,
         sort_order: r.sort_order || 0,
-      }));
-    }
-
-    if (latestRes.data) {
-      Data.latest = latestRes.data.map(e => ({
-        _id:        e.id,
-        entry_type: e.entry_type || 'new',
-        type_label: e.type_label || 'NOVO',
-        date_label: e.date_label || '',
-        time_label: e.time_label || '',
-        title:      e.title,
-        excerpt:    e.excerpt || '',
-        author:     e.author || '',
-        target:     e.target || null,
-        tag:        e.tag || null,
-        meta:       e.meta || null,
-        sort_order: e.sort_order || 0,
+        created_at: r.created_at || null,
+        updated_at: r.updated_at || null,
       }));
     }
 
@@ -175,9 +218,12 @@
         stats:      k.stats || [],
         target:     k.target || null,
         sort_order: k.sort_order || 0,
+        created_at: k.created_at || null,
+        updated_at: k.updated_at || null,
       }));
     }
 
+    Data.feed = buildFeed();
     dispatch();
   }
 
@@ -230,6 +276,7 @@
       sections: data.sections || [],
       related: data.related || [],
       placeholder: data.placeholder || false,
+      updated_at: new Date().toISOString(),
     };
     const res = await window.sb.from('characters').upsert(payload, { onConflict: 'id' });
     if (res.error) throw res.error;
@@ -253,6 +300,7 @@
       sections: data.sections || [],
       related: data.related || [],
       placeholder: data.placeholder || false,
+      updated_at: new Date().toISOString(),
     };
     const res = await window.sb.from('deities').upsert(payload, { onConflict: 'id' });
     if (res.error) throw res.error;
@@ -330,6 +378,7 @@
       rows: data.rows || [],
       summary: data.summary || null,
       sort_order: parseInt(data.sort_order) || 0,
+      updated_at: new Date().toISOString(),
     };
     const res = await window.sb.from('factions').upsert(payload, { onConflict: 'id' });
     if (res.error) throw res.error;
@@ -363,36 +412,6 @@
     await loadAll();
   }
 
-  async function saveLatestEntry(data) {
-    const payload = {
-      entry_type: data.entry_type || 'new',
-      type_label: data.type_label || 'NOVO',
-      date_label: data.date_label || null,
-      time_label: data.time_label || null,
-      title:      data.title,
-      excerpt:    data.excerpt || null,
-      author:     data.author || null,
-      target:     data.target || null,
-      tag:        data.tag || null,
-      meta:       data.meta || null,
-      sort_order: parseInt(data.sort_order) || 0,
-    };
-    let res;
-    if (data._id) {
-      res = await window.sb.from('latest_entries').update(payload).eq('id', data._id);
-    } else {
-      res = await window.sb.from('latest_entries').insert(payload);
-    }
-    if (res.error) throw res.error;
-    await loadAll();
-  }
-
-  async function deleteLatestEntry(dbId) {
-    const res = await window.sb.from('latest_entries').delete().eq('id', dbId);
-    if (res.error) throw res.error;
-    await loadAll();
-  }
-
   async function saveKingdom(data) {
     const payload = {
       sigil:      data.sigil      || null,
@@ -403,6 +422,7 @@
       stats:      data.stats      || [],
       target:     data.target     || null,
       sort_order: parseInt(data.sort_order) || 0,
+      updated_at: new Date().toISOString(),
     };
     let res;
     if (data._id) {
@@ -429,7 +449,6 @@
     saveTimelineEvent, deleteTimelineEvent,
     saveEvent, deleteEvent,
     saveHouseRule, deleteHouseRule,
-    saveLatestEntry, deleteLatestEntry,
     saveKingdom, deleteKingdom,
   };
 })();

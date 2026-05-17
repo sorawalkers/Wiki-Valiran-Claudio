@@ -74,18 +74,19 @@ function Portal({ onNav }) {
         </div>
 
         {/* Regular cards */}
-        {Data.latest.slice(1, 5).map((c, i) => (
+        {(Data.feed || []).slice(0, 4).map((c, i) => (
           <div
             key={i}
             className="card"
-            onClick={() => onNav(c.target || (i === 0 ? 'timeline' : null))}
+            onClick={() => c.target && onNav(c.target)}
+            style={c.target ? {cursor:'pointer'} : undefined}
           >
-            <div className="card-tag">{c.tag}</div>
+            <div className="card-tag">{c.type_label}</div>
             <h3 className="card-title">{c.title}</h3>
-            <p className="card-excerpt">{c.excerpt}</p>
+            <p className="card-excerpt">{c.subtitle || '—'}</p>
             <div className="card-footer">
-              <span>{c.author}</span>
-              <span>{c.meta}</span>
+              <span>{c.action}</span>
+              <span>{c.date_label}</span>
             </div>
           </div>
         ))}
