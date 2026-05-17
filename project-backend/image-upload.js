@@ -23,15 +23,16 @@
     if (upErr) throw new Error('Storage: ' + upErr.message);
 
     const { data: { publicUrl } } = window.sb.storage.from('media').getPublicUrl(path);
+    const versionedUrl = `${publicUrl}?v=${Date.now()}`;
 
     const { error: dbErr } = await window.sb.from('image_slots').upsert({
       id: slotId,
-      url: publicUrl,
+      url: versionedUrl,
       updated_at: new Date().toISOString(),
     });
     if (dbErr) throw new Error('DB: ' + dbErr.message);
 
-    return publicUrl;
+    return versionedUrl;
   }
 
   window.ImageUpload = { loadSlots, uploadImage };
