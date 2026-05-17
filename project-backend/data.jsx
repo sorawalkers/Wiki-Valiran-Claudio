@@ -107,83 +107,8 @@ const Data = {
     ],
   },
 
-  // ===== Timeline =====
-  timeline: [
-    { era: "A Forja do Mundo · Era dos Titãs" },
-    {
-      year: "T-???",
-      label: "Mítica",
-      title: "Cerigane tece a Trama",
-      desc: "A Titã da magia urde a primeira teia entre todos os planos. Toda magia futura dependerá dela — toda corrupção também.",
-      tag: "Divino", kind: "divine",
-    },
-    {
-      year: "T-401",
-      label: "Mítica",
-      title: "Lamidriel forja os Anjos",
-      desc: "Da própria carne luminosa do Titã da Bondade nascem seis anjos, incluindo Ayael, designado guardião do limiar negativo.",
-      tag: "Divino", kind: "divine",
-    },
-    { era: "A Primeira Era · Reinos Antigos" },
-    {
-      year: "1ªE 112",
-      label: "Civilização",
-      title: "Fundação do Império de Ferro",
-      desc: "Os primeiros humanos a renunciar à Trama Mágica erguem seu império no extremo norte. Seus descendentes, séculos depois, ainda nascem imunes ao arcano.",
-      tag: "Política",
-    },
-    {
-      year: "1ªE 489",
-      label: "Sacrifício",
-      title: "Esmir ascende ao panteão",
-      desc: "Um mortal chamado Esmir se sacrifica para conter a primeira onda planar. Sua morte abre a era seguinte — e funda o reino sagrado de Lancaster.",
-      tag: "Divino", kind: "divine",
-    },
-    { era: "A Segunda Era · As Grandes Cortes" },
-    {
-      year: "2ªE 023",
-      label: "Fundação",
-      title: "Bahamut funda a República Prateada",
-      desc: "Dragões anciões metálicos pousam suas escamas no continente sul e proclamam a primeira república de Valiran. Justiça vira lei.",
-      tag: "Política",
-    },
-    {
-      year: "2ªE 314",
-      label: "Arcano",
-      title: "Primeiro Warforged desperta",
-      desc: "Em Lorean Treaz, a arquimaga Ven Sothiel transfere a consciência de seu aprendiz moribundo para um corpo de aço e cristal. O experimento sobrevive — e ainda anda hoje.",
-      tag: "Arcano",
-    },
-    {
-      year: "2ªE 798",
-      label: "Coroação",
-      title: "Annabella Whiteflame assume Oshain",
-      desc: "Uma rainha jovem é coroada em Oshain. Em 178 anos no trono, ela jamais envelheceu um dia sequer.",
-      tag: "Política",
-    },
-    { era: "A Terceira Era · O Vazamento" },
-    {
-      year: "3ªE 1276",
-      label: "Catástrofe",
-      title: "A Queda de Lancaster",
-      desc: "Noel Braent rompe o Selo da Tumba dos Hereges. Lancaster cai em uma noite. O Rei Vaglies Lihleran I se sacrifica para retardar a fenda. Oshain ocupa as ruínas.",
-      tag: "Catástrofe", kind: "catastrophe",
-    },
-    {
-      year: "3ªE 1278",
-      label: "Conspiração",
-      title: "Blackflame revelada (parcialmente)",
-      desc: "Documentos vazados sugerem que Oshain orquestrou a queda de Lancaster. A Rainha nega. A República Prateada começa a se mobilizar.",
-      tag: "Política", kind: "catastrophe",
-    },
-    {
-      year: "3ªE 1281",
-      label: "Hoje",
-      title: "A campanha começa",
-      desc: "Sete heróis improváveis se cruzam numa estalagem em Tarvane. Nenhum ainda sabe que sua aventura terminará nos pés de Ayael.",
-      tag: "Atual",
-    },
-  ],
+  // ===== Timeline (populated from DB) =====
+  timeline: [],
 
   // ===== Map regions =====
   regions: [
