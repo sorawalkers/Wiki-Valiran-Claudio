@@ -302,8 +302,8 @@ function Campanha3({ onNav }) {
     return () => window.removeEventListener('db-refresh', handler);
   }, []);
 
-  const dbData = Data.campaigns?.[CAMPANHA3_ID];
-  const camp = dbData || CAMPANHA3_DEFAULTS;
+  const raw = Entities.characters?.[CAMPANHA3_ID];
+  const camp = raw ? { id: raw.id, title: raw.name, subtitle: raw.role, sections: raw.sections || [], infobox: raw.infobox || { rows: [], status: '' }, related: raw.related || [] } : CAMPANHA3_DEFAULTS;
 
   async function handleSave(data) {
     await window.DB.saveCampaignArticle(data);

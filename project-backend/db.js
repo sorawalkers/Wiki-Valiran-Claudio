@@ -70,9 +70,7 @@
     Data.houserules = [];
     Data.feed       = [];
     Data.kingdoms   = [];
-    Data.campaigns  = {};
-
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, campRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -81,7 +79,6 @@
       window.sb.from('factions').select('*').order('sort_order'),
       window.sb.from('houserules').select('*').order('sort_order'),
       window.sb.from('kingdoms').select('*').order('sort_order'),
-      window.sb.from('campaign_articles').select('*'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -226,21 +223,6 @@
       }));
     }
 
-    if (campRes.data) {
-      campRes.data.forEach(c => {
-        Data.campaigns[c.id] = {
-          id: c.id,
-          title: c.title,
-          subtitle: c.subtitle || null,
-          sections: c.sections || [],
-          infobox: c.infobox || { rows: [], status: '' },
-          related: c.related || [],
-          updated_at: c.updated_at || null,
-          created_at: c.created_at || null,
-        };
-      });
-    }
-
     Data.feed = buildFeed();
     dispatch();
   }
@@ -248,14 +230,19 @@
   async function saveCampaignArticle(data) {
     const payload = {
       id: data.id,
-      title: data.title,
-      subtitle: data.subtitle || null,
+      name: data.title,
+      role: data.subtitle || null,
+      tag: 'ARTICLE',
+      tagClass: null,
+      infobox: data.infobox || { rows: [] },
       sections: data.sections || [],
-      infobox: data.infobox || { rows: [], status: '' },
       related: data.related || [],
+      hero: null,
+      placeholder: false,
+      campaign: null,
       updated_at: new Date().toISOString(),
     };
-    const res = await window.sb.from('campaign_articles').upsert(payload, { onConflict: 'id' });
+    const res = await window.sb.from('characters').upsert(payload, { onConflict: 'id' });
     if (res.error) throw res.error;
     await loadAll();
   }

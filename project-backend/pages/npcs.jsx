@@ -317,7 +317,7 @@ function Npcs({ onNav }) {
 
   const cast = (Data.charIds || [])
     .map(id => Entities.characters[id])
-    .filter(c => c && c.tag !== 'PC');
+    .filter(c => c && c.tag !== 'PC' && c.tag !== 'ARTICLE');
 
   // Lista de campanhas distintas
   const campaignSet = new Set();
