@@ -483,7 +483,7 @@ function Npcs({ onNav }) {
               key={c.id}
               char={c}
               nr={String(i + 1).padStart(3, '0')}
-              onClick={() => onNav('character:' + c.id)}
+              onClick={() => onNav('npc:' + c.id)}
               onEdit={() => setModal(c)}
               isEditor={isEditor}
             />
@@ -504,7 +504,7 @@ function Npcs({ onNav }) {
               key={c.id}
               char={c}
               nr={String(i + 1).padStart(3, '0')}
-              onClick={() => onNav('character:' + c.id)}
+              onClick={() => onNav('npc:' + c.id)}
               onEdit={() => setModal(c)}
               isEditor={isEditor}
             />
