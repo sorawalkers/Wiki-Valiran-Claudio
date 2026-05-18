@@ -188,7 +188,6 @@ function PlacaCard({ char, nr, onClick, onEdit, isEditor }) {
           id={`char-portrait-${char.id}`}
           shape="rect"
           placeholder={`Arraste retrato · ${char.name}`}
-          {...(dead ? { fit: 'contain', position: '50% 20%' } : {})}
         ></image-slot>
         {dead && <div className="placa-cameo-ring" />}
         {status && (
