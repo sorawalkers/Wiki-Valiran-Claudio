@@ -53,8 +53,23 @@ function PalettePicker({ value, onChange }) {
 }
 
 function App() {
-  const [active, setActive] = useStateApp('home');
+  const hashToRoute = (hash) => hash.replace(/^#\/?/, '') || 'home';
+
+  const [active, setActiveState] = useStateApp(() => hashToRoute(window.location.hash));
   const [dbVersion, setDbVersion] = useStateApp(0);
+
+  // Navigate: update hash + state
+  const navigate = useCallbackApp((route) => {
+    window.location.hash = '/' + route;
+    setActiveState(route);
+  }, []);
+
+  // Sync state when user hits Back / Forward
+  useEffectApp(() => {
+    const onHashChange = () => setActiveState(hashToRoute(window.location.hash));
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   useEffectApp(() => {
     const refresh = () => setDbVersion(v => v + 1);
@@ -90,28 +105,28 @@ function App() {
     // Composite IDs like 'character:kathryn' or 'session:23' or 'deity:bahamut'
     const [page, entity] = active.split(':');
     switch (page) {
-      case 'home': return <Portal key={dbVersion} onNav={setActive} />;
-      case 'pantheon': return <Pantheon onNav={setActive} />;
-      case 'article': return <Article onNav={setActive} />;
-      case 'campanha3': return <CampaignArticle id="campanha3" onNav={setActive} />;
-      case 'campanha2': return <CampaignArticle id="campanha2" onNav={setActive} />;
-      case 'campanha1': return <CampaignArticle id="campanha1" onNav={setActive} />;
-      case 'rogue1':    return <CampaignArticle id="rogue1"    onNav={setActive} />;
-      case 'timeline': return <Timeline key={dbVersion} onNav={setActive} />;
-      case 'map': return <MapPage onNav={setActive} />;
-      case 'recent': return <Recent onNav={setActive} />;
-      case 'kingdoms': return <Kingdoms onNav={setActive} />;
-      case 'factions': return <Factions onNav={setActive} />;
-      case 'events': return <Events key={dbVersion} onNav={setActive} />;
-      case 'characters': return <Characters key={dbVersion} onNav={setActive} />;
-      case 'npcs': return <Npcs key={dbVersion} onNav={setActive} />;
-      case 'character': return <CharacterDetail id={entity} onNav={setActive} />;
-      case 'deity': return <DeityDetail id={entity} onNav={setActive} />;
-      case 'sessions': return <Sessions key={dbVersion} onNav={setActive} />;
-      case 'session': return <SessionDetail id={entity} onNav={setActive} />;
-      case 'house-rules': return <HouseRules onNav={setActive} />;
+      case 'home': return <Portal key={dbVersion} onNav={navigate} />;
+      case 'pantheon': return <Pantheon onNav={navigate} />;
+      case 'article': return <Article onNav={navigate} />;
+      case 'campanha3': return <CampaignArticle id="campanha3" onNav={navigate} />;
+      case 'campanha2': return <CampaignArticle id="campanha2" onNav={navigate} />;
+      case 'campanha1': return <CampaignArticle id="campanha1" onNav={navigate} />;
+      case 'rogue1':    return <CampaignArticle id="rogue1"    onNav={navigate} />;
+      case 'timeline': return <Timeline key={dbVersion} onNav={navigate} />;
+      case 'map': return <MapPage onNav={navigate} />;
+      case 'recent': return <Recent onNav={navigate} />;
+      case 'kingdoms': return <Kingdoms onNav={navigate} />;
+      case 'factions': return <Factions onNav={navigate} />;
+      case 'events': return <Events key={dbVersion} onNav={navigate} />;
+      case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
+      case 'npcs': return <Npcs key={dbVersion} onNav={navigate} />;
+      case 'character': return <CharacterDetail id={entity} onNav={navigate} />;
+      case 'deity': return <DeityDetail id={entity} onNav={navigate} />;
+      case 'sessions': return <Sessions key={dbVersion} onNav={navigate} />;
+      case 'session': return <SessionDetail id={entity} onNav={navigate} />;
+      case 'house-rules': return <HouseRules onNav={navigate} />;
       default:
-        return <ComingSoon page={active} onNav={setActive} />;
+        return <ComingSoon page={active} onNav={navigate} />;
     }
   };
 
@@ -119,8 +134,8 @@ function App() {
     <AuthProvider>
     <React.Fragment>
       <div className="app">
-        <Topbar onNav={setActive} />
-        <Sidebar active={active} onNav={setActive} />
+        <Topbar onNav={navigate} />
+        <Sidebar active={active} onNav={navigate} />
         <main className="main">{renderPage()}</main>
       </div>
 
@@ -171,7 +186,7 @@ function App() {
               {id:'sessions', label:'Sessões'},
               {id:'house-rules', label:'Regras'},
             ].map(p => (
-              <button key={p.id} onClick={() => setActive(p.id)} style={{
+              <button key={p.id} onClick={() => navigate(p.id)} style={{
                 padding:'7px 8px',
                 background: active === p.id ? 'rgba(184,153,104,0.18)' : 'transparent',
                 color: active === p.id ? '#d4b87f' : '#e8dcc4',
