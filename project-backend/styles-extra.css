@@ -2338,7 +2338,7 @@
 
 .ficha-stamp {
   position: absolute;
-  top: 30px; right: -42px;
+  top: 22px; right: 6px;
   transform: rotate(14deg);
   font-family: 'Cinzel', serif;
   font-weight: 600;
