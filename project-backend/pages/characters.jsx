@@ -214,8 +214,7 @@ function PlacaCard({ char, nr, onClick, onEdit, isEditor }) {
       </div>
       <div className="placa-plaque">
         <div className="placa-plaque-eyebrow">
-          N.º {nr} · {char.tag}
-          {campaignShort && <> · {campaignShort.toUpperCase()}</>}
+          {campaignShort ? campaignShort.toUpperCase() : char.tag}
         </div>
         {!dead && <h3 className="placa-plaque-name">{char.name}</h3>}
         <p className="placa-plaque-role">
