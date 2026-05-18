@@ -74,10 +74,10 @@ const CAMPAIGN_DEFAULTS = {
         'Isla foi morta pela Princesa Pálida da Torre. As Princesas Pálidas são mulheres transformadas pela própria Rainha — guarda de elite que serve diretamente à coroa.',
         'O grupo encontrou um livro codificado da Blackflame: Projeto Oceano — arma de destruição em massa. Projeto Fantasma — objetivo real desconhecido. A Rainha não estava apenas se aproveitando do caos. Ela estava construindo algo com ele.',
       ]},
-      { title: 'A Queda de Lidhaven', paras: [
-        'Lidhaven, a leste de Wolfspine, foi o próximo alvo. Mortos-vivos cercaram a cidade. Dykorkis partiu imediatamente. Diego e Lawrence foram com ele.',
+      { title: 'A Queda de Lindhaven', paras: [
+        'Lindhaven, a leste de Wolfspine, foi o próximo alvo. Mortos-vivos cercaram a cidade. Dykorkis partiu imediatamente. Diego e Lawrence foram com ele.',
         'Lady Joice Rosewood estava infectada pela Princesa Pálida. John a escoltou para Wolfspine, onde Revna conseguiu curá-la.',
-        'Diego foi emboscado por agentes da Blackflame. Derrotou quatro, mas outros quatro fugiram. Nas catacumbas, encontraram a Princesa Pálida de Lidhaven. Ela invocou uma Shadow. Lawrence foi gravemente ferido — o contato deixou uma mácula de Ayael que sacerdotes não conseguiram remover.',
+        'Diego foi emboscado por agentes da Blackflame. Derrotou quatro, mas outros quatro fugiram. Nas catacumbas, encontraram a Princesa Pálida de Lindhaven. Ela invocou uma Shadow. Lawrence foi gravemente ferido — o contato deixou uma mácula de Ayael que sacerdotes não conseguiram remover.',
         'Diego deu o golpe final na Shadow. A Princesa olhou para ele: "Renda-se. E todos os outros sobrevivem."',
         'Diego olhou para Lawrence. Dois paladinos de Lamidriel — a mesma fé, o mesmo Titã. Trocaram um aperto de mão. Trocaram as espadas. Lawrence ficou com a espada de Diego.',
         'Diego foi levado.',
