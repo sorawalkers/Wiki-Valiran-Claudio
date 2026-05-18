@@ -136,6 +136,8 @@ function C3EditModal({ data, onClose, onSave }) {
       title: s.title || '',
       text: (s.paras || []).join('\n\n'),
     })),
+    infoRows: (data.infobox?.rows || []).map(r => ({ ...r })),
+    infoStatus: data.infobox?.status || '',
   }));
   const [busy, setBusy] = useC3State(false);
 
@@ -148,13 +150,35 @@ function C3EditModal({ data, onClose, onSave }) {
       return { ...f, sections };
     });
   }
-
   function addSection() {
     setForm(f => ({ ...f, sections: [...f.sections, { title: '', text: '' }] }));
   }
-
   function removeSection(i) {
     setForm(f => ({ ...f, sections: f.sections.filter((_, idx) => idx !== i) }));
+  }
+
+  function setRow(i, k, v) {
+    setForm(f => {
+      const infoRows = [...f.infoRows];
+      infoRows[i] = { ...infoRows[i], [k]: v };
+      return { ...f, infoRows };
+    });
+  }
+  function addRow() {
+    setForm(f => ({ ...f, infoRows: [...f.infoRows, { k: '', v: '', danger: false, ok: false }] }));
+  }
+  function removeRow(i) {
+    setForm(f => ({ ...f, infoRows: f.infoRows.filter((_, idx) => idx !== i) }));
+  }
+  function cycleRowFlag(i) {
+    setForm(f => {
+      const infoRows = [...f.infoRows];
+      const r = infoRows[i];
+      if (!r.danger && !r.ok)       infoRows[i] = { ...r, danger: true, ok: false };
+      else if (r.danger)            infoRows[i] = { ...r, danger: false, ok: true };
+      else                          infoRows[i] = { ...r, danger: false, ok: false };
+      return { ...f, infoRows };
+    });
   }
 
   async function handleSave(e) {
@@ -169,6 +193,10 @@ function C3EditModal({ data, onClose, onSave }) {
           title: s.title,
           paras: s.text.split(/\n\n+/).map(p => p.trim()).filter(Boolean),
         })),
+        infobox: {
+          rows: form.infoRows.filter(r => r.k || r.v),
+          status: form.infoStatus,
+        },
       });
       onClose();
     } catch (err) {
@@ -191,6 +219,36 @@ function C3EditModal({ data, onClose, onSave }) {
 
             <label className="modal-label" style={{ marginTop: 12 }}>Subtítulo</label>
             <input className="modal-input" value={form.subtitle} onChange={e => setField('subtitle', e.target.value)} />
+
+            {/* ── Infobox ── */}
+            <div style={{ marginTop: 20, borderTop: '1px solid var(--ink-line-soft)', paddingTop: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <label className="modal-label" style={{ margin: 0 }}>Infobox — Linhas</label>
+                <button type="button" className="btn-save" style={{ padding: '4px 12px', fontSize: 12 }} onClick={addRow}>+ Linha</button>
+              </div>
+              {form.infoRows.map((r, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto auto', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                  <input className="modal-input" style={{ margin: 0 }} value={r.k} onChange={e => setRow(i, 'k', e.target.value)} placeholder="Rótulo" />
+                  <input className="modal-input" style={{ margin: 0 }} value={r.v} onChange={e => setRow(i, 'v', e.target.value)} placeholder="Valor" />
+                  <button
+                    type="button"
+                    title="Cor: neutro → vermelho → verde → neutro"
+                    onClick={() => cycleRowFlag(i)}
+                    style={{
+                      padding: '4px 8px', fontSize: 11, border: '1px solid var(--ink-line-soft)',
+                      borderRadius: 3, cursor: 'pointer', background: 'transparent',
+                      color: r.danger ? 'var(--wine-bright)' : r.ok ? '#6fa86f' : 'var(--foam-dim)',
+                    }}
+                  >
+                    {r.danger ? '🔴' : r.ok ? '🟢' : '⚪'}
+                  </button>
+                  <button type="button" className="btn-delete" style={{ padding: '4px 8px', fontSize: 11, opacity: 1 }} onClick={() => removeRow(i)}>✕</button>
+                </div>
+              ))}
+
+              <label className="modal-label" style={{ marginTop: 14 }}>Situação Atual (rodapé do infobox)</label>
+              <textarea className="modal-textarea" rows={3} value={form.infoStatus} onChange={e => setField('infoStatus', e.target.value)} placeholder="Texto de status atual..." />
+            </div>
 
             <div style={{ marginTop: 20, borderTop: '1px solid var(--ink-line-soft)', paddingTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
