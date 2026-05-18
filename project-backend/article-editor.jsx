@@ -9,8 +9,14 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
   const [sigil, setSigil] = React.useState(entity.sigil || '');
   const [sections, setSections] = React.useState(
     (entity.sections || []).map(s => ({
-      title: s.title || '',
-      paras: (s.paras || []).join('\n\n'),
+      title:    s.title    || '',
+      paras:    (s.paras || []).join('\n\n'),
+      eyebrow:  s.eyebrow  || '',
+      location: s.location || '',
+      session:  s.session  || '',
+      date:     s.date     || '',
+      tags:     (s.tags || []).join(', '),
+      redacted: s.redacted || false,
     }))
   );
   const [rows, setRows] = React.useState(
@@ -37,7 +43,11 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
   }
 
   // ── Sections ────────────────────────────────────────────────
-  function addSection() { setSections(s => [...s, { title: '', paras: '' }]); }
+  function addSection() {
+    setSections(s => [...s, {
+      title: '', paras: '', eyebrow: '', location: '', session: '', date: '', tags: '', redacted: false,
+    }]);
+  }
   function removeSection(i) { setSections(s => s.filter((_, j) => j !== i)); }
   function updateSection(i, key, val) {
     setSections(s => s.map((sec, j) => j === i ? { ...sec, [key]: val } : sec));
@@ -97,8 +107,14 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
         epithet: type === 'deity' ? epithet : entity.epithet,
         sigil: type === 'deity' ? sigil : entity.sigil,
         sections: sections.map(s => ({
-          title: s.title,
-          paras: s.paras.split('\n\n').map(p => p.trim()).filter(Boolean),
+          title:    s.title,
+          paras:    s.paras.split('\n\n').map(p => p.trim()).filter(Boolean),
+          eyebrow:  s.eyebrow  || undefined,
+          location: s.location || undefined,
+          session:  s.session  || undefined,
+          date:     s.date     || undefined,
+          tags:     s.tags ? s.tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+          redacted: s.redacted || undefined,
         })),
         infobox: {
           ...(entity.infobox || {}),
@@ -271,6 +287,70 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                   <button style={btnMove} onClick={() => moveSection(i, 1)} title="Mover para baixo">↓</button>
                   <button style={btnRemove} onClick={() => removeSection(i)}>Remover</button>
                 </div>
+                {type === 'character' && (
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
+                    <div>
+                      <label className="modal-label" style={{ marginBottom:4 }}>Olho (eyebrow)</label>
+                      <input
+                        className="modal-input"
+                        value={sec.eyebrow}
+                        onChange={e => updateSection(i, 'eyebrow', e.target.value)}
+                        placeholder="Ex: Primeiro Contato"
+                      />
+                    </div>
+                    <div>
+                      <label className="modal-label" style={{ marginBottom:4 }}>Localização</label>
+                      <input
+                        className="modal-input"
+                        value={sec.location}
+                        onChange={e => updateSection(i, 'location', e.target.value)}
+                        placeholder="Ex: Halensgard"
+                      />
+                    </div>
+                    <div>
+                      <label className="modal-label" style={{ marginBottom:4 }}>Sessão</label>
+                      <input
+                        className="modal-input"
+                        value={sec.session}
+                        onChange={e => updateSection(i, 'session', e.target.value)}
+                        placeholder="Ex: Sessão 12"
+                      />
+                    </div>
+                    <div>
+                      <label className="modal-label" style={{ marginBottom:4 }}>Data (ficção)</label>
+                      <input
+                        className="modal-input"
+                        value={sec.date}
+                        onChange={e => updateSection(i, 'date', e.target.value)}
+                        placeholder="Ex: 14 · Out · 1277"
+                      />
+                    </div>
+                    <div style={{ gridColumn:'1 / -1' }}>
+                      <label className="modal-label" style={{ marginBottom:4 }}>Tags (separadas por vírgula)</label>
+                      <input
+                        className="modal-input"
+                        value={sec.tags}
+                        onChange={e => updateSection(i, 'tags', e.target.value)}
+                        placeholder="Ex: encontro, intriga, traição"
+                      />
+                      <div className="modal-hint" style={{ marginTop:4 }}>
+                        Sugestões: encontro · confronto · aliança · traição · missão · revelação · ritual · profecia
+                      </div>
+                    </div>
+                    <div style={{ gridColumn:'1 / -1', display:'flex', alignItems:'center', gap:8 }}>
+                      <input
+                        type="checkbox"
+                        id={'sec-redacted-' + i}
+                        checked={sec.redacted}
+                        onChange={e => updateSection(i, 'redacted', e.target.checked)}
+                        style={{ width:13, height:13, flexShrink:0 }}
+                      />
+                      <label htmlFor={'sec-redacted-' + i} className="modal-label" style={{ marginBottom:0, cursor:'pointer' }}>
+                        Seção redigida — marca [REDIGIDO] nos parágrafos
+                      </label>
+                    </div>
+                  </div>
+                )}
                 <textarea
                   className="modal-textarea"
                   rows={4}
