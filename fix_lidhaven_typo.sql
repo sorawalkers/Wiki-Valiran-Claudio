@@ -33,7 +33,7 @@ UPDATE timeline_events
 SET
   title       = replace(title,       'Lidhaven', 'Lindhaven'),
   description = replace(description, 'Lidhaven', 'Lindhaven'),
-  location    = replace(location,    'Lidhaven', 'Lindhaven')
-WHERE title   ILIKE '%Lidhaven%'
+  tag         = replace(tag,         'Lidhaven', 'Lindhaven')
+WHERE title       ILIKE '%Lidhaven%'
    OR description ILIKE '%Lidhaven%'
-   OR location ILIKE '%Lidhaven%';
+   OR tag         ILIKE '%Lidhaven%';
