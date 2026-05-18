@@ -18,6 +18,7 @@ const Data = {
     { section: "Crônicas", items: [
       { id: "timeline", label: "Linha do Tempo", icon: "navTime" },
       { id: "events", label: "Eventos da Era", icon: "navBook" },
+      { id: "campanha3", label: "Campanha III", icon: "navScroll" },
     ]},
     { section: "Dramatis Personae", items: [
       { id: "characters", label: "Personagens (PC)", icon: "navScroll" },

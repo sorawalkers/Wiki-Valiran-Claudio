@@ -93,6 +93,7 @@ function App() {
       case 'home': return <Portal key={dbVersion} onNav={setActive} />;
       case 'pantheon': return <Pantheon onNav={setActive} />;
       case 'article': return <Article onNav={setActive} />;
+      case 'campanha3': return <Campanha3 onNav={setActive} />;
       case 'timeline': return <Timeline key={dbVersion} onNav={setActive} />;
       case 'map': return <MapPage onNav={setActive} />;
       case 'recent': return <Recent onNav={setActive} />;

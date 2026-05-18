@@ -206,9 +206,6 @@ function Timeline({ onNav }) {
             <div
               key={i}
               className={`timeline-event ${e.kind || ''}`}
-              onClick={() => {
-                if (e.title && e.title.includes('Lancaster')) onNav('article');
-              }}
               style={{ position:'relative' }}
             >
               <div className="timeline-card">

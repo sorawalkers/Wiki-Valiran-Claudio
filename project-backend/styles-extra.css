@@ -2127,7 +2127,7 @@
 .placa-plaque-role {
   font-family: 'EB Garamond', serif;
   font-style: italic;
-  font-size: 13px;
+  font-size: 20px;
   color: var(--foam-dim);
   margin: 0;
   line-height: 1.4;
@@ -2245,7 +2245,7 @@
 .ficha-alias {
   font-family: 'EB Garamond', serif;
   font-style: italic;
-  font-size: 14px;
+  font-size: 20px;
   color: var(--foam-dim);
   line-height: 1.4;
   margin: 0 0 16px;
@@ -2267,7 +2267,7 @@
 }
 .ficha-row dt {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--foam-dim);
@@ -2276,7 +2276,7 @@
 .ficha-row dd {
   margin: 0;
   font-family: 'EB Garamond', serif;
-  font-size: 13.5px;
+  font-size: 17px;
   color: var(--foam);
   line-height: 1.35;
 }
