@@ -134,7 +134,8 @@ function Topbar({ onNav }) {
 function navBadge(id) {
   switch (id) {
     case 'pantheon':   { const n = Object.values(Entities.deities || {}).filter(d => d && d.name).length; return n || null; }
-    case 'characters': { const n = (Data.charIds || []).length; return n || null; }
+    case 'characters': { const n = (Data.charIds || []).filter(id => Entities.characters[id]?.tag === 'PC').length; return n || null; }
+    case 'npcs':       { const n = (Data.charIds || []).filter(id => Entities.characters[id]?.tag !== 'PC').length; return n || null; }
     case 'sessions':   { const n = (Data.sessionIds || []).length; return n || null; }
     case 'events':     { const n = (Data.events || []).length; return n || null; }
     case 'timeline':   { const n = (Data.timeline || []).filter(e => e.title).length; return n || null; }
@@ -145,7 +146,7 @@ function navBadge(id) {
 function Sidebar({ active, onNav }) {
   const { isAdmin } = useAuth();
   // Composite IDs like "character:kathryn" map to their root ("characters")
-  const rootMap = { character: 'characters', deity: 'pantheon', session: 'sessions' };
+  const rootMap = { character: 'characters', deity: 'pantheon', session: 'sessions', npc: 'npcs' };
   const [rootPart] = active.split(':');
   const activeRoot = rootMap[rootPart] || rootPart;
 

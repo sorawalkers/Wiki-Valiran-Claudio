@@ -1,24 +1,24 @@
-// Dramatis Personae — character gallery
+// Pessoas Importantes — NPC gallery
 
 // ============================================================
-// Character modal (create / edit)
+// NPC modal (create / edit) — reuses characters table
 // ============================================================
-function CharacterModal({ character, onClose }) {
+function NpcModal({ character, onClose }) {
   const isEdit = !!character;
-  const TAG_OPTIONS = ['PC', 'ALIADO', 'INIMIGO', 'NPC'];
-  const TAG_CLASS = { PC: 'pc', ALIADO: 'ally', INIMIGO: 'foe', NPC: 'npc' };
+  const TAG_OPTIONS = ['NPC', 'ALIADO', 'INIMIGO'];
+  const TAG_CLASS = { NPC: 'npc', ALIADO: 'ally', INIMIGO: 'foe' };
 
   const [form, setForm] = React.useState({
-    id: character?.id ?? '',
-    name: character?.name ?? '',
-    role: character?.role ?? '',
-    tag: character?.tag ?? 'PC',
-    hero: character?.hero ?? '',
+    id:          character?.id          ?? '',
+    name:        character?.name        ?? '',
+    role:        character?.role        ?? '',
+    tag:         character?.tag         ?? 'NPC',
+    hero:        character?.hero        ?? '',
     placeholder: character?.placeholder ?? true,
-    _id: character?.id,
+    _id:         character?.id,
   });
-  const [busy, setBusy] = React.useState(false);
-  const [err, setErr] = React.useState('');
+  const [busy, setBusy]             = React.useState(false);
+  const [err, setErr]               = React.useState('');
   const [confirmDel, setConfirmDel] = React.useState(false);
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
@@ -39,9 +39,9 @@ function CharacterModal({ character, onClose }) {
         ...form,
         id,
         tagClass: TAG_CLASS[form.tag] || 'npc',
-        infobox: character?.infobox || { rows: [] },
+        infobox:  character?.infobox  || { rows: [] },
         sections: character?.sections || [],
-        related: character?.related || [],
+        related:  character?.related  || [],
       });
       onClose();
     } catch (e) {
@@ -67,8 +67,8 @@ function CharacterModal({ character, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" style={{ maxWidth: 560 }} onClick={e => e.stopPropagation()}>
         <div className="modal-head">
-          <div className="modal-eyebrow">Dramatis Personae · Personagens (PC)</div>
-          <h2 className="modal-title">{isEdit ? 'Editar Personagem' : 'Novo Personagem'}</h2>
+          <div className="modal-eyebrow">Dramatis Personae · Pessoas Importantes (NPC)</div>
+          <h2 className="modal-title">{isEdit ? 'Editar Pessoa' : 'Nova Pessoa Importante'}</h2>
         </div>
         <form onSubmit={handleSave}>
           <div className="modal-body">
@@ -91,7 +91,7 @@ function CharacterModal({ character, onClose }) {
             </div>
             <div className="modal-field">
               <label className="modal-label">Papel / Descrição curta</label>
-              <input className="modal-input" value={form.role} onChange={e => set('role', e.target.value)} placeholder="Paladina dissidente · Lancaster" />
+              <input className="modal-input" value={form.role} onChange={e => set('role', e.target.value)} placeholder="Chanceler de Oshain · antagonista" />
             </div>
             <div className="modal-field">
               <label className="modal-label">Citação introdutória</label>
@@ -112,7 +112,7 @@ function CharacterModal({ character, onClose }) {
           </div>
           <div className="modal-foot">
             <button type="button" className="btn-cancel" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn-save" disabled={busy}>{busy ? 'Salvando…' : 'Salvar Personagem'}</button>
+            <button type="submit" className="btn-save" disabled={busy}>{busy ? 'Salvando…' : 'Salvar'}</button>
             {isEdit && (
               <button type="button" className={`btn-delete ${confirmDel ? 'confirm' : ''}`} onClick={handleDelete} disabled={busy}>
                 {confirmDel ? 'Confirmar exclusão' : 'Apagar'}
@@ -126,13 +126,13 @@ function CharacterModal({ character, onClose }) {
 }
 
 // ============================================================
-// Characters gallery
+// NPCs gallery
 // ============================================================
-function Characters({ onNav }) {
+function Npcs({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
 
-  const rawCast = (Data.charIds || []).map(id => Entities.characters[id]).filter(c => c && c.tag === 'PC');
+  const rawCast = (Data.charIds || []).map(id => Entities.characters[id]).filter(c => c && c.tag !== 'PC');
 
   function getInfoboxRow(c, key) {
     return (c.infobox?.rows || []).find(r => r.k === key)?.v || '';
@@ -141,33 +141,31 @@ function Characters({ onNav }) {
   const cast = rawCast.map(c => ({
     ...c,
     faction: c.faction || getInfoboxRow(c, 'Origem') || getInfoboxRow(c, 'Facção'),
-    cls: c.cls || getInfoboxRow(c, 'Classe'),
   }));
 
   return (
-    <div className="page" data-screen-label="12 Dramatis Personae">
+    <div className="page" data-screen-label="13 Pessoas Importantes">
       <header className="page-header">
         <div className="page-header-row">
           <div>
-            <div className="page-eyebrow">Dramatis Personae · Heróis de Mesa</div>
-            <h1 className="page-title">Personagens (PC)</h1>
+            <div className="page-eyebrow">Dramatis Personae · Figuras do Mundo</div>
+            <h1 className="page-title">Pessoas Importantes</h1>
           </div>
           {isEditor && (
             <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Novo Personagem
+              Nova Pessoa
             </button>
           )}
         </div>
         <p className="page-lede">
-          Todos os nomes que importam no momento atual da história — heróis
-          de mesa, aliados ganhos, antagonistas confirmados. Clique em
-          qualquer um para abrir a entrada completa.
+          Aliados, antagonistas e figuras neutras que moldaram os eventos —
+          todos que importam além da mesa de jogo.
         </p>
       </header>
 
       {cast.length === 0 && (
         <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
-          Nenhum personagem cadastrado ainda. Use o botão acima para adicionar.
+          Nenhuma pessoa cadastrada ainda. Use o botão acima para adicionar.
         </div>
       )}
 
@@ -199,10 +197,9 @@ function Characters({ onNav }) {
             <div className="cast-body">
               <h3 className="cast-name">{c.name}</h3>
               <p className="cast-role">{c.role}</p>
-              {(c.faction || c.cls) && (
+              {c.faction && (
                 <div className="cast-meta">
                   <span className="faction">{c.faction}</span>
-                  <span>{c.cls}</span>
                 </div>
               )}
             </div>
@@ -211,7 +208,7 @@ function Characters({ onNav }) {
       </div>
 
       {modal && (
-        <CharacterModal
+        <NpcModal
           character={modal === 'new' ? null : modal}
           onClose={() => setModal(null)}
         />
@@ -220,4 +217,4 @@ function Characters({ onNav }) {
   );
 }
 
-window.Characters = Characters;
+window.Npcs = Npcs;

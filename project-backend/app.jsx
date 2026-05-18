@@ -100,6 +100,7 @@ function App() {
       case 'factions': return <Factions onNav={setActive} />;
       case 'events': return <Events key={dbVersion} onNav={setActive} />;
       case 'characters': return <Characters key={dbVersion} onNav={setActive} />;
+      case 'npcs': return <Npcs key={dbVersion} onNav={setActive} />;
       case 'character': return <CharacterDetail id={entity} onNav={setActive} />;
       case 'deity': return <DeityDetail id={entity} onNav={setActive} />;
       case 'sessions': return <Sessions key={dbVersion} onNav={setActive} />;
@@ -161,7 +162,8 @@ function App() {
               {id:'timeline', label:'Timeline'},
               {id:'events', label:'Eventos'},
               {id:'map', label:'Mapa'},
-              {id:'characters', label:'Personae'},
+              {id:'characters', label:'Personae (PC)'},
+              {id:'npcs', label:'Personae (NPC)'},
               {id:'sessions', label:'Sessões'},
               {id:'house-rules', label:'Regras'},
             ].map(p => (

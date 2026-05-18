@@ -18,7 +18,10 @@ const Data = {
     { section: "Crônicas", items: [
       { id: "timeline", label: "Linha do Tempo", icon: "navTime" },
       { id: "events", label: "Eventos da Era", icon: "navBook" },
-      { id: "characters", label: "Dramatis Personae", icon: "navScroll" },
+    ]},
+    { section: "Dramatis Personae", items: [
+      { id: "characters", label: "Personagens (PC)", icon: "navScroll" },
+      { id: "npcs", label: "Pessoas Importantes (NPC)", icon: "navScroll" },
     ]},
     { section: "Mesa", items: [
       { id: "sessions", label: "Diário de sessões", icon: "navScroll" },
