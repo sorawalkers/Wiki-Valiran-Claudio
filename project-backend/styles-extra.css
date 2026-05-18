@@ -1783,3 +1783,692 @@
 .infobox-sigil-wrap:has(.deity-sigil-render.editable:hover) {
   border-color: var(--gold);
 }
+
+/* ============================================================
+   ============================================================
+   PERSONAGENS — VARIAÇÕES DE CARD
+   PCs usam "placa de bronze", NPCs usam "ficha de registro"
+   com toggle para vista de índice (lista densa).
+   ============================================================
+   ============================================================ */
+
+/* ============================================================
+   Common — page controls (search + view toggle)
+   ============================================================ */
+.cast-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--ink-line-soft);
+}
+.cast-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 14px;
+  background: var(--ink-deep);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  transition: border-color 0.18s;
+}
+.cast-search:hover,
+.cast-search:focus-within { border-color: var(--gold-dim); }
+.cast-search:focus-within { box-shadow: 0 0 0 1px var(--gold-dim); }
+.cast-search svg {
+  flex-shrink: 0;
+  width: 14px; height: 14px;
+  color: var(--foam-dim);
+}
+.cast-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--foam);
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+}
+.cast-search input::placeholder { color: var(--foam-dim); font-style: italic; }
+.cast-search-clear {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--foam-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+.cast-search-clear:hover { color: var(--gold); }
+.cast-search-count {
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--foam-dim);
+  text-transform: uppercase;
+}
+
+.cast-view-toggle {
+  display: flex;
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cast-view-toggle button {
+  background: var(--ink-deep);
+  border: none;
+  padding: 0 16px;
+  height: 38px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cast-view-toggle button + button { border-left: 1px solid var(--ink-line); }
+.cast-view-toggle button:hover { color: var(--gold); background: var(--ink-slate); }
+.cast-view-toggle button.active {
+  background: linear-gradient(180deg, rgba(184,153,104,0.18) 0%, rgba(184,153,104,0.06) 100%);
+  color: var(--gold-bright);
+}
+
+.cast-empty {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--foam-dim);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* ============================================================
+   Filter chips bar (PC page — Status + Campanha)
+   ============================================================ */
+.cast-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 22px;
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--ink-line-soft);
+}
+.cast-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cast-filter-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  flex-shrink: 0;
+}
+.cast-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cast-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--ink-deep);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cast-filter-chip:hover {
+  color: var(--gold-bright);
+  border-color: var(--gold-dim);
+}
+.cast-filter-chip.active {
+  background: linear-gradient(180deg, rgba(184,153,104,0.18) 0%, rgba(184,153,104,0.06) 100%);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+.cast-filter-chip.active.tone-necro {
+  background: linear-gradient(180deg, rgba(122,156,74,0.18) 0%, rgba(122,156,74,0.05) 100%);
+  border-color: var(--necro);
+  color: var(--necro);
+}
+.cast-filter-chip.active.tone-wine {
+  background: linear-gradient(180deg, rgba(140,37,53,0.22) 0%, rgba(140,37,53,0.05) 100%);
+  border-color: var(--wine);
+  color: var(--wine-bright);
+}
+.cast-filter-chip.active.tone-mute {
+  background: var(--ink-slate-2);
+  border-color: var(--ink-line);
+  color: var(--foam);
+}
+.cast-filter-count {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  opacity: 0.7;
+  min-width: 18px;
+  text-align: center;
+}
+.cast-filter-chip.active .cast-filter-count {
+  background: rgba(0,0,0,0.35);
+  opacity: 0.9;
+}
+
+.cast-filter-reset {
+  background: transparent;
+  border: none;
+  color: var(--foam-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  transition: color 0.15s;
+}
+.cast-filter-reset:hover { color: var(--wine-bright); }
+
+/* ============================================================
+   VARIAÇÃO PC — Retrato com Placa de Bronze
+   ============================================================ */
+.placa-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  margin-top: 32px;
+}
+@media (max-width: 980px) {
+  .placa-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.placa-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.placa-card:hover { transform: translateY(-3px); }
+
+.placa-frame {
+  position: relative;
+  aspect-ratio: 3/4;
+  border: 1px solid var(--ink-line);
+  background: var(--ink-slate);
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--gold-dim),
+    0 4px 18px -6px rgba(0,0,0,0.7);
+  transition: box-shadow 0.2s;
+  overflow: hidden;
+}
+.placa-card:hover .placa-frame {
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--gold),
+    0 8px 28px -8px rgba(0,0,0,0.8);
+}
+.placa-card.dead .placa-frame {
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--wine),
+    0 4px 18px -6px rgba(0,0,0,0.7);
+}
+.placa-card.dead:hover .placa-frame {
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--wine-bright),
+    0 8px 28px -8px rgba(0,0,0,0.8);
+}
+.placa-frame image-slot {
+  position: absolute !important;
+  inset: 5px !important;
+  width: calc(100% - 10px) !important;
+  height: calc(100% - 10px) !important;
+  z-index: 1;
+}
+
+.placa-status {
+  position: absolute;
+  top: 16px; right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background: rgba(14,13,16,0.92);
+  border: 1px solid;
+  z-index: 3;
+  pointer-events: none;
+}
+.placa-status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.placa-status.necro { color: var(--necro); border-color: var(--necro); }
+.placa-status.wine  { color: var(--wine-bright); border-color: var(--wine); }
+.placa-status.gold  { color: var(--gold-bright); border-color: var(--gold); }
+
+/* Mourning band for dead PCs */
+.placa-card.dead .placa-frame::after {
+  content: "";
+  position: absolute;
+  top: 18%; left: -6%; right: -6%;
+  height: 10px;
+  background: #07070a;
+  transform: rotate(-6deg);
+  box-shadow: 0 0 12px rgba(0,0,0,0.8);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.placa-plaque {
+  position: relative;
+  margin: -16px 18px 0;
+  padding: 18px 18px 16px;
+  background:
+    linear-gradient(180deg, rgba(212,184,127,0.06) 0%, rgba(0,0,0,0) 40%),
+    radial-gradient(ellipse at 50% 0%, rgba(212,184,127,0.18) 0%, transparent 60%),
+    linear-gradient(180deg, #2d2418 0%, #1a1610 100%);
+  border: 1px solid var(--gold-dim);
+  border-top: 2px solid var(--gold);
+  box-shadow:
+    inset 0 1px 0 rgba(212,184,127,0.2),
+    0 4px 12px -4px rgba(0,0,0,0.6);
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.placa-card:hover .placa-plaque {
+  border-color: var(--gold);
+  border-top-color: var(--gold-bright);
+}
+.placa-plaque-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.placa-plaque-name {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--gold-bright);
+  margin: 0 0 6px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+}
+.placa-plaque-role {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--foam-dim);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Edit button placement for placa cards */
+.placa-card .editor-del-btn,
+.placa-card .editor-add-btn {
+  position: absolute;
+  top: 14px; left: 14px;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.placa-card:hover .editor-del-btn,
+.placa-card:hover .editor-add-btn { opacity: 1; }
+
+/* ============================================================
+   VARIAÇÃO NPC — Ficha de Registro (dossier-style)
+   ============================================================ */
+.ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+@media (max-width: 980px) {
+  .ficha-grid { grid-template-columns: 1fr; }
+}
+.ficha-card {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.ficha-card:hover {
+  border-color: var(--gold-dim);
+  transform: translateY(-2px);
+}
+.ficha-card.foe { /* INIMIGO: corner wine */ }
+.ficha-card .ficha-corner {
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border: 22px solid transparent;
+  border-top-color: var(--gold-dim);
+  border-right-color: var(--gold-dim);
+  z-index: 3;
+}
+.ficha-card.foe .ficha-corner {
+  border-top-color: var(--wine);
+  border-right-color: var(--wine);
+}
+
+.ficha-stamp {
+  position: absolute;
+  top: 30px; right: -42px;
+  transform: rotate(14deg);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  padding: 4px 14px;
+  background: rgba(14,13,16,0.85);
+  opacity: 0.92;
+  z-index: 4;
+  pointer-events: none;
+  border: 2px solid;
+}
+.ficha-stamp.necro { color: var(--necro); border-color: var(--necro); }
+.ficha-stamp.wine  { color: var(--wine-bright); border-color: var(--wine-bright); }
+.ficha-stamp.gold  { color: var(--gold-bright); border-color: var(--gold-bright); }
+
+.ficha-portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--ink-deep);
+  border-bottom: 1px solid var(--ink-line);
+  overflow: hidden;
+}
+.ficha-portrait image-slot {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+}
+
+.ficha-body {
+  padding: 22px 26px 24px;
+}
+.ficha-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.ficha-name {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+  color: var(--foam);
+  margin: 0 0 6px;
+  line-height: 1.15;
+}
+.ficha-alias {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--foam-dim);
+  line-height: 1.4;
+  margin: 0 0 16px;
+}
+.ficha-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0 18px;
+  padding: 14px 0;
+  border-top: 1px solid var(--ink-line-soft);
+  border-bottom: 1px solid var(--ink-line-soft);
+}
+.ficha-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.ficha-row dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--foam-dim);
+  margin: 0;
+}
+.ficha-row dd {
+  margin: 0;
+  font-family: 'EB Garamond', serif;
+  font-size: 13.5px;
+  color: var(--foam);
+  line-height: 1.35;
+}
+.ficha-quote {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--foam-dim);
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--gold-dim);
+}
+
+/* Editor button placement for ficha cards */
+.ficha-card .editor-del-btn,
+.ficha-card .editor-add-btn {
+  position: absolute;
+  bottom: 14px; right: 14px;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ficha-card:hover .editor-del-btn,
+.ficha-card:hover .editor-add-btn { opacity: 1; }
+
+/* ============================================================
+   VARIAÇÃO NPC — Índice do Arquivista (lista densa)
+   ============================================================ */
+.indice {
+  background: var(--ink-slate);
+  border: 1px solid var(--ink-line);
+  border-radius: 2px;
+  margin-top: 32px;
+  overflow: hidden;
+}
+.indice-head {
+  display: grid;
+  grid-template-columns: 56px 64px 1fr 220px 140px 64px;
+  gap: 14px;
+  padding: 12px 22px;
+  background: var(--ink-deep);
+  border-bottom: 1px solid var(--ink-line);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+.indice-row {
+  display: grid;
+  grid-template-columns: 56px 64px 1fr 220px 140px 64px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--ink-line-soft);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.indice-row:hover { background: var(--ink-slate-2); }
+.indice-row:last-child { border-bottom: none; }
+.indice-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.indice-row:hover::before { opacity: 1; }
+.indice-row.dead .indice-name { color: var(--foam-dim); }
+.indice-row.dead .indice-name::before {
+  content: '† ';
+  color: var(--wine-bright);
+  font-weight: 600;
+}
+
+.indice-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--gold-dim);
+}
+.indice-portrait {
+  width: 64px;
+  height: 64px;
+  position: relative;
+  border: 1px solid var(--ink-line);
+  background: var(--ink-deep);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.indice-portrait image-slot {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.indice-main { min-width: 0; }
+.indice-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--foam);
+  margin: 0 0 3px;
+}
+.indice-role {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--foam-dim);
+  margin: 0;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+.indice-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  min-width: 0;
+}
+.indice-classe {
+  color: var(--foam);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.indice-faccao {
+  color: var(--gold);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indice-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background: rgba(14,13,16,0.7);
+  border: 1px solid;
+  width: max-content;
+}
+.indice-status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.indice-status.necro { color: var(--necro); border-color: var(--necro); }
+.indice-status.wine  { color: var(--wine-bright); border-color: var(--wine); }
+.indice-status.gold  { color: var(--gold-bright); border-color: var(--gold); }
+
+.indice-tag {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-align: center;
+  padding: 4px 0;
+  border: 1px solid;
+}
+.indice-tag.pc  { color: var(--gold-bright); border-color: var(--gold); }
+.indice-tag.foe { color: var(--wine-bright); border-color: var(--wine); }
+.indice-tag.npc { color: var(--foam-dim); border-color: var(--ink-line); }
+.indice-tag.ally { color: var(--necro); border-color: var(--necro); }
+
+/* Editor controls in row */
+.indice-row .editor-del-btn,
+.indice-row .editor-add-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.indice-row:hover .editor-del-btn,
+.indice-row:hover .editor-add-btn { opacity: 1; }

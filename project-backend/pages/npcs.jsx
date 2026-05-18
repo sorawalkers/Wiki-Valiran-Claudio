@@ -1,9 +1,27 @@
-// Pessoas Importantes — NPC gallery
+// Pessoas Importantes — NPC gallery · "Ficha de Registro" + Índice + Busca + Filtros
 
 // ============================================================
-// NPC modal (create / edit) — reuses characters table
+// Helpers
 // ============================================================
-function NpcModal({ character, onClose }) {
+function npcGetInfoboxRow(c, key) {
+  return (c.infobox?.rows || []).find(r => r.k === key)?.v || '';
+}
+function npcDeriveStatus(c) {
+  const raw = npcGetInfoboxRow(c, 'Status') || '';
+  const up  = raw.toUpperCase();
+  if (!raw) return null;
+  if (/^MORT|FALEC/.test(up))                  return { label: 'MORTO',        cls: 'wine' };
+  if (/DESAPAREC/.test(up))                    return { label: 'DESAPARECIDO', cls: 'gold' };
+  if (/CATIV|PRISIONEIR|REFÉM|REFEM/.test(up)) return { label: 'CATIVO',       cls: 'gold' };
+  if (/EM FUGA|FORAGIDO|FORAGIDA/.test(up))    return { label: 'EM FUGA',      cls: 'wine' };
+  if (/^ATIV/.test(up))                        return { label: 'ATIVO',        cls: 'necro' };
+  return { label: raw.split(/[—–-]/)[0].trim().toUpperCase().slice(0, 16), cls: 'gold' };
+}
+
+// ============================================================
+// NPC modal (create / edit) — agora com campo Campanha
+// ============================================================
+function NpcModal({ character, existingCampaigns, onClose }) {
   const isEdit = !!character;
   const TAG_OPTIONS = ['NPC', 'ALIADO', 'INIMIGO'];
   const TAG_CLASS = { NPC: 'npc', ALIADO: 'ally', INIMIGO: 'foe' };
@@ -14,6 +32,7 @@ function NpcModal({ character, onClose }) {
     role:        character?.role        ?? '',
     tag:         character?.tag         ?? 'NPC',
     hero:        character?.hero        ?? '',
+    campaign:    character?.campaign    ?? '',
     placeholder: character?.placeholder ?? true,
     _id:         character?.id,
   });
@@ -38,6 +57,7 @@ function NpcModal({ character, onClose }) {
       await window.DB.saveCharacter({
         ...form,
         id,
+        campaign: form.campaign?.trim() || null,
         tagClass: TAG_CLASS[form.tag] || 'npc',
         infobox:  character?.infobox  || { rows: [] },
         sections: character?.sections || [],
@@ -90,6 +110,20 @@ function NpcModal({ character, onClose }) {
               </div>
             </div>
             <div className="modal-field">
+              <label className="modal-label">Campanha</label>
+              <input
+                className="modal-input"
+                list="npc-campaign-list"
+                value={form.campaign}
+                onChange={e => set('campaign', e.target.value)}
+                placeholder="Ex: Campanha 3 — Lancaster"
+              />
+              <datalist id="npc-campaign-list">
+                {existingCampaigns.map(c => <option key={c} value={c} />)}
+              </datalist>
+              <span className="modal-hint">Em branco = sem campanha atribuída.</span>
+            </div>
+            <div className="modal-field">
               <label className="modal-label">Papel / Descrição curta</label>
               <input className="modal-input" value={form.role} onChange={e => set('role', e.target.value)} placeholder="Chanceler de Oshain · antagonista" />
             </div>
@@ -126,22 +160,232 @@ function NpcModal({ character, onClose }) {
 }
 
 // ============================================================
-// NPCs gallery
+// FichaCard — dossiê pessoal (galeria)
+// ============================================================
+function FichaCard({ char, nr, onClick, onEdit, isEditor }) {
+  const status  = npcDeriveStatus(char);
+  const tagCls  = char.tagClass || 'npc';
+  const classe  = npcGetInfoboxRow(char, 'Classe');
+  const origem  = npcGetInfoboxRow(char, 'Origem');
+  const raca    = npcGetInfoboxRow(char, 'Raça') || npcGetInfoboxRow(char, 'Raca');
+  const faccao  = char.faction || npcGetInfoboxRow(char, 'Facção') || npcGetInfoboxRow(char, 'Faccao') || npcGetInfoboxRow(char, 'Filiação');
+  const rows = [
+    classe && { k: 'Classe',    v: classe },
+    origem && { k: 'Origem',    v: origem },
+    raca   && { k: 'Raça',      v: raca },
+    faccao && { k: 'Filiação',  v: faccao },
+  ].filter(Boolean);
+  const campaignShort = (char.campaign || '').split(/[—–-]/)[0].trim();
+
+  return (
+    <article
+      className={`ficha-card ${tagCls}`}
+      onClick={onClick}
+    >
+      <div className="ficha-corner" />
+      {status && <div className={`ficha-stamp ${status.cls}`}>{status.label}</div>}
+
+      <div className="ficha-portrait">
+        <image-slot
+          id={`char-portrait-${char.id}`}
+          shape="rect"
+          placeholder={`Arraste retrato · ${char.name}`}
+        ></image-slot>
+      </div>
+
+      <div className="ficha-body">
+        <div className="ficha-id">
+          FICHA Nº {nr} · DRAMATIS PERSONAE · {char.tag}
+          {campaignShort && <> · {campaignShort.toUpperCase()}</>}
+        </div>
+        <h3 className="ficha-name">{char.name}</h3>
+        {char.role && <p className="ficha-alias">{char.role}</p>}
+
+        {rows.length > 0 && (
+          <dl className="ficha-rows">
+            {rows.map((r, i) => (
+              <div key={i} className="ficha-row">
+                <dt>{r.k}</dt><dd>{r.v}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {char.hero && <p className="ficha-quote">"{char.hero}"</p>}
+      </div>
+
+      {isEditor && (
+        <button
+          className="editor-add-btn"
+          onClick={e => { e.stopPropagation(); onEdit(); }}
+        >
+          Editar
+        </button>
+      )}
+    </article>
+  );
+}
+
+// ============================================================
+// IndiceRow — linha do índice (vista densa)
+// ============================================================
+function IndiceRow({ char, nr, onClick, onEdit, isEditor }) {
+  const status = npcDeriveStatus(char);
+  const dead   = status?.label === 'MORTO';
+  const classe = (npcGetInfoboxRow(char, 'Classe') || '').split('·')[0].trim();
+  const faccao = char.faction || npcGetInfoboxRow(char, 'Facção') || npcGetInfoboxRow(char, 'Faccao') || npcGetInfoboxRow(char, 'Filiação') || '—';
+  const tagCls = char.tagClass || 'npc';
+
+  return (
+    <div
+      className={`indice-row ${dead ? 'dead' : ''}`}
+      onClick={onClick}
+    >
+      <div className="indice-num">{nr}</div>
+      <div className="indice-portrait">
+        <image-slot
+          id={`char-portrait-${char.id}`}
+          shape="rect"
+          placeholder={char.name.charAt(0)}
+        ></image-slot>
+      </div>
+      <div className="indice-main">
+        <h4 className="indice-name">{char.name}</h4>
+        <p className="indice-role">{char.role || '—'}</p>
+      </div>
+      <div className="indice-meta">
+        <span className="indice-classe">{classe || '—'}</span>
+        <span className="indice-faccao">{faccao}</span>
+      </div>
+      {status ? (
+        <div className={`indice-status ${status.cls}`}>
+          <span className="indice-status-dot" />
+          {status.label}
+        </div>
+      ) : <div />}
+      <div className={`indice-tag ${tagCls}`}>{char.tag}</div>
+      {isEditor && (
+        <button
+          className="editor-add-btn"
+          onClick={e => { e.stopPropagation(); onEdit(); }}
+        >
+          Editar
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// FilterChips — chips de filtro (label + opções)
+// ============================================================
+function NpcFilterChips({ label, value, options, onChange }) {
+  return (
+    <div className="cast-filter-group">
+      <span className="cast-filter-label">{label}</span>
+      <div className="cast-filter-chips">
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            type="button"
+            className={`cast-filter-chip ${value === opt.value ? 'active' : ''} ${opt.tone ? 'tone-' + opt.tone : ''}`}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+            {opt.count != null && <span className="cast-filter-count">{opt.count}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// NPCs page — Ficha + toggle Galeria/Índice + Busca + Filtros
 // ============================================================
 function Npcs({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
+  const [view, setView]       = React.useState(() => localStorage.getItem('npc-view') || 'galeria');
+  const [query, setQuery]     = React.useState('');
+  const [relFilter, setRelFilter]       = React.useState(() => localStorage.getItem('npc-rel')   || 'todos');
+  const [campaignFilter, setCampaignFilter] = React.useState(() => localStorage.getItem('npc-camp')  || 'todas');
 
-  const rawCast = (Data.charIds || []).map(id => Entities.characters[id]).filter(c => c && c.tag !== 'PC');
+  React.useEffect(() => { localStorage.setItem('npc-view', view);   }, [view]);
+  React.useEffect(() => { localStorage.setItem('npc-rel',  relFilter);      }, [relFilter]);
+  React.useEffect(() => { localStorage.setItem('npc-camp', campaignFilter); }, [campaignFilter]);
 
-  function getInfoboxRow(c, key) {
-    return (c.infobox?.rows || []).find(r => r.k === key)?.v || '';
-  }
+  const cast = (Data.charIds || [])
+    .map(id => Entities.characters[id])
+    .filter(c => c && c.tag !== 'PC');
 
-  const cast = rawCast.map(c => ({
-    ...c,
-    faction: c.faction || getInfoboxRow(c, 'Origem') || getInfoboxRow(c, 'Facção'),
-  }));
+  // Lista de campanhas distintas
+  const campaignSet = new Set();
+  let hasUnassigned = false;
+  cast.forEach(c => {
+    const v = (c.campaign || '').trim();
+    if (v) campaignSet.add(v); else hasUnassigned = true;
+  });
+  const campaignList = Array.from(campaignSet).sort((a, b) =>
+    a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' })
+  );
+  if (hasUnassigned) campaignList.push('__none__');
+
+  // Contagens por relação (tag)
+  const relCounts = {
+    todos:   cast.length,
+    aliado:  cast.filter(c => c.tag === 'ALIADO').length,
+    inimigo: cast.filter(c => c.tag === 'INIMIGO').length,
+    neutro:  cast.filter(c => c.tag === 'NPC').length,
+  };
+  const campaignCounts = {};
+  cast.forEach(c => {
+    const k = (c.campaign || '').trim() || '__none__';
+    campaignCounts[k] = (campaignCounts[k] || 0) + 1;
+  });
+
+  // Filtros: busca + relação + campanha
+  const q = query.trim().toLowerCase();
+  const filtered = cast.filter(c => {
+    if (relFilter !== 'todos') {
+      if (relFilter === 'aliado'  && c.tag !== 'ALIADO')  return false;
+      if (relFilter === 'inimigo' && c.tag !== 'INIMIGO') return false;
+      if (relFilter === 'neutro'  && c.tag !== 'NPC')     return false;
+    }
+    if (campaignFilter !== 'todas') {
+      const cc = (c.campaign || '').trim();
+      if (campaignFilter === '__none__' ? cc !== '' : cc !== campaignFilter) return false;
+    }
+    if (q) {
+      const hay = [
+        c.name, c.role, c.faction, c.campaign,
+        npcGetInfoboxRow(c, 'Classe'),
+        npcGetInfoboxRow(c, 'Origem'),
+        npcGetInfoboxRow(c, 'Facção'),
+        npcGetInfoboxRow(c, 'Filiação'),
+        npcGetInfoboxRow(c, 'Status'),
+        npcGetInfoboxRow(c, 'Raça'),
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const relOptions = [
+    { value: 'todos',   label: 'Todos',    count: relCounts.todos },
+    { value: 'aliado',  label: 'Aliados',  count: relCounts.aliado,  tone: 'necro' },
+    { value: 'inimigo', label: 'Inimigos', count: relCounts.inimigo, tone: 'wine'  },
+    { value: 'neutro',  label: 'Neutros',  count: relCounts.neutro,  tone: 'mute'  },
+  ];
+  const campaignOptions = [
+    { value: 'todas', label: 'Todas', count: cast.length },
+    ...campaignList.map(c => c === '__none__'
+      ? { value: '__none__', label: 'Sem campanha', count: campaignCounts['__none__'] || 0, tone: 'mute' }
+      : { value: c, label: c, count: campaignCounts[c] || 0 }
+    ),
+  ];
+
+  const filtersActive = relFilter !== 'todos' || campaignFilter !== 'todas';
 
   return (
     <div className="page" data-screen-label="13 Pessoas Importantes">
@@ -161,55 +405,117 @@ function Npcs({ onNav }) {
           Aliados, antagonistas e figuras neutras que moldaram os eventos —
           todos que importam além da mesa de jogo.
         </p>
+
+        {cast.length > 0 && (
+          <div className="cast-filters">
+            <NpcFilterChips
+              label="Relação"
+              value={relFilter}
+              options={relOptions}
+              onChange={setRelFilter}
+            />
+            <NpcFilterChips
+              label="Campanha"
+              value={campaignFilter}
+              options={campaignOptions}
+              onChange={setCampaignFilter}
+            />
+            {filtersActive && (
+              <button
+                type="button"
+                className="cast-filter-reset"
+                onClick={() => { setRelFilter('todos'); setCampaignFilter('todas'); }}
+              >LIMPAR FILTROS</button>
+            )}
+          </div>
+        )}
+
+        <div className="cast-controls">
+          <div className="cast-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar por nome, papel, classe, filiação…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+            {query && (
+              <button
+                className="cast-search-clear"
+                onClick={() => setQuery('')}
+                title="Limpar busca"
+              >LIMPAR</button>
+            )}
+            <span className="cast-search-count">
+              {filtered.length}{(q || filtersActive) && cast.length !== filtered.length ? ` / ${cast.length}` : ''}
+            </span>
+          </div>
+          <div className="cast-view-toggle">
+            <button
+              className={view === 'galeria' ? 'active' : ''}
+              onClick={() => setView('galeria')}
+            >Galeria</button>
+            <button
+              className={view === 'indice' ? 'active' : ''}
+              onClick={() => setView('indice')}
+            >Índice</button>
+          </div>
+        </div>
       </header>
 
-      {cast.length === 0 && (
-        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
+      {cast.length === 0 ? (
+        <div className="cast-empty">
           Nenhuma pessoa cadastrada ainda. Use o botão acima para adicionar.
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="cast-empty">
+          {q
+            ? <>Nenhum resultado para “{query}”.</>
+            : <>Nenhum resultado para os filtros atuais.</>}
+        </div>
+      ) : view === 'galeria' ? (
+        <div className="ficha-grid">
+          {filtered.map((c, i) => (
+            <FichaCard
+              key={c.id}
+              char={c}
+              nr={String(i + 1).padStart(3, '0')}
+              onClick={() => onNav('character:' + c.id)}
+              onEdit={() => setModal(c)}
+              isEditor={isEditor}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="indice">
+          <div className="indice-head">
+            <div>Nº</div>
+            <div />
+            <div>Pessoa</div>
+            <div>Classe · Filiação</div>
+            <div>Status</div>
+            <div>Tag</div>
+          </div>
+          {filtered.map((c, i) => (
+            <IndiceRow
+              key={c.id}
+              char={c}
+              nr={String(i + 1).padStart(3, '0')}
+              onClick={() => onNav('character:' + c.id)}
+              onEdit={() => setModal(c)}
+              isEditor={isEditor}
+            />
+          ))}
+        </div>
       )}
-
-      <div className="cast-grid">
-        {cast.map(c => (
-          <article
-            key={c.id}
-            className="cast-card"
-            onClick={() => onNav('character:' + c.id)}
-          >
-            <div className="cast-portrait">
-              <image-slot
-                id={`char-portrait-${c.id}`}
-                shape="rect"
-                placeholder={`Arraste retrato · ${c.name}`}
-                style={{position:'absolute', inset:0, width:'100%', height:'100%'}}
-              ></image-slot>
-              <span className={`cast-portrait-tag ${c.tagClass}`} style={{zIndex:2}}>{c.tag}</span>
-              {isEditor && (
-                <button
-                  className="editor-del-btn"
-                  style={{ position:'absolute', bottom:12, right:12, zIndex:3 }}
-                  onClick={e => { e.stopPropagation(); setModal(c); }}
-                >
-                  Editar
-                </button>
-              )}
-            </div>
-            <div className="cast-body">
-              <h3 className="cast-name">{c.name}</h3>
-              <p className="cast-role">{c.role}</p>
-              {c.faction && (
-                <div className="cast-meta">
-                  <span className="faction">{c.faction}</span>
-                </div>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
 
       {modal && (
         <NpcModal
           character={modal === 'new' ? null : modal}
+          existingCampaigns={campaignList.filter(c => c !== '__none__')}
           onClose={() => setModal(null)}
         />
       )}

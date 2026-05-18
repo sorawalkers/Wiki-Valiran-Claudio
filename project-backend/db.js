@@ -123,6 +123,7 @@
           sections: c.sections || [],
           related: c.related || [],
           placeholder: c.placeholder || false,
+          campaign: c.campaign || null,
           created_at: c.created_at || null,
           updated_at: c.updated_at || null,
         };
@@ -276,6 +277,7 @@
       sections: data.sections || [],
       related: data.related || [],
       placeholder: data.placeholder || false,
+      campaign: data.campaign || null,
       updated_at: new Date().toISOString(),
     };
     const res = await window.sb.from('characters').upsert(payload, { onConflict: 'id' });
