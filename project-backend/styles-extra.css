@@ -2149,7 +2149,12 @@
   text-transform: uppercase;
 }
 /* Plaque enxuta na variante lápide (o nome está na pedra) */
-.placa-card.dead-tomb .placa-plaque { padding: 12px 18px; }
+.placa-card.dead-tomb .placa-plaque {
+  padding: 12px 18px;
+  margin-top: -48px;
+  position: relative;
+  z-index: 4;
+}
 .placa-card.dead-tomb .placa-plaque-name { display: none; }
 
 /* ============================================================
