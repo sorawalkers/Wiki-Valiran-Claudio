@@ -8,7 +8,7 @@
 
 TRUNCATE TABLE timeline_events;
 
-INSERT INTO timeline_events (era, year, label, title, "desc", tag, kind, sort_order) VALUES
+INSERT INTO timeline_events (era, year, label, title, description, tag, kind, sort_order) VALUES
 
 -- ── Divisor de Era ───────────────────────────────────────────
 ('Era Pré-Vranócia · O Mundo Antes do Marco', NULL, NULL, NULL, NULL, NULL, NULL, 1),

@@ -69,7 +69,7 @@ create table if not exists timeline_events (
   year text,
   label text,
   title text,
-  "desc" text,
+  description text,
   tag text,
   kind text,
   sort_order integer default 0
