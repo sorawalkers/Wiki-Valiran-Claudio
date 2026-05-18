@@ -404,7 +404,7 @@ function Campanha3({ onNav }) {
       <aside className="infobox-rail">
         <div className="infobox">
           <div className="infobox-head">
-            <div className="infobox-sigil-wrap"><Sigil.Scroll /></div>
+            <div className="infobox-sigil-wrap"><Sigil.Tome /></div>
             <h3 className="infobox-name">Campanha III</h3>
             <p className="infobox-sub">Segredos de Lamidriel</p>
           </div>
