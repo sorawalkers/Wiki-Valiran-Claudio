@@ -2122,7 +2122,7 @@
     inset 0 0 16px rgba(0,0,0,0.55);
 }
 .placa-card.dead-tomb .placa-status {
-  top: 22px; right: 16px;
+  display: none;
 }
 .placa-tomb-inscription {
   position: absolute;
