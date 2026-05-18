@@ -2076,17 +2076,167 @@
 .placa-status.wine  { color: var(--wine-bright); border-color: var(--wine); }
 .placa-status.gold  { color: var(--gold-bright); border-color: var(--gold); }
 
-/* Mourning band for dead PCs */
-.placa-card.dead .placa-frame::after {
+/* Mourning band removed — replaced by .dead-tomb (lápide) variant */
+
+/* ============================================================
+   STATUS VARIANT · MORTO — Lápide gravada (.dead-tomb)
+   Topo arredondado da moldura, retrato em camafeu sépia,
+   nome em Cinzel + ano gravados na parte inferior da pedra.
+   ============================================================ */
+.placa-card.dead-tomb .placa-frame {
+  border-top-left-radius: 50% 22%;
+  border-top-right-radius: 50% 22%;
+  background:
+    repeating-linear-gradient(135deg, transparent 0px, transparent 9px, rgba(255,255,255,0.012) 9px, rgba(255,255,255,0.012) 10px),
+    linear-gradient(180deg, #1c1a18 0%, #0e0c0a 100%);
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--wine-bright),
+    0 4px 18px -6px rgba(0,0,0,0.7);
+}
+.placa-card.dead-tomb:hover .placa-frame {
+  box-shadow:
+    inset 0 0 0 4px var(--ink-slate),
+    inset 0 0 0 5px var(--wine-bright),
+    inset 0 0 18px rgba(184,153,104,0.12),
+    0 8px 28px -8px rgba(0,0,0,0.85);
+}
+/* Retrato vira camafeu — cortado em cima da inscrição */
+.placa-card.dead-tomb .placa-frame image-slot {
+  top: 5px !important;
+  right: 5px !important;
+  bottom: 26% !important;
+  left: 5px !important;
+  width: calc(100% - 10px) !important;
+  height: auto !important;
+  filter: grayscale(0.7) sepia(0.25) contrast(0.95) brightness(0.85);
+}
+.placa-card.dead-tomb .placa-cameo-ring {
+  position: absolute;
+  top: 5px; right: 5px; bottom: 26%; left: 5px;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 1px rgba(184,153,104,0.35),
+    inset 0 0 0 2px rgba(14,13,16,0.6),
+    inset 0 0 16px rgba(0,0,0,0.55);
+}
+.placa-card.dead-tomb .placa-status {
+  top: 22px; right: 16px;
+}
+.placa-tomb-inscription {
+  position: absolute;
+  left: 6%; right: 6%; bottom: 5%;
+  text-align: center;
+  z-index: 3;
+  pointer-events: none;
+}
+.placa-tomb-name {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  letter-spacing: 0.16em;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.85),
+    0 -1px 0 rgba(255,255,255,0.05);
+  line-height: 1.1;
+  font-weight: 500;
+}
+.placa-tomb-sep {
+  display: block;
+  margin: 8px auto 6px;
+  width: 32px; height: 1px;
+  background: var(--wine);
+}
+.placa-tomb-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--foam-dim);
+  text-transform: uppercase;
+}
+/* Plaque enxuta na variante lápide (o nome está na pedra) */
+.placa-card.dead-tomb .placa-plaque { padding: 12px 18px; }
+.placa-card.dead-tomb .placa-plaque-name { display: none; }
+
+/* ============================================================
+   STATUS VARIANT · ÚLTIMA VISTA — Nota presa ao retrato (.lost-note)
+   Retrato em sépia desbotado + pergaminho rasgado com o texto
+   da última informação confiável e a assinatura de quem viu.
+   Aplica-se a bucket 'outro' (cativo, desaparecido) que tenha
+   o campo `Última Vista` preenchido no infobox.
+   ============================================================ */
+.placa-card.lost-note .placa-frame image-slot {
+  filter: sepia(0.3) grayscale(0.45) brightness(0.85) contrast(1.05);
+}
+.placa-card.lost-note .placa-frame::after {
   content: "";
   position: absolute;
-  top: 18%; left: -6%; right: -6%;
-  height: 10px;
-  background: #07070a;
-  transform: rotate(-6deg);
-  box-shadow: 0 0 12px rgba(0,0,0,0.8);
-  z-index: 2;
+  inset: 5px;
+  background: radial-gradient(ellipse at 50% 30%, transparent 35%, rgba(0,0,0,0.45) 100%);
   pointer-events: none;
+  z-index: 2;
+}
+.placa-lost-note {
+  position: absolute;
+  bottom: 7%; left: 10%; right: 10%;
+  background: linear-gradient(180deg, #ebdcb6 0%, #d6c499 100%);
+  color: #2a1f10;
+  padding: 11px 13px 13px;
+  font-family: 'EB Garamond', serif;
+  z-index: 3;
+  transform: rotate(-1.8deg);
+  box-shadow:
+    0 12px 24px -8px rgba(0,0,0,0.75),
+    0 3px 6px rgba(0,0,0,0.5);
+  /* bordas rasgadas */
+  clip-path: polygon(
+    0% 4%, 4% 0%, 12% 3%, 22% 0%, 38% 4%, 56% 0%, 72% 3%, 88% 1%, 100% 4%,
+    98% 24%, 100% 52%, 96% 78%, 100% 100%,
+    82% 96%, 62% 100%, 42% 96%, 22% 100%, 6% 96%, 0% 100%,
+    2% 72%, 0% 48%, 4% 22%
+  );
+  pointer-events: none;
+}
+.placa-lost-note::before {
+  /* textura granulada do papel */
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 4px, rgba(0,0,0,0.025) 4px, rgba(0,0,0,0.025) 5px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(0,0,0,0.018) 3px, rgba(0,0,0,0.018) 4px);
+  pointer-events: none;
+}
+.placa-lost-note-pin {
+  position: absolute;
+  top: -8px; left: 20%;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c4404a 0%, #6b1a26 60%, #3a0c14 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+.placa-lost-note-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--wine);
+  margin-bottom: 4px;
+}
+.placa-lost-note-text {
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: #2a1f10;
+}
+.placa-lost-note-sig {
+  margin-top: 6px;
+  text-align: right;
+  font-style: italic;
+  font-size: 11px;
+  color: #5a3a20;
+  letter-spacing: 0.04em;
 }
 
 .placa-plaque {

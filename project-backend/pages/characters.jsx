@@ -166,15 +166,21 @@ function CharacterModal({ character, existingCampaigns, onClose }) {
 // PlacaCard — retrato + placa de bronze
 // ============================================================
 function PlacaCard({ char, nr, onClick, onEdit, isEditor }) {
-  const status = deriveStatus(char);
-  const dead   = status?.bucket === 'morto';
-  const classe = (char.cls || getInfoboxRow(char, 'Classe') || '').split('·')[0].trim();
-  const origem = (getInfoboxRow(char, 'Origem') || '').split(/[—–-]/)[0].trim();
+  const status      = deriveStatus(char);
+  const dead        = status?.bucket === 'morto';
+  const morte       = getInfoboxRow(char, 'Morte');
+  const ultimaVista = getInfoboxRow(char, 'Última Vista');
+  const vistoPor    = getInfoboxRow(char, 'Visto Por');
+  const hasNote     = !dead && status?.bucket === 'outro' && !!ultimaVista;
+  const classe      = (char.cls || getInfoboxRow(char, 'Classe') || '').split('·')[0].trim();
+  const origem      = (getInfoboxRow(char, 'Origem') || '').split(/[—–-]/)[0].trim();
   const campaignShort = (char.campaign || '').split(/[—–-]/)[0].trim();
+
+  const variantCls = dead ? 'dead dead-tomb' : (hasNote ? 'lost-note' : '');
 
   return (
     <article
-      className={`placa-card ${dead ? 'dead' : ''}`}
+      className={`placa-card ${variantCls}`}
       onClick={onClick}
     >
       <div className="placa-frame">
@@ -183,10 +189,26 @@ function PlacaCard({ char, nr, onClick, onEdit, isEditor }) {
           shape="rect"
           placeholder={`Arraste retrato · ${char.name}`}
         ></image-slot>
+        {dead && <div className="placa-cameo-ring" />}
         {status && (
           <div className={`placa-status ${status.cls}`}>
             <span className="placa-status-dot" />
             {status.label}
+          </div>
+        )}
+        {dead && (
+          <div className="placa-tomb-inscription">
+            <div className="placa-tomb-name">{char.name}</div>
+            {morte && <span className="placa-tomb-sep" />}
+            {morte && <div className="placa-tomb-year">{morte}</div>}
+          </div>
+        )}
+        {hasNote && (
+          <div className="placa-lost-note">
+            <span className="placa-lost-note-pin" />
+            <div className="placa-lost-note-lbl">Última vista</div>
+            <div className="placa-lost-note-text">{ultimaVista}</div>
+            {vistoPor && <div className="placa-lost-note-sig">— {vistoPor}</div>}
           </div>
         )}
       </div>
@@ -195,7 +217,7 @@ function PlacaCard({ char, nr, onClick, onEdit, isEditor }) {
           N.º {nr} · {char.tag}
           {campaignShort && <> · {campaignShort.toUpperCase()}</>}
         </div>
-        <h3 className="placa-plaque-name">{char.name}</h3>
+        {!dead && <h3 className="placa-plaque-name">{char.name}</h3>}
         <p className="placa-plaque-role">
           {classe && origem ? `${classe} · ${origem}` : (char.role || classe || origem)}
         </p>
