@@ -1,25 +1,53 @@
-# CODING AGENTS: READ THIS FIRST
+# O Arquivo de Valiran
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Campaign wiki for the **Valiran** dark-fantasy tabletop RPG campaign.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+---
 
-## What you should do — IMPORTANT
+## What it is
 
-**Read the chat transcripts first.** There are 1 chat transcript(s) in `chats/`. The transcripts show the full back-and-forth between the user and the design assistant — they tell you **what the user actually wants** and **where they landed** after iterating. Don't skip them. The final HTML files are the output, but the chat is where the intent lives.
+A single-page web application where players and the GM can read session recaps, explore world lore (deities, kingdoms, factions, NPCs), consult house rules, and follow an in-world timeline. Editors and admins can create and update content directly from the browser.
 
-**Read `project/index.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+Built with React and Supabase. No build step — open the HTML file and it runs.
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+---
 
-## About the design files
+## How to run
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+Open `project-backend/index.html` in a browser, or serve it via a local HTTP server:
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+```bash
+# Python
+python -m http.server 8080 --directory project-backend
 
-## Bundle contents
+# Node (npx)
+npx serve project-backend
+```
 
-- `README.md` — this file
-- `chats/` — conversation transcripts (read these!)
-- `project/` — the `O Arquivo de Valiran` project files (HTML prototypes, assets, components)
+The app connects to a hosted Supabase instance. No local database setup is needed for read-only access.
+
+---
+
+## Repo structure
+
+| Path | Status | Description |
+|------|--------|-------------|
+| `project-backend/` | Active | The live application — work here |
+| `project/` | Deprecated | Original HTML prototype, no database |
+| `seed_*.sql` | Active | Supabase seed data (run once per environment) |
+| `ESTRUTURA-ARTIGOS.md` | Reference | SQL schema + INSERT examples per entity type |
+| `PROJECT_REFERENCE.md` | Reference | Full technical documentation for this repo |
+
+---
+
+## Documentation
+
+- **[PROJECT_REFERENCE.md](PROJECT_REFERENCE.md)** — Full technical map: file roles, DB schema, auth system, design tokens, agent guidelines.
+- **[project-backend/CONTEUDO-INSTRUCOES.md](project-backend/CONTEUDO-INSTRUCOES.md)** — Content editor guide: how to add sessions, characters, deities, and other entities via the in-app UI.
+- **[ESTRUTURA-ARTIGOS.md](ESTRUTURA-ARTIGOS.md)** — Technical data structure reference with SQL INSERT examples.
+
+---
+
+## For AI agents
+
+Read **[PROJECT_REFERENCE.md](PROJECT_REFERENCE.md)** before making any changes.
