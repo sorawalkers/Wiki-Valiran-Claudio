@@ -36,12 +36,16 @@ function CharacterDetail({ id, onNav }) {
   }, [nq]);
 
   if (!c) {
+    const isLoading = Object.keys(Entities.characters).length === 0;
     return (
       <div className="page">
         <button className="back-btn" onClick={() => onNav('characters')}>
           Voltar à galeria
         </button>
-        <h1 className="page-title">Personagem não encontrado</h1>
+        {isLoading
+          ? <p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>Carregando…</p>
+          : <h1 className="page-title">Personagem não encontrado</h1>
+        }
       </div>
     );
   }
