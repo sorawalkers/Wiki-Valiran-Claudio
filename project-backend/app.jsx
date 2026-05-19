@@ -113,9 +113,9 @@ function App() {
       case 'campanha1': return <CampaignArticle id="campanha1" onNav={navigate} />;
       case 'rogue1':    return <CampaignArticle id="rogue1"    onNav={navigate} />;
       case 'timeline': return <Timeline key={dbVersion} onNav={navigate} />;
-      case 'map': return <MapPage onNav={navigate} />;
+      case 'map': return <RealmMapPage onNav={navigate} />;
       case 'recent': return <Recent onNav={navigate} />;
-      case 'kingdoms': return <Kingdoms onNav={navigate} />;
+      case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
       case 'events': return <Events key={dbVersion} onNav={navigate} />;
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
@@ -176,7 +176,6 @@ function App() {
               {id:'recent', label:'Recentes'},
               {id:'pantheon', label:'Panteão'},
               {id:'article', label:'Artigo'},
-              {id:'kingdoms', label:'Reinos'},
               {id:'factions', label:'Facções'},
               {id:'timeline', label:'Timeline'},
               {id:'events', label:'Eventos'},
