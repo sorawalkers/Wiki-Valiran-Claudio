@@ -242,6 +242,27 @@ function NpcDetail({ id, onNav }) {
 
   const c = Entities.characters[id];
 
+  // All hooks must run before any early return (Rules of Hooks)
+  const sections = c ? (c.sections || []) : [];
+  const nq = npNorm(query);
+
+  const allTags = useNpcMemo(() =>
+    Array.from(new Set(sections.flatMap(s => s.tags || []))),
+    [sections]
+  );
+
+  const filtered = useNpcMemo(() =>
+    sections.map((sec, i) => ({ sec, i, matches: npSectionMatches(sec, nq, tagFilter) })),
+    [sections, nq, tagFilter]
+  );
+  const visibleFiltered = filtered.filter(f => f.matches);
+
+  useNpcEffect(() => {
+    if (!nq) return;
+    const matching = filtered.filter(f => f.matches).map(f => f.i);
+    setOpenSet(prev => new Set([...prev, ...matching]));
+  }, [nq]);
+
   if (!c) {
     return (
       <div className="page">
@@ -252,29 +273,6 @@ function NpcDetail({ id, onNav }) {
       </div>
     );
   }
-
-  const sections = c.sections || [];
-  const nq = npNorm(query);
-
-  // All unique tags across all sections
-  const allTags = useNpcMemo(() =>
-    Array.from(new Set(sections.flatMap(s => s.tags || []))),
-    [sections]
-  );
-
-  // Filtered sections
-  const filtered = useNpcMemo(() =>
-    sections.map((sec, i) => ({ sec, i, matches: npSectionMatches(sec, nq, tagFilter) })),
-    [sections, nq, tagFilter]
-  );
-  const visibleFiltered = filtered.filter(f => f.matches);
-
-  // Auto-expand matching sections when query changes
-  useNpcEffect(() => {
-    if (!nq) return;
-    const matching = filtered.filter(f => f.matches).map(f => f.i);
-    setOpenSet(prev => new Set([...prev, ...matching]));
-  }, [nq]);
 
   function toggleReport(idx) {
     setOpenSet(prev => {

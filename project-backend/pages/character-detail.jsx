@@ -14,18 +14,8 @@ function CharacterDetail({ id, onNav }) {
 
   const c = Entities.characters[id];
 
-  if (!c) {
-    return (
-      <div className="page">
-        <button className="back-btn" onClick={() => onNav('characters')}>
-          Voltar à galeria
-        </button>
-        <h1 className="page-title">Personagem não encontrado</h1>
-      </div>
-    );
-  }
-
-  const sections = c.sections || [];
+  // All hooks must run before any early return (Rules of Hooks)
+  const sections = c ? (c.sections || []) : [];
   const nq = npNorm(query);
 
   const allTags = useChMemo(() =>
@@ -44,6 +34,17 @@ function CharacterDetail({ id, onNav }) {
     const matching = filtered.filter(f => f.matches).map(f => f.i);
     setOpenSet(prev => new Set([...prev, ...matching]));
   }, [nq]);
+
+  if (!c) {
+    return (
+      <div className="page">
+        <button className="back-btn" onClick={() => onNav('characters')}>
+          Voltar à galeria
+        </button>
+        <h1 className="page-title">Personagem não encontrado</h1>
+      </div>
+    );
+  }
 
   function toggleReport(idx) {
     setOpenSet(prev => {
