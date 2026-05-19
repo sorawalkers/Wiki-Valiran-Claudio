@@ -120,8 +120,8 @@ function App() {
       case 'events': return <Events key={dbVersion} onNav={navigate} />;
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
       case 'npcs': return <Npcs key={dbVersion} onNav={navigate} />;
-      case 'character': return <CharacterDetail id={entity} onNav={navigate} />;
-      case 'npc':       return <NpcDetail id={entity} onNav={navigate} />;
+      case 'character': return <CharacterDetail key={entity + ':' + dbVersion} id={entity} onNav={navigate} />;
+      case 'npc':       return <NpcDetail       key={entity + ':' + dbVersion} id={entity} onNav={navigate} />;
       case 'deity': return <DeityDetail id={entity} onNav={navigate} />;
       case 'sessions': return <Sessions key={dbVersion} onNav={navigate} />;
       case 'session': return <SessionDetail id={entity} onNav={navigate} />;

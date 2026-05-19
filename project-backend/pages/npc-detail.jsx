@@ -242,39 +242,41 @@ function NpcDetail({ id, onNav }) {
 
   const c = Entities.characters[id];
 
-  if (!c) {
-    return (
-      <div className="page">
-        <button className="back-btn" onClick={() => onNav('npcs')}>
-          Voltar à galeria
-        </button>
-        <h1 className="page-title">Pessoa não encontrada</h1>
-      </div>
-    );
-  }
-
-  const sections = c.sections || [];
+  // All hooks must run before any early return (Rules of Hooks)
+  const sections = c ? (c.sections || []) : [];
   const nq = npNorm(query);
 
-  // All unique tags across all sections
   const allTags = useNpcMemo(() =>
     Array.from(new Set(sections.flatMap(s => s.tags || []))),
     [sections]
   );
 
-  // Filtered sections
   const filtered = useNpcMemo(() =>
     sections.map((sec, i) => ({ sec, i, matches: npSectionMatches(sec, nq, tagFilter) })),
     [sections, nq, tagFilter]
   );
   const visibleFiltered = filtered.filter(f => f.matches);
 
-  // Auto-expand matching sections when query changes
   useNpcEffect(() => {
     if (!nq) return;
     const matching = filtered.filter(f => f.matches).map(f => f.i);
     setOpenSet(prev => new Set([...prev, ...matching]));
   }, [nq]);
+
+  if (!c) {
+    const isLoading = Object.keys(Entities.characters).length === 0;
+    return (
+      <div className="page">
+        <button className="back-btn" onClick={() => onNav('npcs')}>
+          Voltar à galeria
+        </button>
+        {isLoading
+          ? <p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>Carregando…</p>
+          : <h1 className="page-title">Pessoa não encontrada</h1>
+        }
+      </div>
+    );
+  }
 
   function toggleReport(idx) {
     setOpenSet(prev => {
@@ -335,10 +337,6 @@ function NpcDetail({ id, onNav }) {
 
           {/* Dossier header */}
           <div className="np-header">
-            <div className="np-header-eyebrow">
-              DRAMATIS PERSONAE · {c.tag}
-              {campaignShort && <> · {campaignShort}</>}
-            </div>
             <h1 className="np-title">{c.name}</h1>
             {c.role && <p className="np-subtitle">{c.role}</p>}
           </div>
@@ -536,3 +534,19 @@ function NpcDetail({ id, onNav }) {
 }
 
 window.NpcDetail = NpcDetail;
+
+// Expose shared helpers for character-detail.jsx
+window.npNorm            = npNorm;
+window.npHighlight       = npHighlight;
+window.npSectionMatches  = npSectionMatches;
+window.NpReport          = NpReport;
+window.NpGrid            = NpGrid;
+window.NpPinIcon         = NpPinIcon;
+window.NpScrollIcon      = NpScrollIcon;
+window.NpClockIcon       = NpClockIcon;
+window.NpChevronIcon     = NpChevronIcon;
+window.NpListIcon        = NpListIcon;
+window.NpGridIcon        = NpGridIcon;
+window.NpExpandIcon      = NpExpandIcon;
+window.NpCollapseIcon    = NpCollapseIcon;
+window.NpSearchIcon      = NpSearchIcon;

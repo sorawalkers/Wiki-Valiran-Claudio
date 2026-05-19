@@ -14,18 +14,8 @@ function CharacterDetail({ id, onNav }) {
 
   const c = Entities.characters[id];
 
-  if (!c) {
-    return (
-      <div className="page">
-        <button className="back-btn" onClick={() => onNav('characters')}>
-          Voltar à galeria
-        </button>
-        <h1 className="page-title">Personagem não encontrado</h1>
-      </div>
-    );
-  }
-
-  const sections = c.sections || [];
+  // All hooks must run before any early return (Rules of Hooks)
+  const sections = c ? (c.sections || []) : [];
   const nq = npNorm(query);
 
   const allTags = useChMemo(() =>
@@ -44,6 +34,21 @@ function CharacterDetail({ id, onNav }) {
     const matching = filtered.filter(f => f.matches).map(f => f.i);
     setOpenSet(prev => new Set([...prev, ...matching]));
   }, [nq]);
+
+  if (!c) {
+    const isLoading = Object.keys(Entities.characters).length === 0;
+    return (
+      <div className="page">
+        <button className="back-btn" onClick={() => onNav('characters')}>
+          Voltar à galeria
+        </button>
+        {isLoading
+          ? <p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>Carregando…</p>
+          : <h1 className="page-title">Personagem não encontrado</h1>
+        }
+      </div>
+    );
+  }
 
   function toggleReport(idx) {
     setOpenSet(prev => {
@@ -100,10 +105,6 @@ function CharacterDetail({ id, onNav }) {
           </nav>
 
           <div className="np-header">
-            <div className="np-header-eyebrow">
-              DRAMATIS PERSONAE · {c.tag}
-              {campaignShort && <> · {campaignShort}</>}
-            </div>
             <h1 className="np-title">{c.name}</h1>
             {c.role && <p className="np-subtitle">{c.role}</p>}
           </div>
