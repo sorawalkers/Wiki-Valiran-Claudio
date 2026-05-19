@@ -100,10 +100,6 @@ function CharacterDetail({ id, onNav }) {
           </nav>
 
           <div className="np-header">
-            <div className="np-header-eyebrow">
-              DRAMATIS PERSONAE · {c.tag}
-              {campaignShort && <> · {campaignShort}</>}
-            </div>
             <h1 className="np-title">{c.name}</h1>
             {c.role && <p className="np-subtitle">{c.role}</p>}
           </div>
