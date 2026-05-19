@@ -532,3 +532,19 @@ function NpcDetail({ id, onNav }) {
 }
 
 window.NpcDetail = NpcDetail;
+
+// Expose shared helpers for character-detail.jsx
+window.npNorm            = npNorm;
+window.npHighlight       = npHighlight;
+window.npSectionMatches  = npSectionMatches;
+window.NpReport          = NpReport;
+window.NpGrid            = NpGrid;
+window.NpPinIcon         = NpPinIcon;
+window.NpScrollIcon      = NpScrollIcon;
+window.NpClockIcon       = NpClockIcon;
+window.NpChevronIcon     = NpChevronIcon;
+window.NpListIcon        = NpListIcon;
+window.NpGridIcon        = NpGridIcon;
+window.NpExpandIcon      = NpExpandIcon;
+window.NpCollapseIcon    = NpCollapseIcon;
+window.NpSearchIcon      = NpSearchIcon;
