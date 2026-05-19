@@ -1,6 +1,6 @@
-# Guia de SQL para Artigos de Personagem — O Arquivo de Valiran
+# Guia de SQL para Artigos — O Arquivo de Valiran
 
-> Instruções para geração e execução de SQL ao criar ou atualizar artigos de personagem na wiki.
+> Instruções para geração e execução de SQL ao criar ou atualizar artigos de personagem, divindade ou sessão na wiki.
 > Inclui templates prontos, mapa de campos e cuidados técnicos obrigatórios.
 
 ---
@@ -393,24 +393,280 @@ As seções antigas são **completamente substituídas**. Sempre inclua todo o c
 
 ---
 
-## 10. Checklist antes de executar
+## 10. Divindades (`deities`)
 
-- [ ] ID gerado corretamente via slugify (sem acentos, sem símbolos)
-- [ ] Aspas simples dentro de strings estão duplicadas (`''`)
-- [ ] Todos os campos JSONB terminam com `::jsonb`
-- [ ] JSON válido (sem trailing commas, chaves com aspas duplas)
-- [ ] `sections` usa `"paras"` e não `"body"` ou `"paragraphs"`
-- [ ] `tag` e `tagClass` estão sincronizados
-- [ ] `"tagClass"` está com aspas duplas no nome da coluna
-- [ ] `placeholder = false` se o artigo é completo
-- [ ] Nomes próprios com grafia correta (ex: Lindhaven)
-- [ ] Targets de `related` apontam para slugs existentes
-- [ ] UPDATE inclui `updated_at = NOW()`
-- [ ] UPDATE inclui **todos** os campos JSONB (não apenas os que mudaram)
+### 10.1 Mapa de campos
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `id` | text PK | ✓ | Slug único via slugify |
+| `name` | text | ✓ | Nome da divindade |
+| `epithet` | text | | Epíteto exibido no subtítulo (ex: `"O que Sangra Luz"`) |
+| `sigil` | text | | Nome do ícone SVG — ver lista abaixo |
+| `hero` | text | | Citação de abertura do artigo |
+| `placeholder` | boolean | | `true` = sem artigo ainda · `false` = artigo completo |
+| `infobox` | jsonb | | Mesma estrutura de personagens |
+| `sections` | jsonb | | Mesma estrutura de personagens (`"paras"`) |
+| `related` | jsonb | | Mesma estrutura de personagens |
+
+### 10.2 Sigils disponíveis
+
+`Dragon` · `Dawn` · `Chain` · `Sun` · `Moon` · `Skull` · `Eye` · `Flame` · `Wave` · `Tree` · `Crown` · `Sword` · `Tome`
+
+> O sigil é o ícone SVG exibido na infobox e na grade do Panteão. Se o valor não corresponder a um nome da lista, nenhum ícone é renderizado.
+
+### 10.3 Estrutura `infobox` para divindades
+
+Mesma estrutura de personagens. Campos comuns para divindades:
+
+```json
+{
+  "rows": [
+    { "k": "Tipo",       "v": "Divindade Maior" },
+    { "k": "Domínio",    "v": "Luz, Sacrifício",    "danger": true },
+    { "k": "Alinhamento","v": "Leal-Bom",            "ok": true },
+    { "k": "Plano",      "v": "Sétimo Céu" },
+    { "k": "Símbolo",    "v": "Chama ascendente" },
+    { "k": "Adoradores", "v": "Paladinos, clérigos" },
+    { "k": "Status",     "v": "Ativo" }
+  ],
+  "statusNote": "Nota opcional exibida no rodapé da infobox."
+}
+```
+
+### 10.4 Template INSERT — nova divindade
+
+```sql
+INSERT INTO deities (id, name, epithet, sigil, placeholder, hero, infobox, sections, related)
+VALUES (
+  'nome-da-divindade',
+  'Nome da Divindade',
+  'O Epíteto · A Descrição',
+  'Flame',
+  false,
+  '"Citação de abertura da divindade."',
+  '{
+    "rows": [
+      {"k": "Tipo",       "v": "Divindade Maior"},
+      {"k": "Domínio",    "v": "Domínio aqui",   "danger": true},
+      {"k": "Alinhamento","v": "Alinhamento"},
+      {"k": "Plano",      "v": "Plano de existência"},
+      {"k": "Símbolo",    "v": "Descrição do símbolo sagrado"},
+      {"k": "Adoradores", "v": "Quem a adora"},
+      {"k": "Status",     "v": "Ativo"}
+    ]
+  }'::jsonb,
+  '[
+    {
+      "title": "Origem",
+      "paras": [
+        "Primeiro parágrafo sobre a origem da divindade.",
+        "Segundo parágrafo."
+      ]
+    },
+    {
+      "title": "Culto e Adoradores",
+      "paras": [
+        "Como a divindade é venerada."
+      ]
+    }
+  ]'::jsonb,
+  '[
+    {"tag": "Plano",  "title": "Nome do plano",    "target": "article"},
+    {"tag": "Evento", "title": "Evento relacionado","target": "timeline"}
+  ]'::jsonb
+);
+```
+
+### 10.5 Template UPDATE — atualizar divindade existente
+
+```sql
+UPDATE deities
+SET
+  epithet  = 'Novo Epíteto',
+  hero     = '"Nova citação."',
+  sections = '[
+    {
+      "title": "Origem",
+      "paras": ["Texto atualizado."]
+    }
+  ]'::jsonb,
+  related  = '[
+    {"tag": "Titã", "title": "Lamidriel", "target": "deity:lamidriel"}
+  ]'::jsonb,
+  infobox  = '{
+    "rows": [
+      {"k": "Status", "v": "Ativo"}
+    ]
+  }'::jsonb,
+  updated_at = NOW()
+WHERE id = 'id-da-divindade';
+```
 
 ---
 
-## 11. Onde executar
+## 11. Sessões (`sessions`)
+
+### 11.1 Mapa de campos
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `num` | integer UNIQUE | ✓ | Número da sessão (1, 2, 3…) — chave lógica de navegação |
+| `title` | text | ✓ | Título narrativo da sessão |
+| `date` | text | | Data por extenso (ex: `"21 do Segundo Mês, 1281"`) |
+| `dateShort` | text | | Data abreviada para chips (ex: `"21 · MAI · 1281"`) |
+| `location` | text | | Local principal da sessão |
+| `locationDetail` | text | | Descrição geográfica do local |
+| `duration` | text | | Duração real da sessão (ex: `"4h30"`) |
+| `session_xp` | text | | XP concedida na sessão |
+| `summary` | text | | Resumo de uma linha exibido no card |
+| `cast` | jsonb | | Array de strings com nomes dos presentes |
+| `places` | jsonb | | Array de strings com lugares visitados |
+| `narrative` | jsonb | | Array de parágrafos da narrativa |
+| `keypoints` | jsonb | | Array de `{text, danger}` — pontos-chave |
+| `loot` | jsonb | | Array de itens coletados (opcional) |
+| `gmnote` | text | | Nota privada do GM (não exibida para viewers) |
+| `next` | text | | Gancho para a próxima sessão |
+
+> **Atenção**: `num` é o identificador lógico de sessão. A rota de navegação é `session:num` (ex: `session:5`). O `id` UUID é gerado automaticamente pelo banco.
+
+### 11.2 Estrutura do campo `cast`
+
+Array de strings simples. Para NPCs, adicione `(NPC)` ao final — o componente detecta e exibe o badge NPC automaticamente.
+
+```json
+["Käthryn", "Lawrence", "Halric", "Tannis (NPC)", "Cael (NPC · guia)"]
+```
+
+### 11.3 Estrutura do campo `places`
+
+Array de strings com os locais visitados na sessão:
+
+```json
+["Catacumbas de Lindhaven", "Torre do Vigia", "Estalagem do Junco Partido"]
+```
+
+### 11.4 Estrutura do campo `narrative`
+
+Array de parágrafos. Cada string se torna um `<p>` na seção Narrativa:
+
+```json
+[
+  "O grupo chegou às muralhas de Lindhaven ao entardecer.",
+  "Dentro, o silêncio era absoluto — os guardas haviam sido substituídos.",
+  "Foi Käthryn quem notou a marca da Blackflame na pedra da entrada."
+]
+```
+
+### 11.5 Estrutura do campo `keypoints`
+
+Array de objetos `{text, danger}`. Itens com `"danger": true` são exibidos em vermelho:
+
+```json
+[
+  {"text": "Käthryn encontrou o diário de seu pai nas ruínas",    "danger": false},
+  {"text": "Lawrence foi marcado pela mácula de Ayael",           "danger": true},
+  {"text": "Diego entregou-se à Princesa Pálida em troca do grupo","danger": true},
+  {"text": "Brotherhood of Hope foi fundada em Silverhain",       "danger": false}
+]
+```
+
+> Convenção: use `danger: true` para eventos de alto impacto — mortes, capturas, revelações críticas, mudanças de campanha.
+
+### 11.6 Template INSERT — nova sessão
+
+```sql
+INSERT INTO sessions (
+  num, title, date, "dateShort", location, "locationDetail",
+  duration, session_xp, summary, cast, places, narrative, keypoints, loot, gmnote, next
+)
+VALUES (
+  7,
+  'O Preço de Lindhaven',
+  '14 do Terceiro Mês, 1281',
+  '14 · JUN · 1281',
+  'Castelo de Lindhaven',
+  'Muralhas norte do Ducado de Lindhaven, fronteira com Oshain',
+  '4h',
+  '350 XP',
+  'O grupo desce às catacumbas e encontra a Blackflame — Diego não volta.',
+  '["Käthryn", "Lawrence", "Halric", "Tannis (NPC)"]'::jsonb,
+  '["Catacumbas de Lindhaven", "Câmara do Selo", "Torre Norte"]'::jsonb,
+  '[
+    "O grupo infiltrou o castelo pelo aqueduto antigo.",
+    "Nas catacumbas, encontraram a Princesa Pálida com uma Shadow de Ayael.",
+    "Lawrence foi gravemente ferido. A criatura deixou uma mácula.",
+    "Diego entregou-se. O grupo escapou. O silêncio que se seguiu durou horas."
+  ]'::jsonb,
+  '[
+    {"text": "Lawrence recebeu a mácula de Ayael",                         "danger": true},
+    {"text": "Diego Vans Loupd''or capturado pela Blackflame",             "danger": true},
+    {"text": "Käthryn recuperou a espada de família nas ruínas do castelo", "danger": false}
+  ]'::jsonb,
+  '[]'::jsonb,
+  'Investigar a origem da mácula de Lawrence. Encontrar rastro de Diego.',
+  'O grupo precisa chegar a Silverhain antes que Oshain feche as estradas.'
+);
+```
+
+### 11.7 Template UPDATE — atualizar sessão existente
+
+```sql
+UPDATE sessions
+SET
+  title           = 'Título Atualizado',
+  summary         = 'Novo resumo de uma linha.',
+  narrative       = '[
+    "Parágrafo atualizado da narrativa.",
+    "Segundo parágrafo."
+  ]'::jsonb,
+  keypoints       = '[
+    {"text": "Ponto-chave atualizado", "danger": false}
+  ]'::jsonb,
+  cast            = '["Käthryn", "Lawrence"]'::jsonb,
+  places          = '["Local 1", "Local 2"]'::jsonb,
+  updated_at      = NOW()
+WHERE num = 7;
+```
+
+> O UPDATE de sessão usa `WHERE num = 7` (número da sessão), não o UUID.
+
+---
+
+## 12. Checklist antes de executar
+
+### Geral (todos os tipos)
+- [ ] Aspas simples dentro de strings estão duplicadas (`''`)
+- [ ] Todos os campos JSONB terminam com `::jsonb`
+- [ ] JSON válido (sem trailing commas, chaves com aspas duplas)
+- [ ] Nomes próprios com grafia correta (ex: **Lindhaven**, não Lidhaven)
+- [ ] Targets de `related` apontam para slugs/nums existentes
+- [ ] UPDATE inclui `updated_at = NOW()`
+- [ ] UPDATE inclui **todos** os campos JSONB (não apenas os que mudaram)
+
+### Personagens (`characters`)
+- [ ] ID gerado via slugify (sem acentos, sem símbolos)
+- [ ] `sections` usa `"paras"` e não `"body"` ou `"paragraphs"`
+- [ ] `tag` e `tagClass` estão sincronizados (ex: `PC` / `pc`)
+- [ ] `"tagClass"` com aspas duplas no nome da coluna SQL
+- [ ] `placeholder = false` se o artigo está completo
+
+### Divindades (`deities`)
+- [ ] ID gerado via slugify
+- [ ] `sigil` é um dos valores válidos da lista (Dragon, Dawn, Chain…)
+- [ ] `sections` usa `"paras"`
+- [ ] `placeholder = false` se o artigo está completo
+
+### Sessões (`sessions`)
+- [ ] `num` é único e não conflita com sessões existentes
+- [ ] `"dateShort"` e `"locationDetail"` com aspas duplas no nome da coluna SQL
+- [ ] `keypoints` usa `{text, danger}` e não apenas strings
+- [ ] UPDATE usa `WHERE num = X` (não o UUID)
+- [ ] `cast` com `(NPC)` para identificar NPCs corretamente
+
+---
+
+## 13. Onde executar
 
 **Supabase Dashboard → SQL Editor**
 
