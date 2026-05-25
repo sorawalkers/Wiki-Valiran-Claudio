@@ -70,7 +70,8 @@
     Data.houserules = [];
     Data.feed       = [];
     Data.kingdoms   = [];
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes] = await Promise.all([
+    Data.realms = [];
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, realmRes, hexRes, cityRes, riverRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -79,6 +80,10 @@
       window.sb.from('factions').select('*').order('sort_order'),
       window.sb.from('houserules').select('*').order('sort_order'),
       window.sb.from('kingdoms').select('*').order('sort_order'),
+      window.sb.from('realms').select('*').order('sort_order'),
+      window.sb.from('realm_hexes').select('*'),
+      window.sb.from('realm_cities').select('*'),
+      window.sb.from('realm_rivers').select('*'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -223,8 +228,166 @@
       }));
     }
 
+    if (realmRes.data && hexRes.data && cityRes.data) {
+      const hexesByRealm = {};
+      hexRes.data.forEach(h => {
+        if (!hexesByRealm[h.realm_id]) hexesByRealm[h.realm_id] = [];
+        hexesByRealm[h.realm_id].push({ id: h.id, q: h.q, r: h.r, biome: h.biome || 'plain' });
+      });
+      const citiesByRealm = {};
+      cityRes.data.forEach(c => {
+        if (!citiesByRealm[c.realm_id]) citiesByRealm[c.realm_id] = [];
+        citiesByRealm[c.realm_id].push({ id: c.id, q: c.q, r: c.r, kind: c.kind, name: c.name, critical: c.critical || false });
+      });
+      Data.realms = realmRes.data.map(r => ({
+        id:           r.id,
+        slug:         r.slug,
+        name:         r.name,
+        short:        r.short,
+        eyebrow:      r.eyebrow || null,
+        sigil:        r.sigil || null,
+        motto:        r.motto || null,
+        desc:         r.desc || null,
+        accent:       r.accent,
+        accentDeep:   r.accent_deep,
+        cursed:       r.cursed || false,
+        capitalQ:     r.capital_q,
+        capitalR:     r.capital_r,
+        capitalName:  r.capital_name || null,
+        stats6:       r.stats6 || {},
+        resources:    r.resources || [],
+        sort_order:   r.sort_order || 0,
+        hexes:        hexesByRealm[r.id] || [],
+        cities:       citiesByRealm[r.id] || [],
+      }));
+    }
+    Data.rivers = (riverRes && riverRes.data) ? riverRes.data.map(r => ({
+      id:     r.id,
+      name:   r.name,
+      width:  r.width || 3,
+      points: r.points || [],
+      delta:  r.delta || [],
+    })) : [];
+
     Data.feed = buildFeed();
     dispatch();
+  }
+
+  async function loadRealms() {
+    if (!window.sb) return;
+    const [realmRes, hexRes, cityRes, riverRes] = await Promise.all([
+      window.sb.from('realms').select('*').order('sort_order'),
+      window.sb.from('realm_hexes').select('*'),
+      window.sb.from('realm_cities').select('*'),
+      window.sb.from('realm_rivers').select('*'),
+    ]);
+    if (realmRes.data && hexRes.data && cityRes.data) {
+      const hexesByRealm = {};
+      hexRes.data.forEach(h => {
+        if (!hexesByRealm[h.realm_id]) hexesByRealm[h.realm_id] = [];
+        hexesByRealm[h.realm_id].push({ id: h.id, q: h.q, r: h.r, biome: h.biome || 'plain' });
+      });
+      const citiesByRealm = {};
+      cityRes.data.forEach(c => {
+        if (!citiesByRealm[c.realm_id]) citiesByRealm[c.realm_id] = [];
+        citiesByRealm[c.realm_id].push({ id: c.id, q: c.q, r: c.r, kind: c.kind, name: c.name, critical: c.critical || false });
+      });
+      Data.realms = realmRes.data.map(r => ({
+        id:           r.id,
+        slug:         r.slug,
+        name:         r.name,
+        short:        r.short,
+        eyebrow:      r.eyebrow || null,
+        sigil:        r.sigil || null,
+        motto:        r.motto || null,
+        desc:         r.desc || null,
+        accent:       r.accent,
+        accentDeep:   r.accent_deep,
+        cursed:       r.cursed || false,
+        capitalQ:     r.capital_q,
+        capitalR:     r.capital_r,
+        capitalName:  r.capital_name || null,
+        stats6:       r.stats6 || {},
+        resources:    r.resources || [],
+        sort_order:   r.sort_order || 0,
+        hexes:        hexesByRealm[r.id] || [],
+        cities:       citiesByRealm[r.id] || [],
+      }));
+    }
+    Data.rivers = (riverRes && riverRes.data) ? riverRes.data.map(r => ({
+      id: r.id, name: r.name, width: r.width || 3, points: r.points || [], delta: r.delta || [],
+    })) : [];
+    dispatch();
+  }
+
+  async function saveRealm(data) {
+    const payload = {
+      slug:         data.slug,
+      name:         data.name,
+      short:        data.short,
+      eyebrow:      data.eyebrow || null,
+      sigil:        data.sigil || null,
+      motto:        data.motto || null,
+      desc:         data.desc || null,
+      accent:       data.accent || '#888888',
+      accent_deep:  data.accentDeep || '#222222',
+      cursed:       data.cursed || false,
+      capital_q:    data.capitalQ != null ? data.capitalQ : null,
+      capital_r:    data.capitalR != null ? data.capitalR : null,
+      capital_name: data.capitalName || null,
+      stats6:       data.stats6 || {},
+      resources:    data.resources || [],
+      sort_order:   data.sort_order || 0,
+      updated_at:   new Date().toISOString(),
+    };
+    let res;
+    if (data.id) {
+      res = await window.sb.from('realms').update(payload).eq('id', data.id);
+    } else {
+      res = await window.sb.from('realms').insert(payload);
+    }
+    if (res.error) throw res.error;
+    await loadRealms();
+  }
+
+  async function deleteRealm(id) {
+    const res = await window.sb.from('realms').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadRealms();
+  }
+
+  async function saveHex(realmId, q, r, biome) {
+    const res = await window.sb.from('realm_hexes')
+      .upsert({ realm_id: realmId, q, r, biome: biome || 'plain' }, { onConflict: 'q,r' });
+    if (res.error) throw res.error;
+  }
+
+  async function removeHex(q, r) {
+    const res = await window.sb.from('realm_hexes').delete().eq('q', q).eq('r', r);
+    if (res.error) throw res.error;
+  }
+
+  async function saveCity(data) {
+    const payload = {
+      realm_id: data.realmId,
+      q:        data.q,
+      r:        data.r,
+      kind:     data.kind,
+      name:     data.name,
+      critical: data.critical || false,
+    };
+    let res;
+    if (data.id) {
+      res = await window.sb.from('realm_cities').update(payload).eq('id', data.id);
+    } else {
+      res = await window.sb.from('realm_cities').insert(payload);
+    }
+    if (res.error) throw res.error;
+  }
+
+  async function removeCity(id) {
+    const res = await window.sb.from('realm_cities').delete().eq('id', id);
+    if (res.error) throw res.error;
   }
 
   async function saveCampaignArticle(data) {
@@ -472,5 +635,8 @@
     saveHouseRule, deleteHouseRule,
     saveKingdom, deleteKingdom,
     saveCampaignArticle,
+    loadRealms, saveRealm, deleteRealm,
+    saveHex, removeHex,
+    saveCity, removeCity,
   };
 })();

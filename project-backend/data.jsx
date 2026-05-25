@@ -11,8 +11,7 @@ const Data = {
       { id: "pantheon", label: "Panteão", icon: "navDeity" },
     ]},
     { section: "Geopolítica", items: [
-      { id: "map", label: "Mapa de Valiran", icon: "navMap", adminOnly: true },
-      { id: "kingdoms", label: "Reinos & Potências", icon: "navSword" },
+      { id: "map", label: "Reinos & Potências", icon: "navSword" },
       { id: "factions", label: "Facções", icon: "navBook" },
     ]},
     { section: "Crônicas", items: [
