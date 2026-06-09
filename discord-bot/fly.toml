@@ -1,0 +1,14 @@
+# Fly.io — worker sem HTTP (Discord bot via WebSocket)
+app = "wiki-valiran-bot"
+primary_region = "gru"
+
+[build]
+
+[env]
+  DISCORD_CHANNEL_ID = "1498988634395902063"
+  SUPABASE_URL       = "https://ytphxqybjxokokbnnbrz.supabase.co"
+
+[[vm]]
+  memory   = "256mb"
+  cpu_kind = "shared"
+  cpus     = 1
