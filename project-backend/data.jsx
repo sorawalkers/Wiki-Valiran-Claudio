@@ -26,6 +26,7 @@ const Data = {
     { section: "Mesa", items: [
       { id: "sessions", label: "Diário de sessões", icon: "navScroll" },
       { id: "house-rules", label: "Regras da casa", icon: "navBook" },
+      { id: "sistema", label: "Sistema", icon: "navBook" },
     ]},
   ],
 

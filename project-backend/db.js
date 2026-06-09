@@ -50,6 +50,9 @@
     (Data.houserules || []).forEach(r => {
       push('houserule', 'Regra da Casa', r.title, null, 'house-rules', r.created_at, r.updated_at);
     });
+    (Data.systemEntries || []).forEach(e => {
+      push('system', 'Sistema', e.title, e.date_short || e.date_long || null, 'sistema', e.created_at, e.updated_at);
+    });
 
     items.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
     return items;
@@ -70,8 +73,9 @@
     Data.houserules = [];
     Data.feed       = [];
     Data.kingdoms   = [];
+    Data.systemEntries = [];
     Data.realms = [];
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, realmRes, hexRes, cityRes, riverRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, sysRes, realmRes, hexRes, cityRes, riverRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -80,6 +84,7 @@
       window.sb.from('factions').select('*').order('sort_order'),
       window.sb.from('houserules').select('*').order('sort_order'),
       window.sb.from('kingdoms').select('*').order('sort_order'),
+      window.sb.from('system_entries').select('*').order('sort_order', { ascending: false }),
       window.sb.from('realms').select('*').order('sort_order'),
       window.sb.from('realm_hexes').select('*'),
       window.sb.from('realm_cities').select('*'),
@@ -225,6 +230,22 @@
         sort_order: k.sort_order || 0,
         created_at: k.created_at || null,
         updated_at: k.updated_at || null,
+      }));
+    }
+
+    if (sysRes && !sysRes.error && sysRes.data) {
+      Data.systemEntries = sysRes.data.map(e => ({
+        _id:        e.id,
+        id:         e.id,
+        title:      e.title,
+        date_long:  e.date_long  || null,
+        date_short: e.date_short || null,
+        compact:    !!e.compact,
+        line:       e.line || null,
+        body:       e.body || null,
+        sort_order: e.sort_order || 0,
+        created_at: e.created_at || null,
+        updated_at: e.updated_at || null,
       }));
     }
 
@@ -624,6 +645,29 @@
     await loadAll();
   }
 
+  async function saveSystemEntry(data) {
+    const payload = {
+      id:         data.id,
+      title:      data.title,
+      date_long:  data.date_long  || null,
+      date_short: data.date_short || null,
+      compact:    !!data.compact,
+      line:       data.line || null,
+      body:       data.body || null,
+      sort_order: parseInt(data.sort_order) || 0,
+      updated_at: new Date().toISOString(),
+    };
+    const res = await window.sb.from('system_entries').upsert(payload, { onConflict: 'id' });
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteSystemEntry(id) {
+    const res = await window.sb.from('system_entries').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   window.DB = {
     loadAll,
     saveSession, deleteSession,
@@ -634,6 +678,7 @@
     saveEvent, deleteEvent,
     saveHouseRule, deleteHouseRule,
     saveKingdom, deleteKingdom,
+    saveSystemEntry, deleteSystemEntry,
     saveCampaignArticle,
     loadRealms, saveRealm, deleteRealm,
     saveHex, removeHex,
