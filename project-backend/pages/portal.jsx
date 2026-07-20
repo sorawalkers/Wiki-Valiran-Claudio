@@ -213,8 +213,8 @@ function Portal({ onNav }) {
       {/* Reinos principais do Supabase */}
       <section className="portal-grid">
         <div className="section-header">
-          <h2 className="section-title">Os Cinco Poderes</h2>
-          <a className="section-link" onClick={() => onNav('map')}>Conselho completo →</a>
+          <h2 className="section-title">Reinos</h2>
+          <a className="section-link" onClick={() => onNav('map')}>Reinos completos →</a>
         </div>
 
         {activeRealms.length > 0
