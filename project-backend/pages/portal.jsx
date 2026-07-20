@@ -1,5 +1,115 @@
 // Portal — homepage of the wiki
 
+// ── Mini mapa real (hexes do Supabase, sem interação) ──────────────────────
+function PortalMapPreview({ onNav }) {
+  const realms = Data.realms || [];
+  const rivers = Data.rivers || [];
+
+  const allHexEntries = realms.flatMap(k =>
+    (k.hexes || []).map(h => {
+      const [x, y] = rmQrToXY(h.q, h.r);
+      return { q: h.q, r: h.r, biome: h.biome || 'plain', realm: k, x, y };
+    })
+  ).sort((a, b) => a.y - b.y);
+
+  return (
+    <div style={{ position: 'relative', height: 280, overflow: 'hidden', cursor: 'pointer' }}
+      onClick={() => onNav('map')}>
+      <svg
+        viewBox={`0 0 ${RM_VIEW_W} ${RM_VIEW_H}`}
+        preserveAspectRatio="xMidYMid slice"
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      >
+        <defs>
+          <radialGradient id="pm-ocean" cx="50%" cy="50%" r="100%">
+            <stop offset="0%"   stopColor="#0e0c1c" />
+            <stop offset="100%" stopColor="#040310" />
+          </radialGradient>
+          <pattern id="pm-paper" width="48" height="48" patternUnits="userSpaceOnUse">
+            <circle cx="3"  cy="3"  r="0.4" fill="#2a2840" opacity="0.55" />
+            <circle cx="24" cy="24" r="0.3" fill="#2a2840" opacity="0.5"  />
+            <circle cx="36" cy="12" r="0.3" fill="#2a2840" opacity="0.45" />
+          </pattern>
+          <pattern id="pm-topo" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 0 20 Q 10 14, 20 20 T 40 20" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" />
+          </pattern>
+          <pattern id="pm-cursed" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#3a0a0e" strokeWidth="1.4" strokeOpacity="0.65" />
+          </pattern>
+          <filter id="rm-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="1" dy="2" stdDeviation="1.2" floodOpacity="0.55" />
+          </filter>
+          <filter id="rm-shadow-strong" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="1.5" dy="2.5" stdDeviation="2" floodOpacity="0.65" />
+          </filter>
+        </defs>
+
+        <rect width={RM_VIEW_W} height={RM_VIEW_H} fill="url(#pm-ocean)" />
+        <rect width={RM_VIEW_W} height={RM_VIEW_H} fill="url(#pm-paper)" />
+
+        <RMOceanDeco />
+
+        {allHexEntries.map((e, i) => {
+          const { q, r, biome, realm: k, x, y } = e;
+          return (
+            <g key={`pm-tile-${i}`}>
+              <path d={rmSidePath(x, y)} fill="rgba(0,0,0,0.5)" />
+              <path d={rmHexPath(x, y, 0.3)} fill={rmBiomeTint(biome)} />
+              <path d={rmHexPath(x, y, 0.3)}
+                fill={k.cursed ? k.accentDeep : k.accent}
+                fillOpacity={k.cursed ? 0.92 : 0.82}
+                stroke={k.accent} strokeOpacity="0.85" strokeWidth="0.4" />
+              <path d={rmHexPath(x, y, 0.3)} fill="url(#pm-topo)" pointerEvents="none" />
+              {k.cursed && <path d={rmHexPath(x, y, 0.3)} fill="url(#pm-cursed)" pointerEvents="none" />}
+              <RMTerrainOnTile x={x} y={y} biome={biome} hkey={`${q},${r}`} cursed={k.cursed} />
+            </g>
+          );
+        })}
+
+        {realms.map(k => {
+          const edges = rmKingdomBorderEdges(k);
+          return (
+            <g key={`pm-border-${k.id}`} pointerEvents="none">
+              {edges.map(([x1, y1, x2, y2], i) => (
+                <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+                  stroke="#0a070d" strokeWidth="1.6" strokeOpacity="0.95" strokeLinecap="round" />
+              ))}
+            </g>
+          );
+        })}
+
+        <RMRiversLayer rivers={rivers} />
+
+        {realms.flatMap(k => {
+          const cities = [
+            ...(k.capitalQ != null ? [{ q: k.capitalQ, r: k.capitalR, kind: 'capital', critical: false }] : []),
+            ...(k.cities || []),
+          ];
+          return cities.map((c, i) => (
+            <RMCityPiece key={`pm-city-${k.id}-${i}`} q={c.q} r={c.r} kind={c.kind} critical={c.critical || false} dim={false} />
+          ));
+        })}
+
+        {realms.map(k => (
+          <RMKingdomFlag key={`pm-flag-${k.id}`} realm={k} dim={false} />
+        ))}
+
+        <RMCloudsDeco />
+      </svg>
+
+      <div style={{
+        position: 'absolute', top: 16, left: 24,
+        fontFamily: 'Cinzel', fontSize: 11,
+        letterSpacing: '0.22em',
+        color: 'rgba(212,184,127,0.75)',
+        textTransform: 'uppercase',
+        pointerEvents: 'none',
+      }}>Carta de Valiran · 3ª Era</div>
+    </div>
+  );
+}
+
+// ── Portal ─────────────────────────────────────────────────────────────────
 function Portal({ onNav }) {
   const deityCount   = Object.values(Entities.deities || {}).filter(d => d && d.name).length;
   const charCount    = (Data.charIds || []).length;
@@ -7,6 +117,8 @@ function Portal({ onNav }) {
   const eventCount   = (Data.events || []).length;
   const tlCount      = (Data.timeline || []).filter(e => e.title).length;
   const totalCount   = deityCount + charCount + sessionCount + eventCount + tlCount;
+
+  const activeRealms = (Data.realms || []).filter(r => !r.cursed);
 
   return (
     <div className="portal" data-screen-label="01 Portal">
@@ -47,18 +159,17 @@ function Portal({ onNav }) {
         </div>
       </section>
 
+      {/* Adições recentes */}
       <section className="portal-grid">
         <div className="section-header">
           <h2 className="section-title">Adições Recentes</h2>
           <a className="section-link" onClick={() => onNav('recent')}>Ver todas →</a>
         </div>
 
-        {/* Featured — first feed entry */}
         {(Data.feed || []).length > 0 && (() => {
           const f = Data.feed[0];
           return (
             <div className="card card-featured" onClick={() => f.target && onNav(f.target)} style={f.target ? {cursor:'pointer'} : undefined}>
-              <div className="card-featured-image" />
               <div className="card-featured-body">
                 <div className="card-tag">{f.type_label}</div>
                 <h3 className="card-title">{f.title}</h3>
@@ -72,14 +183,10 @@ function Portal({ onNav }) {
           );
         })()}
 
-        {/* Regular cards */}
         {(Data.feed || []).slice(1, 4).map((c, i) => (
-          <div
-            key={i}
-            className="card"
+          <div key={i} className="card"
             onClick={() => c.target && onNav(c.target)}
-            style={c.target ? {cursor:'pointer'} : undefined}
-          >
+            style={c.target ? {cursor:'pointer'} : undefined}>
             <div className="card-tag">{c.type_label}</div>
             <h3 className="card-title">{c.title}</h3>
             <p className="card-excerpt">{c.subtitle || '—'}</p>
@@ -91,80 +198,66 @@ function Portal({ onNav }) {
         ))}
       </section>
 
+      {/* Mapa real */}
       <section className="portal-grid" style={{borderBottom:'none'}}>
         <div className="section-header">
           <h2 className="section-title">Pelas Veias do Continente</h2>
           <a className="section-link" onClick={() => onNav('map')}>Abrir mapa →</a>
         </div>
 
-        <div className="card" onClick={() => onNav('map')} style={{gridColumn:'span 3', padding:0, minHeight: 280, overflow:'hidden'}}>
-          <div style={{
-            height: 280,
-            position: 'relative',
-            background: 'linear-gradient(135deg, #e8dcc4 0%, #c4b48f 100%)',
-          }}>
-            <svg viewBox="0 0 800 320" style={{width:'100%', height:'100%', display:'block'}}>
-              <defs>
-                <pattern id="paper-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M40 0 L0 0 0 40" fill="none" stroke="#a89870" strokeWidth="0.3" strokeOpacity="0.4" />
-                </pattern>
-              </defs>
-              <rect width="800" height="320" fill="url(#paper-grid)" />
-              {/* simplified continent silhouette */}
-              <path d="M 120 80 L 280 60 L 380 90 L 520 70 L 640 100 L 720 160 L 700 240 L 580 280 L 420 290 L 280 270 L 160 240 L 100 180 Z"
-                fill="rgba(120,90,50,0.18)" stroke="#5a4a2a" strokeWidth="1.5" />
-              {/* mountains */}
-              {[[200,140],[260,130],[480,120],[540,140],[600,130]].map(([x,y],i) => (
-                <path key={i} d={`M${x} ${y} l 10 -16 l 10 16 z`} fill="none" stroke="#5a4a2a" strokeWidth="1" />
-              ))}
-              {/* labels */}
-              <text x="240" y="100" textAnchor="middle" style={{fontFamily:'Cinzel', fontSize:12, fill:'#2a2418', letterSpacing:'0.18em'}}>OSHAIN</text>
-              <text x="500" y="180" textAnchor="middle" style={{fontFamily:'Cinzel', fontSize:11, fill:'#6b1a26', letterSpacing:'0.18em'}}>† NOVA LANCASTER</text>
-              <text x="380" y="240" textAnchor="middle" style={{fontFamily:'Cinzel', fontSize:12, fill:'#2a2418', letterSpacing:'0.18em'}}>REPÚBLICA PRATEADA</text>
-              <text x="640" y="200" textAnchor="middle" style={{fontFamily:'Cinzel', fontSize:11, fill:'#2a2418', letterSpacing:'0.18em'}}>LOREAN TREAZ</text>
-              {/* compass */}
-              <g transform="translate(720,40)">
-                <circle r="20" fill="none" stroke="#5a4a2a" strokeWidth="0.8" />
-                <path d="M0 -16 L4 0 L0 16 L-4 0 Z" fill="#5a4a2a" />
-                <text textAnchor="middle" y="-24" style={{fontFamily:'Cinzel', fontSize:9, fill:'#5a4a2a'}}>N</text>
-              </g>
-            </svg>
-            <div style={{
-              position:'absolute', top:24, left:32,
-              fontFamily:'Cinzel', fontSize:13, letterSpacing:'0.22em',
-              color:'#5a4e36', textTransform:'uppercase'
-            }}>Carta de Valiran · 3ª Era</div>
-          </div>
+        <div className="card" style={{gridColumn:'span 3', padding:0, overflow:'hidden'}}>
+          <PortalMapPreview onNav={onNav} />
         </div>
       </section>
 
+      {/* Reinos principais do Supabase */}
       <section className="portal-grid">
         <div className="section-header">
           <h2 className="section-title">Os Cinco Poderes</h2>
-          <a className="section-link" onClick={() => onNav('kingdoms')}>Conselho completo →</a>
+          <a className="section-link" onClick={() => onNav('map')}>Conselho completo →</a>
         </div>
 
-        {[
-          { name: 'Oshain', sub: 'Monarquia · Annabella Whiteflame', desc: 'Expansionismo sob pretexto de proteção.', sigil: 'Crown', color: 'var(--wine)' },
-          { name: 'República Prateada', sub: 'República dracônica · Conselho dos Dez', desc: 'Bastião de justiça fundado por dragões.', sigil: 'Dragon', color: '#6a8aaa' },
-          { name: 'Lorean Treaz', sub: 'Magocracia · Concílio Magisterial', desc: 'Domínio absoluto da Trama e dos Warforged.', sigil: 'Tome', color: '#8a6aba' },
-        ].map(p => {
-          const Icon = Sigil[p.sigil];
-          return (
-            <div key={p.name} className="card" style={{cursor:'pointer'}}>
-              <div style={{display:'flex', alignItems:'center', gap:14, marginBottom:18}}>
-                <div style={{width:48, height:48, color: p.color, flexShrink:0}}>
-                  <Icon style={{width:'100%', height:'100%'}}/>
+        {activeRealms.length > 0
+          ? activeRealms.map(realm => {
+              const Icon = Sigil && Sigil[realm.sigil];
+              return (
+                <div key={realm.id} className="card" onClick={() => onNav('map')} style={{cursor:'pointer'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:14, marginBottom:18}}>
+                    <div style={{width:48, height:48, color: realm.accent, flexShrink:0}}>
+                      {Icon && <Icon style={{width:'100%', height:'100%'}} />}
+                    </div>
+                    <div>
+                      <div className="card-title" style={{margin:0, fontSize:19}}>{realm.name}</div>
+                      <div style={{fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--parchment-text-soft)', marginTop:4}}>{realm.eyebrow}</div>
+                    </div>
+                  </div>
+                  <p className="card-excerpt" style={{margin:0}}>{realm.desc}</p>
                 </div>
-                <div>
-                  <div className="card-title" style={{margin:0, fontSize:19}}>{p.name}</div>
-                  <div style={{fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--parchment-text-soft)', marginTop:4}}>{p.sub}</div>
+              );
+            })
+          : /* fallback enquanto DB carrega */
+            [
+              { name: 'Oshain', sub: 'Monarquia · Annabella Whiteflame', desc: 'Expansionismo sob pretexto de proteção.', sigil: 'Crown', color: 'var(--wine)' },
+              { name: 'República Prateada', sub: 'República dracônica · Conselho dos Dez', desc: 'Bastião de justiça fundado por dragões.', sigil: 'Dragon', color: '#6a8aaa' },
+              { name: 'Lorean Treaz', sub: 'Magocracia · Concílio Magisterial', desc: 'Domínio absoluto da Trama e dos Warforged.', sigil: 'Tome', color: '#8a6aba' },
+            ].map(p => {
+              const Icon = Sigil[p.sigil];
+              return (
+                <div key={p.name} className="card" style={{cursor:'pointer'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:14, marginBottom:18}}>
+                    <div style={{width:48, height:48, color: p.color, flexShrink:0}}>
+                      {Icon && <Icon style={{width:'100%', height:'100%'}} />}
+                    </div>
+                    <div>
+                      <div className="card-title" style={{margin:0, fontSize:19}}>{p.name}</div>
+                      <div style={{fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--parchment-text-soft)', marginTop:4}}>{p.sub}</div>
+                    </div>
+                  </div>
+                  <p className="card-excerpt" style={{margin:0}}>{p.desc}</p>
                 </div>
-              </div>
-              <p className="card-excerpt" style={{margin:0}}>{p.desc}</p>
-            </div>
-          );
-        })}
+              );
+            })
+        }
       </section>
     </div>
   );
