@@ -117,6 +117,7 @@ function App() {
       case 'recent': return <Recent onNav={navigate} />;
       case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
+      case 'faction': return <FactionDetail id={entity} onNav={navigate} />;
       case 'events': return <Events key={dbVersion} onNav={navigate} />;
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
       case 'npcs': return <Npcs key={dbVersion} onNav={navigate} />;

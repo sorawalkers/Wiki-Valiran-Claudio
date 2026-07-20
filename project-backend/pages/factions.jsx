@@ -212,12 +212,13 @@ function Factions({ onNav }) {
 
       <div className="dossier-grid">
         {list.map(d => (
-          <article key={d.id} className="dossier" style={{ position: 'relative' }}>
+          <article key={d.id} className="dossier" style={{ position: 'relative' }}
+            onClick={e => { if (e.target.closest('.editor-add-btn')) return; onNav('faction:' + d.id); }}>
             {isEditor && (
               <button
                 className="editor-add-btn"
                 style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', fontSize: 9 }}
-                onClick={() => setModal(d)}
+                onClick={e => { e.stopPropagation(); setModal(d); }}
               >
                 Editar
               </button>
@@ -253,4 +254,109 @@ function Factions({ onNav }) {
   );
 }
 
+// ============================================================
+// FactionDetail — página individual de uma facção
+// ============================================================
+function FactionDetail({ id, onNav }) {
+  const { isEditor } = useAuth();
+  const [modal, setModal] = React.useState(false);
+  const [imgSrc, setImgSrc] = React.useState(null);
+
+  const faction = (Entities.factions || {})[id];
+
+  const slotId = faction ? `faction-img-${faction.id}` : null;
+
+  React.useEffect(() => {
+    if (!slotId) return;
+    const check = () => {
+      const slot = window._imageSlotGet && window._imageSlotGet(slotId);
+      if (slot && slot.u) { setImgSrc(slot.u); return true; }
+      return false;
+    };
+    if (check()) return;
+    let attempts = 0;
+    const iv = setInterval(() => {
+      if (check() || ++attempts > 25) clearInterval(iv);
+    }, 200);
+    return () => clearInterval(iv);
+  }, [slotId]);
+
+  if (!faction) {
+    return (
+      <div style={{ padding: '80px', textAlign: 'center' }}>
+        <p style={{ fontFamily: 'EB Garamond, serif', fontStyle: 'italic', color: 'var(--foam-dim)' }}>
+          Dossiê não encontrado.
+        </p>
+        <button onClick={() => onNav('factions')} style={{
+          marginTop: 24, padding: '10px 20px', background: 'transparent',
+          color: 'var(--gold-bright)', border: '1px solid var(--gold-dim)',
+          fontFamily: 'Cinzel, serif', fontSize: 11, letterSpacing: '0.2em',
+          textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2,
+        }}>← Facções</button>
+      </div>
+    );
+  }
+
+  const paragraphs = (faction.summary || '').split(/\n\n+/).map(s => s.trim()).filter(Boolean);
+
+  return (
+    <div className="page faction-detail" data-screen-label="Facção">
+      <div className="page-breadcrumb" style={{
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: 'var(--foam-dim)', marginBottom: 4,
+        display: 'flex', gap: 8, alignItems: 'center',
+      }}>
+        <a style={{ color: 'var(--gold)', cursor: 'pointer' }} onClick={() => onNav('factions')}>Facções</a>
+        <span>›</span>
+        <span>{faction.name}</span>
+      </div>
+
+      <div className="faction-detail-header">
+        {faction.stamp && (
+          <div className={`faction-detail-stamp ${faction.stampClass || ''}`}>{faction.stamp}</div>
+        )}
+        <div className="faction-detail-id">DOSSIÊ · {faction.id.toUpperCase()}</div>
+        <h1 className="faction-detail-title">{faction.name}</h1>
+        {faction.alias && <p className="faction-detail-alias">{faction.alias}</p>}
+        {isEditor && (
+          <button className="editor-add-btn" style={{ position: 'absolute', bottom: 24, right: 0, padding: '5px 14px', fontSize: 10 }}
+            onClick={() => setModal(true)}>
+            Editar
+          </button>
+        )}
+      </div>
+
+      {/* Imagem / slot de upload */}
+      <div className="faction-detail-img-slot">
+        {imgSrc
+          ? <img src={imgSrc} alt={faction.name} />
+          : isEditor && <image-slot id={slotId} shape="rect" fit="contain" placeholder="Arraste imagem da facção"></image-slot>
+        }
+      </div>
+
+      {faction.rows && faction.rows.length > 0 && (
+        <dl className="faction-detail-rows">
+          {faction.rows.map((r, i) => (
+            <div key={i} className="faction-detail-row">
+              <dt>{r.k}</dt>
+              <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {paragraphs.length > 0 && (
+        <div className="faction-detail-body">
+          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+        </div>
+      )}
+
+      {modal && (
+        <FactionModal faction={faction} onClose={() => setModal(false)} />
+      )}
+    </div>
+  );
+}
+
 window.Factions = Factions;
+window.FactionDetail = FactionDetail;
