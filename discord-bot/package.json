@@ -4,7 +4,7 @@
   "description": "Espelha mensagens do #meta-updates-dh para a Página Sistema da Wiki de Valiran",
   "main": "index.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "start": "node index.js"
