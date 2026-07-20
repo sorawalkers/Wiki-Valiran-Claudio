@@ -186,26 +186,28 @@
       }));
     }
 
-    if (facRes.data) {
-      facRes.data.forEach(f => {
-        Entities.factions[f.id] = {
-          id: f.id,
-          name: f.name,
-          alias: f.alias || null,
-          stamp: f.stamp || null,
-          stampClass: f.stamp_class || null,
-          rows: f.rows || [],
-          summary: f.summary || null,
-          sort_order: f.sort_order || 0,
-          hero: f.hero || null,
-          sections: f.sections || [],
-          related: f.related || [],
-          placeholder: f.placeholder || false,
-          created_at: f.created_at || null,
-          updated_at: f.updated_at || null,
-        };
-      });
-    }
+    try {
+      if (facRes.data) {
+        facRes.data.forEach(f => {
+          Entities.factions[f.id] = {
+            id: f.id,
+            name: f.name,
+            alias: f.alias || null,
+            stamp: f.stamp || null,
+            stampClass: f.stamp_class || null,
+            rows: Array.isArray(f.rows) ? f.rows : [],
+            summary: f.summary || null,
+            sort_order: f.sort_order || 0,
+            hero: f.hero || null,
+            sections: Array.isArray(f.sections) ? f.sections : [],
+            related: Array.isArray(f.related) ? f.related : [],
+            placeholder: f.placeholder || false,
+            created_at: f.created_at || null,
+            updated_at: f.updated_at || null,
+          };
+        });
+      }
+    } catch(e) { console.error('[DB] factions mapping error:', e); }
 
     if (hrRes.data) {
       Data.houserules = hrRes.data.map(r => ({
