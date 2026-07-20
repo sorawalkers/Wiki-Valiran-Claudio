@@ -255,104 +255,228 @@ function Factions({ onNav }) {
 }
 
 // ============================================================
-// FactionDetail — página individual de uma facção
+// FactionDetail — dossier layout (igual a Personagens / NPCs)
+// Depende de: npNorm, npSectionMatches, NpReport, NpGrid, e ícones
+// definidos em npc-detail.jsx (carregado antes na index.html)
 // ============================================================
 function FactionDetail({ id, onNav }) {
   const { isEditor } = useAuth();
-  const [modal, setModal] = React.useState(false);
-  const [imgSrc, setImgSrc] = React.useState(null);
+  const [editModal,  setEditModal]  = React.useState(false);
+  const [openSet,    setOpenSet]    = React.useState(() => new Set([0]));
+  const [query,      setQuery]      = React.useState('');
+  const [tagFilter,  setTagFilter]  = React.useState(null);
+  const [viewMode,   setViewMode]   = React.useState('list');
+  const reportRefs = React.useRef({});
 
-  const faction = (Entities.factions || {})[id];
+  const faction  = (Entities.factions || {})[id];
+  const sections = faction ? (faction.sections || []) : [];
+  const nq       = npNorm(query);
 
-  const slotId = faction ? `faction-img-${faction.id}` : null;
+  const allTags = React.useMemo(
+    () => Array.from(new Set(sections.flatMap(s => s.tags || []))),
+    [sections]
+  );
+  const filtered = React.useMemo(
+    () => sections.map((sec, i) => ({ sec, i, matches: npSectionMatches(sec, nq, tagFilter) })),
+    [sections, nq, tagFilter]
+  );
+  const visibleFiltered = filtered.filter(f => f.matches);
 
   React.useEffect(() => {
-    if (!slotId) return;
-    const check = () => {
-      const slot = window._imageSlotGet && window._imageSlotGet(slotId);
-      if (slot && slot.u) { setImgSrc(slot.u); return true; }
-      return false;
-    };
-    if (check()) return;
-    let attempts = 0;
-    const iv = setInterval(() => {
-      if (check() || ++attempts > 25) clearInterval(iv);
-    }, 200);
-    return () => clearInterval(iv);
-  }, [slotId]);
+    if (!nq) return;
+    const matching = filtered.filter(f => f.matches).map(f => f.i);
+    setOpenSet(prev => new Set([...prev, ...matching]));
+  }, [nq]);
 
   if (!faction) {
     return (
-      <div style={{ padding: '80px', textAlign: 'center' }}>
-        <p style={{ fontFamily: 'EB Garamond, serif', fontStyle: 'italic', color: 'var(--foam-dim)' }}>
+      <div className="page">
+        <button className="back-btn" onClick={() => onNav('factions')}>Voltar às Facções</button>
+        <p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>
           Dossiê não encontrado.
         </p>
-        <button onClick={() => onNav('factions')} style={{
-          marginTop: 24, padding: '10px 20px', background: 'transparent',
-          color: 'var(--gold-bright)', border: '1px solid var(--gold-dim)',
-          fontFamily: 'Cinzel, serif', fontSize: 11, letterSpacing: '0.2em',
-          textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2,
-        }}>← Facções</button>
       </div>
     );
   }
 
-  const paragraphs = (faction.summary || '').split(/\n\n+/).map(s => s.trim()).filter(Boolean);
+  function toggleReport(idx) {
+    setOpenSet(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  }
+  function expandAll()   { setOpenSet(new Set(sections.map((_, i) => i))); }
+  function collapseAll() { setOpenSet(new Set()); }
+  function handleGridSelect(idx) {
+    setViewMode('list');
+    setOpenSet(prev => new Set([...prev, idx]));
+    requestAnimationFrame(() => {
+      const el = reportRefs.current[idx];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('pulse');
+        setTimeout(() => el.classList.remove('pulse'), 700);
+      }
+    });
+  }
 
   return (
-    <div className="page faction-detail" data-screen-label="Facção">
-      <div className="page-breadcrumb" style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.18em',
-        textTransform: 'uppercase', color: 'var(--foam-dim)', marginBottom: 4,
-        display: 'flex', gap: 8, alignItems: 'center',
-      }}>
-        <a style={{ color: 'var(--gold)', cursor: 'pointer' }} onClick={() => onNav('factions')}>Facções</a>
-        <span>›</span>
-        <span>{faction.name}</span>
-      </div>
+    <div className="article np-dossier" data-screen-label={'Facção · ' + faction.name}>
 
-      <div className="faction-detail-header">
-        {faction.stamp && (
-          <div className={`faction-detail-stamp ${faction.stampClass || ''}`}>{faction.stamp}</div>
-        )}
-        <div className="faction-detail-id">DOSSIÊ · {faction.id.toUpperCase()}</div>
-        <h1 className="faction-detail-title">{faction.name}</h1>
-        {faction.alias && <p className="faction-detail-alias">{faction.alias}</p>}
-        {isEditor && (
-          <button className="editor-add-btn" style={{ position: 'absolute', bottom: 24, right: 0, padding: '5px 14px', fontSize: 10 }}
-            onClick={() => setModal(true)}>
-            Editar
-          </button>
-        )}
-      </div>
+      {/* ── Esquerda: corpo do dossiê ─────────────────────────── */}
+      <div className="parchment" style={{ minWidth: 0 }}>
+        <div className="article-body np-body">
 
-      {/* Imagem / slot de upload */}
-      <div className="faction-detail-img-slot">
-        {imgSrc
-          ? <img src={imgSrc} alt={faction.name} />
-          : isEditor && <image-slot id={slotId} shape="rect" fit="contain" placeholder="Arraste imagem da facção"></image-slot>
-        }
-      </div>
+          <div className="np-topbar">
+            <button className="back-btn" style={{ marginBottom: 0 }} onClick={() => onNav('factions')}>
+              Voltar às Facções
+            </button>
+            {isEditor && (
+              <button className="editor-add-btn" onClick={() => setEditModal(true)}>
+                Editar Artigo
+              </button>
+            )}
+          </div>
 
-      {faction.rows && faction.rows.length > 0 && (
-        <dl className="faction-detail-rows">
-          {faction.rows.map((r, i) => (
-            <div key={i} className="faction-detail-row">
-              <dt>{r.k}</dt>
-              <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
+          <nav className="breadcrumb">
+            <a onClick={() => onNav('home')}>Arquivo</a>
+            <span className="sep">▸</span>
+            <a onClick={() => onNav('factions')}>Facções</a>
+            <span className="sep">▸</span>
+            <span>{faction.name}</span>
+          </nav>
+
+          <div className="np-header">
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 6 }}>
+              DOSSIÊ · {faction.id.toUpperCase()}
             </div>
-          ))}
-        </dl>
-      )}
+            <h1 className="np-title">{faction.name}</h1>
+            {faction.alias && <p className="np-subtitle">{faction.alias}</p>}
+          </div>
 
-      {paragraphs.length > 0 && (
-        <div className="faction-detail-body">
-          {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+          <div className="article-divider"><Sigil.Ornament /></div>
+
+          {faction.hero && <p className="detail-hero">{faction.hero}</p>}
+
+          {faction.placeholder && (
+            <div className="placeholder-banner" style={{
+              background: 'rgba(120,90,50,0.04)',
+              border: '1px dashed var(--parchment-rule)',
+              color: 'var(--parchment-text)',
+            }}>
+              <div className="placeholder-banner-eyebrow" style={{ color: 'var(--wine)' }}>Em compilação</div>
+              <h3 style={{ color: 'var(--parchment-text)' }}>Esta entrada ainda está sendo transcrita</h3>
+              <p style={{ color: 'var(--parchment-text-soft)' }}>
+                O arquivista Cael reuniu o esqueleto desta entrada. Inteligência detalhada será acrescentada nas próximas sessões.
+              </p>
+            </div>
+          )}
+
+          {!faction.placeholder && sections.length > 0 && (
+            <React.Fragment>
+              <div className="np-toolbar">
+                <div className="np-toolbar-search">
+                  <NpSearchIcon />
+                  <input
+                    type="text"
+                    placeholder="Buscar por texto ou tag…"
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                  />
+                  {query && (
+                    <button className="np-toolbar-search-clear" onClick={() => setQuery('')}>Limpar</button>
+                  )}
+                </div>
+                <button className="np-toolbar-btn" title="Expandir tudo" onClick={expandAll}><NpExpandIcon /></button>
+                <button className="np-toolbar-btn" title="Recolher tudo" onClick={collapseAll}><NpCollapseIcon /></button>
+                <div className="np-toolbar-divider" />
+                <button className={'np-toolbar-btn' + (viewMode === 'list' ? ' active' : '')} title="Vista lista" onClick={() => setViewMode('list')}><NpListIcon /></button>
+                <button className={'np-toolbar-btn' + (viewMode === 'grid' ? ' active' : '')} title="Vista grade" onClick={() => setViewMode('grid')}><NpGridIcon /></button>
+              </div>
+
+              {allTags.length > 0 && (
+                <div className="np-tag-filter">
+                  <span className="np-tag-filter-label">Filtrar:</span>
+                  <button className={'np-tag-pill' + (!tagFilter ? ' active' : '')} onClick={() => setTagFilter(null)}>Tudo</button>
+                  {allTags.map(t => (
+                    <button key={t} className={'np-tag-pill' + (tagFilter === t ? ' active' : '')} onClick={() => setTagFilter(prev => prev === t ? null : t)}>{t}</button>
+                  ))}
+                </div>
+              )}
+
+              {visibleFiltered.length === 0 ? (
+                <div className="np-empty"><strong>Nada encontrado</strong>Nenhuma seção corresponde à busca ou ao filtro ativo.</div>
+              ) : viewMode === 'list' ? (
+                <div className="np-reports">
+                  {visibleFiltered.map(({ sec, i }) => (
+                    <NpReport key={i} sec={sec} idx={i} isOpen={openSet.has(i)} query={query} onToggle={() => toggleReport(i)} reportRef={el => { reportRefs.current[i] = el; }} />
+                  ))}
+                </div>
+              ) : (
+                <NpGrid sections={visibleFiltered.map(f => f.sec)} onSelect={localIdx => handleGridSelect(visibleFiltered[localIdx].i)} />
+              )}
+            </React.Fragment>
+          )}
+
+          {!faction.placeholder && sections.length === 0 && (
+            <p style={{ fontFamily: 'EB Garamond, serif', fontStyle: 'italic', color: 'var(--foam-dim)', textAlign: 'center', marginTop: 40 }}>
+              {isEditor ? 'Nenhuma seção ainda — clique em "Editar Artigo" para adicionar.' : 'Nenhuma informação adicional registrada.'}
+            </p>
+          )}
+
         </div>
-      )}
+      </div>
 
-      {modal && (
-        <FactionModal faction={faction} onClose={() => setModal(false)} />
+      {/* ── Direita: infobox do dossiê ───────────────────────── */}
+      <aside className="infobox-rail">
+        <div className="infobox">
+          <div className="infobox-head">
+            <div className="infobox-portrait-wrap" style={{ position: 'relative' }}>
+              <image-slot
+                id={`faction-portrait-${faction.id}`}
+                shape="rect"
+                placeholder={`Imagem · ${faction.name}`}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+              ></image-slot>
+              {faction.stamp && (
+                <div className={`dossier-stamp ${faction.stampClass || ''}`}
+                  style={{ position: 'absolute', top: 10, right: 8, fontSize: 10, padding: '2px 8px', letterSpacing: '0.2em' }}>
+                  {faction.stamp}
+                </div>
+              )}
+            </div>
+            <h3 className="infobox-name">{faction.name}</h3>
+            {faction.alias && <p className="infobox-sub">{faction.alias}</p>}
+          </div>
+
+          {faction.rows && faction.rows.length > 0 && (
+            <dl className="infobox-rows">
+              {faction.rows.map((r, i) => (
+                <div key={i} className="infobox-row">
+                  <dt>{r.k}</dt>
+                  <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+
+        {faction.related && faction.related.length > 0 && (
+          <div className="related">
+            <h4 className="related-title">Cf. Relacionados</h4>
+            {faction.related.map(r => (
+              <a key={r.title} className="related-link" onClick={() => onNav(r.target)}>
+                <span className="related-link-tag">{r.tag}</span>
+                <span className="related-link-title">{r.title}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </aside>
+
+      {editModal && (
+        <ArticleEditor type="faction" entity={faction} onClose={() => setEditModal(false)} onDelete={() => onNav('factions')} />
       )}
     </div>
   );

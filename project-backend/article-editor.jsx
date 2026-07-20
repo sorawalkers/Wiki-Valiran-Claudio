@@ -1,7 +1,11 @@
 // Article editor — modal for editing hero, sections, infobox, related
 
 function ArticleEditor({ type, entity, onClose, onDelete }) {
-  const slotId = type === 'character' ? `char-portrait-${entity.id}` : `deity-hero-${entity.id}`;
+  const slotId = type === 'character'
+    ? `char-portrait-${entity.id}`
+    : type === 'faction'
+      ? `faction-portrait-${entity.id}`
+      : `deity-hero-${entity.id}`;
   const currentSlot = window._imageSlotGet ? window._imageSlotGet(slotId) : null;
 
   const [hero, setHero] = React.useState(entity.hero || '');
@@ -90,6 +94,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
     try {
       if (type === 'character') await window.DB.deleteCharacter(entity.id);
       else if (type === 'deity') await window.DB.deleteDeity(entity.id);
+      else if (type === 'faction') await window.DB.deleteFaction(entity.id);
       (onDelete || onClose)();
     } catch(e) {
       setErr(e.message || 'Erro ao apagar');
@@ -132,6 +137,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
 
       if (type === 'character') await window.DB.saveCharacter(updated);
       else if (type === 'deity') await window.DB.saveDeity(updated);
+      else if (type === 'faction') await window.DB.saveFaction(updated);
       onClose();
     } catch (e) {
       setErr(e.message || 'Erro ao salvar artigo');
@@ -182,7 +188,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
       <div className="modal-box" style={{ maxWidth: 780 }} onClick={e => e.stopPropagation()}>
         <div className="modal-head">
           <div className="modal-eyebrow">
-            {type === 'character' ? 'Dramatis Personae' : 'Panteão'} · Editor de Artigo
+            {type === 'character' ? 'Dramatis Personae' : type === 'faction' ? 'Facções' : 'Panteão'} · Editor de Artigo
           </div>
           <h2 className="modal-title">{entity.name}</h2>
         </div>
@@ -287,7 +293,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                   <button style={btnMove} onClick={() => moveSection(i, 1)} title="Mover para baixo">↓</button>
                   <button style={btnRemove} onClick={() => removeSection(i)}>Remover</button>
                 </div>
-                {type === 'character' && (
+                {(type === 'character' || type === 'faction') && (
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
                     <div>
                       <label className="modal-label" style={{ marginBottom:4 }}>Olho (eyebrow)</label>
@@ -295,46 +301,54 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                         className="modal-input"
                         value={sec.eyebrow}
                         onChange={e => updateSection(i, 'eyebrow', e.target.value)}
-                        placeholder="Ex: Primeiro Contato"
+                        placeholder={type === 'faction' ? 'Ex: Intel Nível 1' : 'Ex: Primeiro Contato'}
                       />
                     </div>
-                    <div>
-                      <label className="modal-label" style={{ marginBottom:4 }}>Localização</label>
-                      <input
-                        className="modal-input"
-                        value={sec.location}
-                        onChange={e => updateSection(i, 'location', e.target.value)}
-                        placeholder="Ex: Halensgard"
-                      />
-                    </div>
-                    <div>
-                      <label className="modal-label" style={{ marginBottom:4 }}>Sessão</label>
-                      <input
-                        className="modal-input"
-                        value={sec.session}
-                        onChange={e => updateSection(i, 'session', e.target.value)}
-                        placeholder="Ex: Sessão 12"
-                      />
-                    </div>
-                    <div>
-                      <label className="modal-label" style={{ marginBottom:4 }}>Data (ficção)</label>
-                      <input
-                        className="modal-input"
-                        value={sec.date}
-                        onChange={e => updateSection(i, 'date', e.target.value)}
-                        placeholder="Ex: 14 · Out · 1277"
-                      />
-                    </div>
+                    {type === 'character' && (
+                      <div>
+                        <label className="modal-label" style={{ marginBottom:4 }}>Localização</label>
+                        <input
+                          className="modal-input"
+                          value={sec.location}
+                          onChange={e => updateSection(i, 'location', e.target.value)}
+                          placeholder="Ex: Halensgard"
+                        />
+                      </div>
+                    )}
+                    {type === 'character' && (
+                      <div>
+                        <label className="modal-label" style={{ marginBottom:4 }}>Sessão</label>
+                        <input
+                          className="modal-input"
+                          value={sec.session}
+                          onChange={e => updateSection(i, 'session', e.target.value)}
+                          placeholder="Ex: Sessão 12"
+                        />
+                      </div>
+                    )}
+                    {type === 'character' && (
+                      <div>
+                        <label className="modal-label" style={{ marginBottom:4 }}>Data (ficção)</label>
+                        <input
+                          className="modal-input"
+                          value={sec.date}
+                          onChange={e => updateSection(i, 'date', e.target.value)}
+                          placeholder="Ex: 14 · Out · 1277"
+                        />
+                      </div>
+                    )}
                     <div style={{ gridColumn:'1 / -1' }}>
                       <label className="modal-label" style={{ marginBottom:4 }}>Tags (separadas por vírgula)</label>
                       <input
                         className="modal-input"
                         value={sec.tags}
                         onChange={e => updateSection(i, 'tags', e.target.value)}
-                        placeholder="Ex: encontro, intriga, traição"
+                        placeholder={type === 'faction' ? 'Ex: infiltração, política, magia' : 'Ex: encontro, intriga, traição'}
                       />
                       <div className="modal-hint" style={{ marginTop:4 }}>
-                        Sugestões: encontro · confronto · aliança · traição · missão · revelação · ritual · profecia
+                        {type === 'faction'
+                          ? 'Sugestões: infiltração · sabotagem · política · aliança · ritual · segredo · operação'
+                          : 'Sugestões: encontro · confronto · aliança · traição · missão · revelação · ritual · profecia'}
                       </div>
                     </div>
                     <div style={{ gridColumn:'1 / -1', display:'flex', alignItems:'center', gap:8 }}>
@@ -363,43 +377,45 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
             ))}
           </div>
 
-          {/* Infobox rows */}
-          <div style={{ borderTop:'1px solid var(--ink-line)', paddingTop:18, marginTop:6 }}>
-            <div style={subHead}>
-              <span className="modal-label">Infobox — Linhas de dados</span>
-              <button type="button" className="editor-add-btn" style={{ padding:'5px 14px', fontSize:10 }} onClick={addRow}>
-                + Linha
-              </button>
-            </div>
-            {rows.map((row, i) => (
-              <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 2fr 90px auto', gap:8, marginBottom:8, alignItems:'center' }}>
-                <input className="modal-input" value={row.k} onChange={e => updateRowField(i, 'k', e.target.value)} placeholder="Chave" />
-                <input className="modal-input" value={row.v} onChange={e => updateRowField(i, 'v', e.target.value)} placeholder="Valor" />
-                <select
-                  className="modal-select"
-                  value={row.danger ? 'danger' : row.ok ? 'ok' : 'normal'}
-                  onChange={e => updateRowStyle(i, e.target.value)}
-                >
-                  <option value="normal">Normal</option>
-                  <option value="ok">✓ ok</option>
-                  <option value="danger">⚠ perigo</option>
-                </select>
-                <button style={btnRemove} onClick={() => removeRow(i)}>✕</button>
+          {/* Infobox rows + status note — não exibido para facções (gerenciado pelo FactionModal) */}
+          {type !== 'faction' && (
+            <React.Fragment>
+              <div style={{ borderTop:'1px solid var(--ink-line)', paddingTop:18, marginTop:6 }}>
+                <div style={subHead}>
+                  <span className="modal-label">Infobox — Linhas de dados</span>
+                  <button type="button" className="editor-add-btn" style={{ padding:'5px 14px', fontSize:10 }} onClick={addRow}>
+                    + Linha
+                  </button>
+                </div>
+                {rows.map((row, i) => (
+                  <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 2fr 90px auto', gap:8, marginBottom:8, alignItems:'center' }}>
+                    <input className="modal-input" value={row.k} onChange={e => updateRowField(i, 'k', e.target.value)} placeholder="Chave" />
+                    <input className="modal-input" value={row.v} onChange={e => updateRowField(i, 'v', e.target.value)} placeholder="Valor" />
+                    <select
+                      className="modal-select"
+                      value={row.danger ? 'danger' : row.ok ? 'ok' : 'normal'}
+                      onChange={e => updateRowStyle(i, e.target.value)}
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="ok">✓ ok</option>
+                      <option value="danger">⚠ perigo</option>
+                    </select>
+                    <button style={btnRemove} onClick={() => removeRow(i)}>✕</button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-
-          {/* Status note */}
-          <div className="modal-field">
-            <label className="modal-label">Nota de status (rodapé do infobox)</label>
-            <textarea
-              className="modal-textarea"
-              rows={2}
-              value={statusNote}
-              onChange={e => setStatusNote(e.target.value)}
-              placeholder="Nota exibida no rodapé do infobox..."
-            />
-          </div>
+              <div className="modal-field">
+                <label className="modal-label">Nota de status (rodapé do infobox)</label>
+                <textarea
+                  className="modal-textarea"
+                  rows={2}
+                  value={statusNote}
+                  onChange={e => setStatusNote(e.target.value)}
+                  placeholder="Nota exibida no rodapé do infobox..."
+                />
+              </div>
+            </React.Fragment>
+          )}
 
           {/* Related */}
           <div style={{ borderTop:'1px solid var(--ink-line)', paddingTop:18, marginTop:6 }}>

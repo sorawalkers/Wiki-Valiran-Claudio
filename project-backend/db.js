@@ -197,6 +197,10 @@
           rows: f.rows || [],
           summary: f.summary || null,
           sort_order: f.sort_order || 0,
+          hero: f.hero || null,
+          sections: f.sections || [],
+          related: f.related || [],
+          placeholder: f.placeholder || false,
           created_at: f.created_at || null,
           updated_at: f.updated_at || null,
         };
@@ -583,6 +587,10 @@
       rows: data.rows || [],
       summary: data.summary || null,
       sort_order: parseInt(data.sort_order) || 0,
+      hero: data.hero || null,
+      sections: data.sections || [],
+      related: data.related || [],
+      placeholder: data.placeholder || false,
       updated_at: new Date().toISOString(),
     };
     const res = await window.sb.from('factions').upsert(payload, { onConflict: 'id' });
