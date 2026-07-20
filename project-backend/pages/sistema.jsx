@@ -182,17 +182,33 @@ function SystemEntryModal({ entry, onClose }) {
 }
 
 // ============================================================
-// Inline figure — image-slot wired by entry id + index
+// Inline figure — mostra imagem em tamanho natural via URL do slot store
 // ============================================================
 function SystemFigure({ entryId, idx, caption }) {
+  const slotId = `sys-img-${entryId}-${idx}`;
+  const [src, setSrc] = React.useState(() => {
+    const slot = window._imageSlotGet && window._imageSlotGet(slotId);
+    return slot ? slot.u : null;
+  });
+
+  React.useEffect(() => {
+    if (src) return;
+    // loadSlots() é async — poll até a URL aparecer (máx 5s)
+    let attempts = 0;
+    const interval = setInterval(() => {
+      const slot = window._imageSlotGet && window._imageSlotGet(slotId);
+      if (slot && slot.u) { setSrc(slot.u); clearInterval(interval); return; }
+      if (++attempts > 25) clearInterval(interval);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [slotId]);
+
   return (
     <figure className="sys-fig">
-      <image-slot
-        id={`sys-img-${entryId}-${idx}`}
-        shape="rect"
-        fit="contain"
-        placeholder="Arraste imagem"
-      ></image-slot>
+      {src
+        ? <img src={src} alt={caption || ''} className="sys-fig-img" />
+        : <image-slot id={slotId} shape="rect" fit="contain" placeholder="Arraste imagem"></image-slot>
+      }
       {caption && <figcaption className="sys-fig-caption">{caption}</figcaption>}
     </figure>
   );

@@ -965,12 +965,19 @@
 .sys-entry:hover .sys-edit-btn { opacity: 1; }
 .sys-edit-btn:hover { border-color: var(--gold); color: var(--gold-bright); }
 
-.sys-fig { margin: 22px 0 26px; }
+.sys-fig { margin: 22px 0 26px; text-align: center; }
+.sys-fig-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 6px;
+  border: 1px solid var(--ink-line);
+}
 .sys-fig image-slot {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
-  max-height: 520px;
+  height: 300px;
   background: var(--ink-slate);
   border: 1px solid var(--ink-line);
 }
