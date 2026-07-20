@@ -1,5 +1,9 @@
+const http = require('http');
 const { Client, GatewayIntentBits } = require('discord.js');
 const { createClient } = require('@supabase/supabase-js');
+
+// Railway exige uma porta HTTP aberta para manter o container vivo
+http.createServer((_, res) => res.end('ok')).listen(process.env.PORT || 3000);
 
 const DISCORD_TOKEN    = process.env.DISCORD_TOKEN;
 const CHANNEL_ID       = process.env.DISCORD_CHANNEL_ID || '1498988634395902063';
@@ -16,7 +20,7 @@ const discord = new Client({
   ],
 });
 
-discord.once('ready', () => {
+discord.once('clientReady', () => {
   console.log(`Bot online: ${discord.user.tag}`);
   console.log(`Monitorando canal: ${CHANNEL_ID}`);
 });
