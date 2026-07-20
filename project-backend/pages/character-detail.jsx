@@ -195,7 +195,11 @@ function CharacterDetail({ id, onNav }) {
               {c.infobox.rows.map(r => (
                 <div key={r.k} className="infobox-row">
                   <dt>{r.k}</dt>
-                  <dd className={r.danger ? 'danger' : r.ok ? 'ok' : ''}>{r.v}</dd>
+                  <dd className={r.danger ? 'danger' : r.ok ? 'ok' : ''}>
+                    {r.link
+                      ? <span className="infobox-link" onClick={() => onNav(r.link)}>{r.v}</span>
+                      : r.v}
+                  </dd>
                 </div>
               ))}
             </dl>

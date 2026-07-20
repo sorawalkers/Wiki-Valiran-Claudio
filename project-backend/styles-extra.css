@@ -1410,6 +1410,13 @@
 .infobox-portrait-tag.ally { color: var(--necro); border-color: var(--necro); }
 .infobox-portrait-tag.foe  { color: var(--wine-bright); border-color: var(--wine); }
 
+.infobox-link {
+  cursor: pointer;
+  border-bottom: 1px dotted currentColor;
+  transition: opacity 0.15s;
+}
+.infobox-link:hover { opacity: 0.7; }
+
 /* Hero quote at top of detail body */
 .detail-hero {
   margin: 0 0 32px;

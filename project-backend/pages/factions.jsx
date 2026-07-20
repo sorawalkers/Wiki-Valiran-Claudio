@@ -455,7 +455,11 @@ function FactionDetail({ id, onNav }) {
               {faction.rows.map((r, i) => (
                 <div key={i} className="infobox-row">
                   <dt>{r.k}</dt>
-                  <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
+                  <dd className={r.redacted ? 'redacted' : ''}>
+                    {r.link
+                      ? <span className="infobox-link" onClick={() => onNav(r.link)}>{r.v}</span>
+                      : r.v}
+                  </dd>
                 </div>
               ))}
             </dl>

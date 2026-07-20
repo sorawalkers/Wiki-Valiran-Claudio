@@ -149,7 +149,7 @@ function CampaignEditModal({ data, onClose, onSave }) {
   function setRow(i, k, v) {
     setForm(f => { const r = [...f.infoRows]; r[i] = { ...r[i], [k]: v }; return { ...f, infoRows: r }; });
   }
-  function addRow()     { setForm(f => ({ ...f, infoRows: [...f.infoRows, { k: '', v: '' }] })); }
+  function addRow()     { setForm(f => ({ ...f, infoRows: [...f.infoRows, { k: '', v: '', link: '' }] })); }
   function removeRow(i) { setForm(f => ({ ...f, infoRows: f.infoRows.filter((_, x) => x !== i) })); }
   function cycleFlag(i) {
     setForm(f => {
@@ -206,9 +206,10 @@ function CampaignEditModal({ data, onClose, onSave }) {
                 <button type="button" className="btn-save" style={{ padding: '4px 12px', fontSize: 12 }} onClick={addRow}>+ Linha</button>
               </div>
               {form.infoRows.map((r, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto auto', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto auto', gap: 6, marginBottom: 6, alignItems: 'center' }}>
                   <input className="modal-input" style={{ margin: 0 }} value={r.k} onChange={e => setRow(i, 'k', e.target.value)} placeholder="Rótulo" />
                   <input className="modal-input" style={{ margin: 0 }} value={r.v} onChange={e => setRow(i, 'v', e.target.value)} placeholder="Valor" />
+                  <input className="modal-input" style={{ margin: 0 }} value={r.link || ''} onChange={e => setRow(i, 'link', e.target.value)} placeholder="Link (ex: npc:id)" />
                   <button type="button" onClick={() => cycleFlag(i)} style={{ padding: '4px 8px', fontSize: 11, border: '1px solid var(--ink-line-soft)', borderRadius: 3, cursor: 'pointer', background: 'transparent', color: r.danger ? 'var(--wine-bright)' : r.ok ? '#6fa86f' : 'var(--foam-dim)' }}>
                     {r.danger ? '🔴' : r.ok ? '🟢' : '⚪'}
                   </button>
@@ -317,7 +318,11 @@ function CampaignArticle({ id, onNav }) {
             {(camp.infobox?.rows || []).map(r => (
               <div key={r.k} className="infobox-row">
                 <dt>{r.k}</dt>
-                <dd className={r.danger ? 'danger' : r.ok ? 'ok' : ''}>{r.v}</dd>
+                <dd className={r.danger ? 'danger' : r.ok ? 'ok' : ''}>
+                  {r.link
+                    ? <span className="infobox-link" onClick={() => onNav(r.link)}>{r.v}</span>
+                    : r.v}
+                </dd>
               </div>
             ))}
           </dl>

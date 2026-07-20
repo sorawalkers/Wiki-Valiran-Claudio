@@ -67,7 +67,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
   }
 
   // ── Infobox rows ─────────────────────────────────────────────
-  function addRow() { setRows(r => [...r, { k: '', v: '' }]); }
+  function addRow() { setRows(r => [...r, { k: '', v: '', link: '' }]); }
   function removeRow(i) { setRows(r => r.filter((_, j) => j !== i)); }
   function updateRowField(i, key, val) {
     setRows(r => r.map((row, j) => j === i ? { ...row, [key]: val } : row));
@@ -388,9 +388,10 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                   </button>
                 </div>
                 {rows.map((row, i) => (
-                  <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 2fr 90px auto', gap:8, marginBottom:8, alignItems:'center' }}>
+                  <div key={i} style={{ display:'grid', gridTemplateColumns:'1fr 2fr 1fr 90px auto', gap:8, marginBottom:8, alignItems:'center' }}>
                     <input className="modal-input" value={row.k} onChange={e => updateRowField(i, 'k', e.target.value)} placeholder="Chave" />
                     <input className="modal-input" value={row.v} onChange={e => updateRowField(i, 'v', e.target.value)} placeholder="Valor" />
+                    <input className="modal-input" value={row.link || ''} onChange={e => updateRowField(i, 'link', e.target.value)} placeholder="Link (ex: npc:id)" />
                     <select
                       className="modal-select"
                       value={row.danger ? 'danger' : row.ok ? 'ok' : 'normal'}
