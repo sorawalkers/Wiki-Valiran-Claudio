@@ -186,7 +186,7 @@ function App() {
               {id:'npcs', label:'Personae (NPC)'},
               {id:'sessions', label:'Sessões'},
               {id:'house-rules', label:'Regras'},
-              {id:'sistema', label:'Sistema'},
+              {id:'sistema', label:'Atualizações do Sistema'},
             ].map(p => (
               <button key={p.id} onClick={() => navigate(p.id)} style={{
                 padding:'7px 8px',
