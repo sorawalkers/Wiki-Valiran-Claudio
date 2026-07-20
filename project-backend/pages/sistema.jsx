@@ -190,6 +190,7 @@ function SystemFigure({ entryId, idx, caption }) {
       <image-slot
         id={`sys-img-${entryId}-${idx}`}
         shape="rect"
+        fit="contain"
         placeholder="Arraste imagem"
       ></image-slot>
       {caption && <figcaption className="sys-fig-caption">{caption}</figcaption>}

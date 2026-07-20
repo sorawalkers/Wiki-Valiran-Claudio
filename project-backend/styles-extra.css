@@ -969,7 +969,8 @@
 .sys-fig image-slot {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 4;
+  max-height: 520px;
   background: var(--ink-slate);
   border: 1px solid var(--ink-line);
 }
