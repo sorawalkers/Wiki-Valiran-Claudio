@@ -34,10 +34,18 @@ The app connects to a hosted Supabase instance. No local database setup is neede
 |------|--------|-------------|
 | `project-backend/` | Active | The live application — work here |
 | `discord-bot/` | Active | Discord bot companion app |
-| `project/` | Deprecated | Original HTML prototype, no database |
+| `project/` | Archived (v1) | Original Claude Design prototype — static/hardcoded data, no backend. Superseded by `project-backend/`; kept as a record of the project's evolution. |
 | `docs/` | Reference | Architecture reference, article schema, map and routing notes |
 | `db/seeds/*.sql` | Active | Supabase seed data (run once per environment) |
 | `db/fixes/*.sql` | Active | One-off data-fix scripts, kept for record |
+
+---
+
+## Project evolution
+
+This project started as **`project/`**: a single-file React prototype generated with Claude Design, with all lore data hardcoded directly in JSX (`data.jsx`, `data-entities.jsx`). It proved the UI and content model but had no persistence — any edit meant editing code.
+
+It was then rebuilt as **`project-backend/`**: the same UI concepts, now backed by Supabase (PostgreSQL + Auth + Storage), with a real content-editing UI, role-based access control, and image uploads. That is the active application today. `project/` is kept untouched as a historical snapshot of where the design started.
 
 ---
 
