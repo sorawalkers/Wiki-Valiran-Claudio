@@ -20,14 +20,17 @@
 ```
 Wiki-Valiran-Claudio/
 ├── project-backend/        ← ACTIVE APPLICATION — work here
-├── project/                ← DEPRECATED prototype (no DB, hardcoded data)
+├── project/                ← ARCHIVED v1 prototype (no DB, hardcoded data)
+├── discord-bot/            ← Discord bot companion app
 ├── chats/                  ← Historical design conversation transcripts
-├── seed_*.sql              ← Supabase seed data (run once per environment)
-├── ESTRUTURA-ARTIGOS.md    ← Technical schema + SQL INSERT examples per entity
-└── README.md               ← Original handoff instructions (Claude Design export)
+├── docs/                   ← Reference docs (this file, article structure, map, routing)
+├── db/
+│   ├── seeds/*.sql          ← Supabase seed data (run once per environment)
+│   └── fixes/*.sql          ← One-off data-fix scripts, applied once and kept for record
+└── README.md               ← Project overview and quick start
 ```
 
-**`project/` is read-only history.** It is the original HTML/JSX prototype that predates Supabase integration. Never modify it; consult it only for historical reference.
+**`project/` is read-only history — v1 of this project.** It's the original React prototype generated with Claude Design: same UI shell and page layouts as today, but every entity (deities, characters, kingdoms, sessions...) lives hardcoded in `data.jsx`/`data-entities.jsx` instead of a database, so "editing content" meant editing code and redeploying. `project-backend/` (v2) is the rewrite that replaced that hardcoded data with Supabase — real persistence, an in-app content editor, auth and roles. `project/` is never modified; it's kept solely as a record of where the design and content model started. See the [README's "Project evolution"](../README.md#project-evolution) section for the short version.
 
 **All active development happens in `project-backend/`.**
 
@@ -105,7 +108,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 
 ## 5. Database Schema
 
-Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backend/schema.sql`](project-backend/schema.sql).
+Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backend/schema.sql`](../project-backend/schema.sql).
 
 | Table | Purpose | Key JSONB fields |
 |-------|---------|-----------------|
@@ -191,17 +194,18 @@ These files provide deeper guidance for specific tasks:
 
 | File | What it covers |
 |------|---------------|
-| [`project-backend/CONTEUDO-INSTRUCOES.md`](project-backend/CONTEUDO-INSTRUCOES.md) | Content editor guide — how to populate each entity type through the in-app UI |
-| [`project-backend/RETRATOS_GUIA.md`](project-backend/RETRATOS_GUIA.md) | Portrait and sigil image guidance |
+| [`project-backend/CONTEUDO-INSTRUCOES.md`](../project-backend/CONTEUDO-INSTRUCOES.md) | Content editor guide — how to populate each entity type through the in-app UI |
+| [`project-backend/RETRATOS_GUIA.md`](../project-backend/RETRATOS_GUIA.md) | Portrait and sigil image guidance |
 | [`ESTRUTURA-ARTIGOS.md`](ESTRUTURA-ARTIGOS.md) | Technical schema reference with full SQL INSERT examples for every entity type |
-| [`project-backend/schema.sql`](project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
-| `seed_*.sql` (root) | Seed data for each entity type — run once per new Supabase environment |
+| [`../project-backend/schema.sql`](../project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
+| `../db/seeds/*.sql` | Seed data for each entity type — run once per new Supabase environment |
+| `../db/fixes/*.sql` | One-off data-fix scripts, applied once per environment and kept for record |
 
 ---
 
 ## 10. Guidelines for AI Agents
 
-- **Work in `project-backend/` only.** The `project/` folder is frozen history.
+- **Work in `project-backend/` only.** The `project/` folder is the archived v1 prototype — frozen history, never edited.
 - **No build step.** Edit `.jsx` or `.js` files directly; changes are live on browser reload.
 - **Adding a new entity type** requires: a new table in `schema.sql`, new methods in `db.js`, a new page in `pages/`, a route entry in `app.jsx`, and a nav entry in `data.jsx`.
 - **Never add a service-role key to frontend code.** `supabase-client.js` uses the anon key only. The anon key is public and safe to commit.
