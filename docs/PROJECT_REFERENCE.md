@@ -21,10 +21,13 @@
 Wiki-Valiran-Claudio/
 ├── project-backend/        ← ACTIVE APPLICATION — work here
 ├── project/                ← DEPRECATED prototype (no DB, hardcoded data)
+├── discord-bot/            ← Discord bot companion app
 ├── chats/                  ← Historical design conversation transcripts
-├── seed_*.sql              ← Supabase seed data (run once per environment)
-├── ESTRUTURA-ARTIGOS.md    ← Technical schema + SQL INSERT examples per entity
-└── README.md               ← Original handoff instructions (Claude Design export)
+├── docs/                   ← Reference docs (this file, article structure, map, routing)
+├── db/
+│   ├── seeds/*.sql          ← Supabase seed data (run once per environment)
+│   └── fixes/*.sql          ← One-off data-fix scripts, applied once and kept for record
+└── README.md               ← Project overview and quick start
 ```
 
 **`project/` is read-only history.** It is the original HTML/JSX prototype that predates Supabase integration. Never modify it; consult it only for historical reference.
@@ -105,7 +108,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 
 ## 5. Database Schema
 
-Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backend/schema.sql`](project-backend/schema.sql).
+Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backend/schema.sql`](../project-backend/schema.sql).
 
 | Table | Purpose | Key JSONB fields |
 |-------|---------|-----------------|
@@ -191,11 +194,12 @@ These files provide deeper guidance for specific tasks:
 
 | File | What it covers |
 |------|---------------|
-| [`project-backend/CONTEUDO-INSTRUCOES.md`](project-backend/CONTEUDO-INSTRUCOES.md) | Content editor guide — how to populate each entity type through the in-app UI |
-| [`project-backend/RETRATOS_GUIA.md`](project-backend/RETRATOS_GUIA.md) | Portrait and sigil image guidance |
+| [`project-backend/CONTEUDO-INSTRUCOES.md`](../project-backend/CONTEUDO-INSTRUCOES.md) | Content editor guide — how to populate each entity type through the in-app UI |
+| [`project-backend/RETRATOS_GUIA.md`](../project-backend/RETRATOS_GUIA.md) | Portrait and sigil image guidance |
 | [`ESTRUTURA-ARTIGOS.md`](ESTRUTURA-ARTIGOS.md) | Technical schema reference with full SQL INSERT examples for every entity type |
-| [`project-backend/schema.sql`](project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
-| `seed_*.sql` (root) | Seed data for each entity type — run once per new Supabase environment |
+| [`../project-backend/schema.sql`](../project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
+| `../db/seeds/*.sql` | Seed data for each entity type — run once per new Supabase environment |
+| `../db/fixes/*.sql` | One-off data-fix scripts, applied once per environment and kept for record |
 
 ---
 

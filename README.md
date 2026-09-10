@@ -33,21 +33,22 @@ The app connects to a hosted Supabase instance. No local database setup is neede
 | Path | Status | Description |
 |------|--------|-------------|
 | `project-backend/` | Active | The live application — work here |
+| `discord-bot/` | Active | Discord bot companion app |
 | `project/` | Deprecated | Original HTML prototype, no database |
-| `seed_*.sql` | Active | Supabase seed data (run once per environment) |
-| `ESTRUTURA-ARTIGOS.md` | Reference | SQL schema + INSERT examples per entity type |
-| `PROJECT_REFERENCE.md` | Reference | Full technical documentation for this repo |
+| `docs/` | Reference | Architecture reference, article schema, map and routing notes |
+| `db/seeds/*.sql` | Active | Supabase seed data (run once per environment) |
+| `db/fixes/*.sql` | Active | One-off data-fix scripts, kept for record |
 
 ---
 
 ## Documentation
 
-- **[PROJECT_REFERENCE.md](PROJECT_REFERENCE.md)** — Full technical map: file roles, DB schema, auth system, design tokens, agent guidelines.
+- **[PROJECT_REFERENCE.md](docs/PROJECT_REFERENCE.md)** — Full technical map: file roles, DB schema, auth system, design tokens, agent guidelines.
 - **[project-backend/CONTEUDO-INSTRUCOES.md](project-backend/CONTEUDO-INSTRUCOES.md)** — Content editor guide: how to add sessions, characters, deities, and other entities via the in-app UI.
-- **[ESTRUTURA-ARTIGOS.md](ESTRUTURA-ARTIGOS.md)** — Technical data structure reference with SQL INSERT examples.
+- **[ESTRUTURA-ARTIGOS.md](docs/ESTRUTURA-ARTIGOS.md)** — Technical data structure reference with SQL INSERT examples.
 
 ---
 
 ## For AI agents
 
-Read **[PROJECT_REFERENCE.md](PROJECT_REFERENCE.md)** before making any changes.
+Read **[PROJECT_REFERENCE.md](docs/PROJECT_REFERENCE.md)** before making any changes.
