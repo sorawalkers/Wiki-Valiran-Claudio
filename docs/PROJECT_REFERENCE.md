@@ -96,13 +96,14 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `timeline.jsx` | Timeline | Chronological event line with era markers |
 | `events.jsx` | Recent Events | Categorical event feed (divine / political / catastrophe / arcane) |
 | `factions.jsx` | Factions | Secret organization dossiers with redacted fields |
-| `kingdoms.jsx` | Kingdoms | Political powers with stats and sigils |
+| `realm-map.jsx` | Map (`#/map`) | Interactive hex-grid map of kingdoms — reads `realms` / `realm_hexes` / `realm_cities` / `realm_rivers` |
 | `houserules.jsx` | House Rules | Mechanical house rule compendium |
-| `map.jsx` | Map | Interactive SVG regional map |
 | `planes.jsx` | Planes | Cosmological planes (Feywild, Underdark, Abyss, etc.) |
 | `weave.jsx` | The Weave | Magical system primer |
 | `article.jsx` | Ayael | Static lore article |
 | `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles |
+
+**Dead code, still loaded but never rendered:** `kingdoms.jsx` and `map.jsx` predate the hex-map rewrite. `app.jsx`'s router redirects `kingdoms` → `map` and renders `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component is ever reached — but both are still `<script>`-loaded in `index.html`. Safe to delete both files and their script tags; see `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
 
 ---
 
@@ -119,16 +120,27 @@ Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backe
 | `timeline_events` | Historical chronological events | — |
 | `events` | Recent-events feed | — |
 | `factions` | Organizations with redacted fields | `rows` |
-| `kingdoms` | Political powers with sigils | `stats` |
+| `kingdoms` | **Legacy, unused.** Table and `stats` field remain in the schema, but `pages/kingdoms.jsx` is dead code — see §4. Any existing rows are not rendered anywhere. | `stats` |
 | `houserules` | Mechanical house rules | `paragraphs` |
 | `planes` | Cosmological planes | — |
 | `image_slots` | Persistent image URL mapping | — |
-| `regions` | SVG map region data (path, fill, stroke) | — |
+| `regions` | SVG map region data (path, fill, stroke) — used by the also-dead `pages/map.jsx`, not by the live `realm-map.jsx` | — |
 | `latest_entries` | Recent activity view (read-only) | — |
+
+The hex-grid kingdoms map (`realm-map.jsx`, live at `#/map`) uses a **separate schema file**, [`project-backend/schema-realm-map.sql`](../project-backend/schema-realm-map.sql), not covered by the table above:
+
+| Table | Purpose | Key fields |
+|-------|---------|-----------|
+| `realms` | One row per kingdom/power shown on the hex map | `slug`, `name`, `accent`/`accent_deep` (map colors), `stats6` (jsonb, 6-stat radar), `resources` (jsonb array), `capital_q`/`capital_r` |
+| `realm_hexes` | Hex tiles belonging to a realm (axial coordinates) | `realm_id`, `q`, `r`, `biome` |
+| `realm_cities` | Cities/towns placed on the hex grid | `realm_id`, `q`, `r`, `kind`, `name` |
+| `realm_rivers` | River paths drawn across the hex grid | `realm_id`, `path` (jsonb array of `{q,r}`) |
+
+See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for full field tables and SQL examples for these four.
 
 **Characters vs NPCs**: both live in `characters`. They are differentiated by the `role` field (`pc` / `npc`) and the `tag` field (campaign name or faction tag).
 
-**JSONB pattern**: infoboxes are `{ "rows": [{ "k": "Label", "v": "Value" }] }`. Sections are arrays of `{ "title", "body" }` objects.
+**JSONB pattern**: infoboxes are `{ "rows": [{ "k": "Label", "v": "Value" }] }`. Sections are arrays of `{ "title", "paras": ["..."] }` objects — there is no `body` column; see `docs/GUIA-ESTRUTURA-ARTIGOS.md` §11.10 for this exact gotcha.
 
 **ID convention (slugify)**:
 ```
@@ -196,7 +208,7 @@ These files provide deeper guidance for specific tasks:
 |------|---------------|
 | [`project-backend/CONTEUDO-INSTRUCOES.md`](../project-backend/CONTEUDO-INSTRUCOES.md) | Content editor guide — how to populate each entity type through the in-app UI |
 | [`project-backend/RETRATOS_GUIA.md`](../project-backend/RETRATOS_GUIA.md) | Portrait and sigil image guidance |
-| [`ESTRUTURA-ARTIGOS.md`](ESTRUTURA-ARTIGOS.md) | Technical schema reference with full SQL INSERT examples for every entity type |
+| [`GUIA-ESTRUTURA-ARTIGOS.md`](GUIA-ESTRUTURA-ARTIGOS.md) | Technical schema reference: full field tables, SQL INSERT/UPDATE examples, JSON shapes, and SQL gotchas for every entity type, including the hex-map realm tables |
 | [`../project-backend/schema.sql`](../project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
 | `../db/seeds/*.sql` | Seed data for each entity type — run once per new Supabase environment |
 | `../db/fixes/*.sql` | One-off data-fix scripts, applied once per environment and kept for record |

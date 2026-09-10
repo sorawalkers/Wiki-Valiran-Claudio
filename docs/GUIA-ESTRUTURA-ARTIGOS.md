@@ -358,6 +358,8 @@ Eventos são diferentes da Linha do Tempo — aparecem na aba **Eventos** como u
 
 O mapa hexagonal usa **4 tabelas** interligadas. Os dados do mapa de hexágonos substituíram a aba antiga de Reinos — `#/kingdoms` redireciona para `#/map`.
 
+> **Nota sobre a tabela `kingdoms` (legada):** a tabela `kingdoms` e o componente `pages/kingdoms.jsx` ainda existem no schema e no repositório, mas a rota nunca os alcança mais (`app.jsx` redireciona `kingdoms` → `map` antes de renderizar). Qualquer dado que ainda exista em `kingdoms` não é exibido em lugar nenhum do app hoje. Use as 4 tabelas abaixo para tudo relacionado a reinos.
+
 ### 9.1 Tabela `realms` (reinos)
 
 | Campo | Tipo | Descrição |
@@ -494,6 +496,63 @@ A coluna correta é `sections` (JSONB com array de seções). Não existe coluna
 | `#/kingdoms` | — | Redireciona para `#/map` |
 | `#/house-rules` | Regras da Casa | `houserules` |
 | `#/recent` | Recentes | Feed agregado |
+
+---
+
+## 13. Referência rápida de estruturas JSON reutilizáveis
+
+### `infobox` (deities e characters)
+```json
+{
+  "rows": [
+    { "k": "Chave", "v": "Valor" },
+    { "k": "Chave Perigo", "v": "Valor", "danger": true },
+    { "k": "Chave Ok",     "v": "Valor", "ok": true }
+  ],
+  "statusNote": "Nota opcional no rodapé."
+}
+```
+
+### `sections` (deities e characters) — ver também Seção 3 e o item 10 de "Cuidados técnicos"
+```json
+[
+  {
+    "title": "Nome da Seção",
+    "paras": ["Parágrafo 1.", "Parágrafo 2."]
+  }
+]
+```
+
+### `related` (deities e characters)
+```json
+[
+  { "tag": "Categoria", "title": "Título do link", "target": "rota-de-navegacao" }
+]
+```
+
+### `keypoints` (sessions)
+```json
+[
+  { "text": "Ponto normal.", "danger": false },
+  { "text": "Ponto crítico — exibido em vermelho.", "danger": true }
+]
+```
+
+### `stats` (kingdoms — página legada, ver nota na Seção 9)
+```json
+[
+  { "k": "Chave", "v": "Valor" },
+  { "k": "Chave Perigo", "v": "Valor", "danger": true }
+]
+```
+
+### `rows` (factions)
+```json
+[
+  { "k": "Chave", "v": "Valor" },
+  { "k": "Censurado", "v": "[REDIGIDO]", "redacted": true }
+]
+```
 
 ---
 
