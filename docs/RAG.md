@@ -54,6 +54,8 @@ Tudo o mais que já é publicamente renderizado (sections de personagens/divinda
 
 ## 4. Setup — ordem de execução
 
+> **Rodando isso pela primeira vez a partir de uma sessão sem acesso à rede do Supabase?** Veja [`rag/SETUP.md`](../rag/SETUP.md) — lista exatamente o que precisa ter em mãos (chaves, tokens) e o que uma sessão local do Claude Code consegue rodar sozinha a partir disso.
+
 1. **Schema**: rode `project-backend/schema-rag.sql` no SQL Editor do Supabase.
 2. **Indexador**:
    ```bash
