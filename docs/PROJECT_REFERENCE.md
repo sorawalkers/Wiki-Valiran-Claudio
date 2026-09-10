@@ -22,7 +22,6 @@ Wiki-Valiran-Claudio/
 ├── project-backend/        ← ACTIVE APPLICATION — work here
 ├── project/                ← ARCHIVED v1 prototype (no DB, hardcoded data)
 ├── discord-bot/            ← Discord bot companion app
-├── chats/                  ← Historical design conversation transcripts
 ├── docs/                   ← Reference docs (this file, article structure, map, routing)
 ├── db/
 │   ├── seeds/*.sql          ← Supabase seed data (run once per environment)
