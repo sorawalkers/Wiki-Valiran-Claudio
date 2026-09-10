@@ -103,7 +103,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `article.jsx` | Ayael | Static lore article |
 | `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles |
 
-**Dead code, still loaded but never rendered:** `kingdoms.jsx` and `map.jsx` predate the hex-map rewrite. `app.jsx`'s router redirects `kingdoms` → `map` and renders `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component is ever reached — but both are still `<script>`-loaded in `index.html`. Safe to delete both files and their script tags; see `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
+**Removed dead code (2026):** `kingdoms.jsx` and `map.jsx` predated the hex-map rewrite and were removed — `app.jsx`'s router already redirected `kingdoms` → `map` and rendered `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component was ever reached. Their `<script>` tags in `index.html` and the orphaned `.kingdom-*` CSS block in `styles-extra.css` were removed along with them. See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
 
 ---
 
@@ -120,7 +120,7 @@ Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backe
 | `timeline_events` | Historical chronological events | — |
 | `events` | Recent-events feed | — |
 | `factions` | Organizations with redacted fields | `rows` |
-| `kingdoms` | **Legacy, unused.** Table and `stats` field remain in the schema, but `pages/kingdoms.jsx` is dead code — see §4. Any existing rows are not rendered anywhere. | `stats` |
+| `kingdoms` | **Legacy, unused.** Table and `stats` field remain in the schema — `pages/kingdoms.jsx`, the only component that read it, was removed (see §4). Any existing rows are orphaned data, not rendered anywhere. Dropping the table is a separate decision (data loss); not done as part of the code cleanup. | `stats` |
 | `houserules` | Mechanical house rules | `paragraphs` |
 | `planes` | Cosmological planes | — |
 | `image_slots` | Persistent image URL mapping | — |
