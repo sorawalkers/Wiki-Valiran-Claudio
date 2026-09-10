@@ -128,6 +128,7 @@ function App() {
       case 'session': return <SessionDetail id={entity} onNav={navigate} />;
       case 'house-rules': return <HouseRules onNav={navigate} />;
       case 'sistema': return <Sistema key={dbVersion} onNav={navigate} />;
+      case 'chat-lore': return <ChatLore onNav={navigate} />;
       default:
         return <ComingSoon page={active} onNav={navigate} />;
     }

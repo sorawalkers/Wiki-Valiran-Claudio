@@ -54,6 +54,7 @@ It was then rebuilt as **`project-backend/`**: the same UI concepts, now backed 
 - **[PROJECT_REFERENCE.md](docs/PROJECT_REFERENCE.md)** — Full technical map: file roles, DB schema, auth system, design tokens, agent guidelines.
 - **[project-backend/CONTEUDO-INSTRUCOES.md](project-backend/CONTEUDO-INSTRUCOES.md)** — Content editor guide: how to add sessions, characters, deities, and other entities via the in-app UI.
 - **[GUIA-ESTRUTURA-ARTIGOS.md](docs/GUIA-ESTRUTURA-ARTIGOS.md)** — Technical data structure reference: full schema, SQL INSERT/UPDATE examples, JSON field shapes, and SQL gotchas.
+- **[RAG.md](docs/RAG.md)** — "Pergunte ao Arquivo": the RAG lore chatbot (pgvector + Gemini) — architecture, redaction policy, and setup.
 
 ---
 

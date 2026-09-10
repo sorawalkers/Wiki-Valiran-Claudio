@@ -22,7 +22,9 @@ Wiki-Valiran-Claudio/
 ├── project-backend/        ← ACTIVE APPLICATION — work here
 ├── project/                ← ARCHIVED v1 prototype (no DB, hardcoded data)
 ├── discord-bot/            ← Discord bot companion app
-├── docs/                   ← Reference docs (this file, article structure, map, routing)
+├── rag/                    ← RAG indexer + isolated search test (see docs/RAG.md)
+├── supabase/functions/     ← Edge Functions (wiki-chat) deployed via the Supabase CLI
+├── docs/                   ← Reference docs (this file, article structure, map, routing, RAG)
 ├── db/
 │   ├── seeds/*.sql          ← Supabase seed data (run once per environment)
 │   └── fixes/*.sql          ← One-off data-fix scripts, applied once and kept for record
@@ -103,6 +105,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `weave.jsx` | The Weave | Magical system primer |
 | `article.jsx` | Ayael | Static lore article |
 | `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles |
+| `chat-lore.jsx` | Pergunte ao Arquivo | RAG lore chatbot — calls the `wiki-chat` Edge Function, see `docs/RAG.md` |
 
 **Removed dead code (2026):** `kingdoms.jsx` and `map.jsx` predated the hex-map rewrite and were removed — `app.jsx`'s router already redirected `kingdoms` → `map` and rendered `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component was ever reached. Their `<script>` tags in `index.html` and the orphaned `.kingdom-*` CSS block in `styles-extra.css` were removed along with them. See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
 
@@ -213,6 +216,8 @@ These files provide deeper guidance for specific tasks:
 | [`../project-backend/schema.sql`](../project-backend/schema.sql) | Canonical PostgreSQL schema (tables, RLS policies, triggers) |
 | `../db/seeds/*.sql` | Seed data for each entity type — run once per new Supabase environment |
 | `../db/fixes/*.sql` | One-off data-fix scripts, applied once per environment and kept for record |
+| [`RAG.md`](RAG.md) | RAG chatbot architecture (indexer, Edge Function, redaction policy, rate limits) |
+| [`../project-backend/schema-rag.sql`](../project-backend/schema-rag.sql) | pgvector schema for the RAG chatbot (`wiki_chunks`, `match_wiki_chunks`, rate-limit table) |
 
 ---
 

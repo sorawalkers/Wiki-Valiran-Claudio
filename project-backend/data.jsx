@@ -28,6 +28,9 @@ const Data = {
       { id: "house-rules", label: "Regras da casa", icon: "navBook" },
       { id: "sistema", label: "Atualizações do Sistema", icon: "navBook" },
     ]},
+    { section: "Assistente", items: [
+      { id: "chat-lore", label: "Pergunte ao Arquivo", icon: "navStar" },
+    ]},
   ],
 
   // ===== Latest entries (portal + feed — populated from DB) =====

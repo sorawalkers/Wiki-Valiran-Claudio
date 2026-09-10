@@ -1,0 +1,17 @@
+{
+  "name": "wiki-valiran-rag-indexer",
+  "version": "1.0.0",
+  "description": "Indexador e ferramenta de teste do RAG da wiki (chunking + embeddings Gemini)",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "index": "node index-wiki.js",
+    "test-search": "node test-search.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.0"
+  }
+}
