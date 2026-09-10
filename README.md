@@ -60,3 +60,9 @@ It was then rebuilt as **`project-backend/`**: the same UI concepts, now backed 
 ## For AI agents
 
 Read **[PROJECT_REFERENCE.md](docs/PROJECT_REFERENCE.md)** before making any changes.
+
+---
+
+## License
+
+All rights reserved — see [LICENSE](LICENSE). This repo is public for portfolio purposes; see [CONTRIBUTING.md](CONTRIBUTING.md) for how it's worked on.

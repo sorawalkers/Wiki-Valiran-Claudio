@@ -22,7 +22,6 @@ Wiki-Valiran-Claudio/
 ├── project-backend/        ← ACTIVE APPLICATION — work here
 ├── project/                ← ARCHIVED v1 prototype (no DB, hardcoded data)
 ├── discord-bot/            ← Discord bot companion app
-├── chats/                  ← Historical design conversation transcripts
 ├── docs/                   ← Reference docs (this file, article structure, map, routing)
 ├── db/
 │   ├── seeds/*.sql          ← Supabase seed data (run once per environment)
@@ -65,6 +64,8 @@ Wiki-Valiran-Claudio/
 | `db.js` | `window.DB` — CRUD wrapper for all entities: `loadAll()`, `saveX()`, `deleteX()`. Fires a `db-refresh` event after writes to trigger UI updates. |
 | `image-slot.js` | Tracks image slot state (URL mapping, versioning). |
 | `image-upload.js` | Uploads files to Supabase Storage (`media` bucket); returns versioned public URLs. |
+
+**Removed stray file (2026):** `index.bundle-src.html` was a frozen standalone-export copy of the pre-Supabase v1 prototype (no `auth.jsx`, no `db.js`, referencing the already-removed `pages/kingdoms.jsx`/`pages/map.jsx`) that had been committed into `project-backend/` by mistake instead of `project/`. It never reflected the live Supabase-backed app. Deleted rather than kept in sync, since it duplicated `project/index.html`'s role as archived v1 history.
 
 ### Core React Modules
 
