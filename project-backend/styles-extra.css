@@ -3148,17 +3148,31 @@
      white paper, whether or not the printer renders background colors,
      so print is forced to plain dark ink on white regardless of the
      on-screen palette. */
-  .main, .main * {
+  .main, .main *,
+  .main *::before, .main *::after {
     background: #fff !important;
     background-image: none !important;
     box-shadow: none !important;
     text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
     color: #1a1208 !important;
     border-color: #ccc !important;
   }
 
   .main img, .main svg {
     background: transparent !important;
+  }
+
+  /* Decorative overlays (paper grain, vignette, gradient hairlines) add
+     many stacked semi-transparent layers. Some print drivers (notably
+     Windows' "Microsoft Print to PDF") flatten pages like that into a
+     single rasterized image instead of real vector text, which makes
+     the resulting PDF uncopiable. They're purely cosmetic, so drop them
+     for print rather than risk that. */
+  .parchment::before, .parchment::after {
+    content: none !important;
+    display: none !important;
   }
 
   .infobox-row dd.danger { color: #8c2535 !important; }
