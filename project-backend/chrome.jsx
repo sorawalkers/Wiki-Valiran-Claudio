@@ -21,7 +21,7 @@ function Banner() {
   );
 }
 
-function Topbar({ onNav }) {
+function Topbar({ onNav, active }) {
   const [query, setQuery] = React.useState('');
   const [open, setOpen]   = React.useState(false);
   const inputRef = React.useRef(null);
@@ -123,7 +123,7 @@ function Topbar({ onNav }) {
       </div>
 
       <div className="topbar-right">
-        <button className="icon-btn" title="Exportar página para PDF" onClick={() => window.print()}><Sigil.PdfExport /></button>
+        <button className="icon-btn" title="Exportar página para PDF" onClick={() => window.PdfExport.export(active)}><Sigil.PdfExport /></button>
         <button className="icon-btn" title="Marcadores"><Sigil.Bookmark /></button>
         <button className="icon-btn" title="Configurações"><Sigil.Settings /></button>
         <AuthButton />

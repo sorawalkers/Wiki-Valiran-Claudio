@@ -137,7 +137,7 @@ function App() {
     <AuthProvider>
     <React.Fragment>
       <div className="app">
-        <Topbar onNav={navigate} />
+        <Topbar onNav={navigate} active={active} />
         <Sidebar active={active} onNav={navigate} />
         <main className="main">{renderPage()}</main>
       </div>
