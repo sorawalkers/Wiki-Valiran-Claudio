@@ -123,6 +123,7 @@ function Topbar({ onNav }) {
       </div>
 
       <div className="topbar-right">
+        <button className="icon-btn" title="Exportar página para PDF" onClick={() => window.print()}><Sigil.PdfExport /></button>
         <button className="icon-btn" title="Marcadores"><Sigil.Bookmark /></button>
         <button className="icon-btn" title="Configurações"><Sigil.Settings /></button>
         <AuthButton />

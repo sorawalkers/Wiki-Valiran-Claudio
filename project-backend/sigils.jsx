@@ -195,6 +195,13 @@ const Sigil = {
       <path d="M8 1 L8 3 M8 13 L8 15 M1 8 L3 8 M13 8 L15 8 M3 3 L4.5 4.5 M11.5 11.5 L13 13 M3 13 L4.5 11.5 M11.5 4.5 L13 3" />
     </svg>
   ),
+  PdfExport: ({ className }) => (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+      <path d="M4 1.5 H9.5 L12.5 4.5 V14.5 H4 Z" />
+      <path d="M9.5 1.5 V4.5 H12.5" />
+      <path d="M6 11.5 L8 13.5 L10 11.5 M8 8 V13.5" />
+    </svg>
+  ),
 };
 
 window.Sigil = Sigil;
