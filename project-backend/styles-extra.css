@@ -3125,12 +3125,10 @@
   .app {
     display: block !important;
     min-height: 0 !important;
-    background: #fff !important;
   }
 
   .main {
     overflow: visible !important;
-    background: #fff !important;
   }
 
   .article, .np-dossier {
@@ -3144,6 +3142,28 @@
   .infobox-rail {
     break-inside: avoid;
   }
+
+  /* The site's default theme is light text on dark surfaces (gold,
+     "foam" beige, etc). None of that is legible once printed on plain
+     white paper, whether or not the printer renders background colors,
+     so print is forced to plain dark ink on white regardless of the
+     on-screen palette. */
+  .main, .main * {
+    background: #fff !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #1a1208 !important;
+    border-color: #ccc !important;
+  }
+
+  .main img, .main svg {
+    background: transparent !important;
+  }
+
+  .infobox-row dd.danger { color: #8c2535 !important; }
+  .infobox-row dd.ok { color: #3f6b2a !important; }
+  .infobox-link { color: #6b1a26 !important; text-decoration: underline; }
 
   @page {
     margin: 1.5cm;
