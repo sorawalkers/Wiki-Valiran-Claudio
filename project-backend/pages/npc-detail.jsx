@@ -230,6 +230,7 @@ function NpGrid({ sections, onSelect }) {
 
 function NpcDetail({ id, onNav }) {
   const { isEditor } = useAuth();
+  const [vitral] = useVitralMode();
   const [editModal, setEditModal] = useNpcState(false);
 
   // Interactivity state
@@ -278,6 +279,24 @@ function NpcDetail({ id, onNav }) {
     );
   }
 
+  if (vitral) {
+    return (
+      <React.Fragment>
+        <VitralArticle
+          c={c}
+          onNav={onNav}
+          backTo="npcs"
+          backLabel="Pessoas importantes"
+          isEditor={isEditor}
+          onEdit={() => setEditModal(true)}
+        />
+        {editModal && (
+          <ArticleEditor type="character" entity={c} onClose={() => setEditModal(false)} onDelete={() => onNav('npcs')} />
+        )}
+      </React.Fragment>
+    );
+  }
+
   function toggleReport(idx) {
     setOpenSet(prev => {
       const next = new Set(prev);
@@ -319,11 +338,14 @@ function NpcDetail({ id, onNav }) {
             <button className="back-btn" style={{ marginBottom: 0 }} onClick={() => onNav('npcs')}>
               Voltar à galeria
             </button>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <VitralToggle />
             {isEditor && (
               <button className="editor-add-btn" onClick={() => setEditModal(true)}>
                 Editar Artigo
               </button>
             )}
+            </div>
           </div>
 
           {/* Breadcrumb */}

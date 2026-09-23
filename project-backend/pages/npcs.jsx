@@ -305,6 +305,7 @@ function NpcFilterChips({ label, value, options, onChange }) {
 // ============================================================
 function Npcs({ onNav }) {
   const { isEditor } = useAuth();
+  const [vitral] = useVitralMode();
   const [modal, setModal] = React.useState(null);
   const [view, setView]       = React.useState(() => localStorage.getItem('npc-view') || 'galeria');
   const [query, setQuery]     = React.useState('');
@@ -395,11 +396,14 @@ function Npcs({ onNav }) {
             <div className="page-eyebrow">Dramatis Personae · Figuras do Mundo</div>
             <h1 className="page-title">Pessoas Importantes</h1>
           </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Nova Pessoa
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginLeft: 'auto' }}>
+            <VitralToggle />
+            {isEditor && (
+              <button className="editor-add-btn" onClick={() => setModal('new')}>
+                Nova Pessoa
+              </button>
+            )}
+          </div>
         </div>
         <p className="page-lede">
           Aliados, antagonistas e figuras neutras que moldaram os eventos —
@@ -475,6 +479,18 @@ function Npcs({ onNav }) {
           {q
             ? <>Nenhum resultado para “{query}”.</>
             : <>Nenhum resultado para os filtros atuais.</>}
+        </div>
+      ) : view === 'galeria' && vitral ? (
+        <div className="vt vt-gallery">
+          {filtered.map(c => (
+            <VitralCard
+              key={c.id}
+              char={c}
+              onClick={() => onNav('npc:' + c.id)}
+              onEdit={() => setModal(c)}
+              isEditor={isEditor}
+            />
+          ))}
         </div>
       ) : view === 'galeria' ? (
         <div className="ficha-grid">

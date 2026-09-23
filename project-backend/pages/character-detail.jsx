@@ -4,6 +4,7 @@ const { useState: useChState, useEffect: useChEffect, useMemo: useChMemo, useRef
 
 function CharacterDetail({ id, onNav }) {
   const { isEditor } = useAuth();
+  const [vitral] = useVitralMode();
   const [editModal, setEditModal]   = useChState(false);
   const [openSet, setOpenSet]       = useChState(() => new Set([0]));
   const [query, setQuery]           = useChState('');
@@ -50,6 +51,24 @@ function CharacterDetail({ id, onNav }) {
     );
   }
 
+  if (vitral) {
+    return (
+      <React.Fragment>
+        <VitralArticle
+          c={c}
+          onNav={onNav}
+          backTo="characters"
+          backLabel="Personagens"
+          isEditor={isEditor}
+          onEdit={() => setEditModal(true)}
+        />
+        {editModal && (
+          <ArticleEditor type="character" entity={c} onClose={() => setEditModal(false)} onDelete={() => onNav('characters')} />
+        )}
+      </React.Fragment>
+    );
+  }
+
   function toggleReport(idx) {
     setOpenSet(prev => {
       const next = new Set(prev);
@@ -89,11 +108,14 @@ function CharacterDetail({ id, onNav }) {
             <button className="back-btn" style={{ marginBottom: 0 }} onClick={() => onNav('characters')}>
               Voltar à galeria
             </button>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <VitralToggle />
             {isEditor && (
               <button className="editor-add-btn" onClick={() => setEditModal(true)}>
                 Editar Artigo
               </button>
             )}
+            </div>
           </div>
 
           <nav className="breadcrumb">

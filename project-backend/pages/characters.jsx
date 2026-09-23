@@ -262,6 +262,7 @@ function FilterChips({ label, value, options, onChange }) {
 // ============================================================
 function Characters({ onNav }) {
   const { isEditor } = useAuth();
+  const [vitral] = useVitralMode();
   const [modal, setModal] = React.useState(null);
   const [statusFilter, setStatusFilter]   = React.useState(() => localStorage.getItem('pc-status')   || 'todos');
   const [campaignFilter, setCampaignFilter] = React.useState(() => localStorage.getItem('pc-camp')   || 'todas');
@@ -339,11 +340,14 @@ function Characters({ onNav }) {
             <div className="page-eyebrow">Dramatis Personae · Heróis de Mesa</div>
             <h1 className="page-title">Personagens (PC)</h1>
           </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Novo Personagem
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginLeft: 'auto' }}>
+            <VitralToggle />
+            {isEditor && (
+              <button className="editor-add-btn" onClick={() => setModal('new')}>
+                Novo Personagem
+              </button>
+            )}
+          </div>
         </div>
         <p className="page-lede">
           Galeria dos heróis em campo — cada placa registra origem, classe e
@@ -383,6 +387,18 @@ function Characters({ onNav }) {
       ) : filtered.length === 0 ? (
         <div className="cast-empty">
           Nenhum personagem corresponde aos filtros atuais.
+        </div>
+      ) : vitral ? (
+        <div className="vt vt-gallery">
+          {filtered.map(c => (
+            <VitralCard
+              key={c.id}
+              char={c}
+              onClick={() => onNav('character:' + c.id)}
+              onEdit={() => setModal(c)}
+              isEditor={isEditor}
+            />
+          ))}
         </div>
       ) : (
         <div className="placa-grid">

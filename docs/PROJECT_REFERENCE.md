@@ -80,6 +80,7 @@ Wiki-Valiran-Claudio/
 | `tweaks-panel.jsx` | Settings panel: palette selector (wine/planar/necro), density (compact/normal/spacious), ornaments toggle. |
 | `deity-sigil.jsx` | Renders a deity sigil SVG by ID. |
 | `sigils.jsx` / `sigils-deities.jsx` | Heraldic sigil definitions and rendering for kingdoms, factions, deities. |
+| `vitral.jsx` + `styles-vitral.css` | **Test redesign "Vitral sob Holofote"** (opt-in). `VitralArticle` (PC/NPC article), `VitralCard` (gallery card, alive/dead), `VitralToggle`, `useVitralMode()`, `ogivePath(w,h)`. Off by default; toggled per browser via the "Visual Vitral" button or `?visual=vitral` / `?visual=classico` (saved in `localStorage` key `valiran.visual`). Reads the same `characters` data — no schema change. Optional section JSONB keys it understands: `confiabilidade` (`confirmado`/`relato`/`suspeita`), `fase`, `corrompida`, `quote`. |
 
 ### Pages (`pages/`)
 
