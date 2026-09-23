@@ -1,9 +1,6 @@
-// Visual "Vitral sob Holofote" — teste de redesenho (artigo de personagem + card da galeria)
+// Visual "Vitral sob Holofote" — artigo de personagem (PC/NPC) + card da galeria
 //
-// Opt-in: desligado por padrão. Liga pelo botão "Visual Vitral" nas páginas de
-// personagem/galeria, ou pela URL `?visual=vitral` (`?visual=classico` desliga).
-// A escolha fica salva em localStorage. Nenhum campo do Supabase muda: tudo é
-// lido de `Entities.characters` como nas páginas clássicas.
+// Lê `Entities.characters` sem nenhum campo novo obrigatório no Supabase.
 //
 // Campos opcionais de seção (JSONB, ignorados se ausentes):
 //   confiabilidade: 'confirmado' | 'relato' | 'suspeita'  → selo nas passagens NPC
@@ -12,52 +9,6 @@
 //   quote:          string | { text, by }                → citação entre filetes
 
 const { useState: useVtState, useEffect: useVtEffect, useRef: useVtRef, useLayoutEffect: useVtLayoutEffect } = React;
-
-// ── Modo (clássico / vitral) ─────────────────────────────────────
-const VT_KEY = 'valiran.visual';
-
-function vtReadMode() {
-  try {
-    const q = new URLSearchParams(window.location.search).get('visual');
-    if (q) {
-      const mode = q === 'vitral' ? 'vitral' : 'classico';
-      localStorage.setItem(VT_KEY, mode);
-      return mode;
-    }
-    return localStorage.getItem(VT_KEY) || 'classico';
-  } catch (e) {
-    return 'classico';
-  }
-}
-
-function useVitralMode() {
-  const [mode, setMode] = useVtState(vtReadMode);
-  useVtEffect(() => {
-    const onChange = e => setMode(e.detail);
-    window.addEventListener('vitral-mode', onChange);
-    return () => window.removeEventListener('vitral-mode', onChange);
-  }, []);
-  const set = on => {
-    const next = on ? 'vitral' : 'classico';
-    try { localStorage.setItem(VT_KEY, next); } catch (e) {}
-    window.dispatchEvent(new CustomEvent('vitral-mode', { detail: next }));
-  };
-  return [mode === 'vitral', set];
-}
-
-function VitralToggle() {
-  const [on, setOn] = useVitralMode();
-  return (
-    <button
-      type="button"
-      className={'vt-toggle' + (on ? ' on' : '')}
-      title="Teste do redesenho “Vitral sob Holofote”"
-      onClick={() => setOn(!on)}
-    >
-      {on ? 'Visual clássico' : '✠ Visual Vitral (teste)'}
-    </button>
-  );
-}
 
 // ── Helpers ──────────────────────────────────────────────────────
 
@@ -455,7 +406,6 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
           <span className="vt-breadcrumb-current">{c.name}</span>
         </nav>
         <div className="vt-topbar-actions">
-          <VitralToggle />
           {isEditor && <button className="vt-btn" onClick={onEdit}>Editar artigo</button>}
         </div>
       </div>
@@ -544,7 +494,5 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 }
 
 window.ogivePath     = ogivePath;
-window.useVitralMode = useVitralMode;
-window.VitralToggle  = VitralToggle;
 window.VitralArticle = VitralArticle;
 window.VitralCard    = VitralCard;

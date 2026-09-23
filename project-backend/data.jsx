@@ -1,34 +1,36 @@
 // Wiki data — articles, deities, timeline events, regions
 
 const Data = {
-  // ===== Nav structure =====
-  nav: [
-    { section: "Portal", items: [
-      { id: "home", label: "Início", icon: "navHome" },
-      { id: "recent", label: "Adições recentes", icon: "navScroll" },
+  // ===== Nav structure (header em 5 seções + "Mais") =====
+  // `home` é para onde o rótulo da seção leva; `items` aparecem no menu suspenso.
+  topnav: [
+    { id: 'panteao', label: 'Panteão', home: 'pantheon', items: [
+      { id: 'pantheon', label: 'Panteão' },
+      { id: 'article', label: 'Ayael' },
     ]},
-    { section: "Cosmologia", items: [
-      { id: "pantheon", label: "Panteão", icon: "navDeity" },
+    { id: 'casas', label: 'Casas', home: 'factions', items: [
+      { id: 'factions', label: 'Facções' },
     ]},
-    { section: "Geopolítica", items: [
-      { id: "map", label: "Reinos & Potências", icon: "navSword" },
-      { id: "factions", label: "Facções", icon: "navBook" },
+    { id: 'almas', label: 'Almas', home: 'characters', items: [
+      { id: 'characters', label: 'Personagens (PC)' },
+      { id: 'npcs', label: 'Pessoas importantes' },
     ]},
-    { section: "Crônicas", items: [
-      { id: "timeline", label: "Linha do Tempo", icon: "navTime" },
-      { id: "events", label: "Eventos da Era", icon: "navBook" },
-      { id: "campanha3", label: "Campanha III", icon: "navScroll" },
+    { id: 'cronicas', label: 'Crônicas', home: 'sessions', items: [
+      { id: 'sessions', label: 'Diário de sessões' },
+      { id: 'timeline', label: 'Linha do tempo' },
+      { id: 'events', label: 'Eventos da era' },
+      { id: 'campanha3', label: 'Campanha III' },
+      { id: 'recent', label: 'Adições recentes' },
     ]},
-    { section: "Dramatis Personae", items: [
-      { id: "characters", label: "Personagens (PC)", icon: "navScroll" },
-      { id: "npcs", label: "Pessoas Importantes (NPC)", icon: "navScroll" },
-    ]},
-    { section: "Mesa", items: [
-      { id: "sessions", label: "Diário de sessões", icon: "navScroll" },
-      { id: "house-rules", label: "Regras da casa", icon: "navBook" },
-      { id: "sistema", label: "Atualizações do Sistema", icon: "navBook" },
+    { id: 'atlas', label: 'Atlas', home: 'map', items: [
+      { id: 'map', label: 'Reinos & Potências' },
     ]},
   ],
+  moreNav: { id: 'mais', label: 'Mais', home: 'house-rules', items: [
+    { id: 'home', label: 'Início' },
+    { id: 'house-rules', label: 'Regras da casa' },
+    { id: 'sistema', label: 'Atualizações do sistema', adminOnly: true },
+  ]},
 
   // ===== Latest entries (portal + feed — populated from DB) =====
   latest: [],

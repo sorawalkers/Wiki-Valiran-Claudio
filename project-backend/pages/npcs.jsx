@@ -160,73 +160,6 @@ function NpcModal({ character, existingCampaigns, onClose }) {
 }
 
 // ============================================================
-// FichaCard — dossiê pessoal (galeria)
-// ============================================================
-function FichaCard({ char, nr, onClick, onEdit, isEditor }) {
-  const status  = npcDeriveStatus(char);
-  const tagCls  = char.tagClass || 'npc';
-  const classe  = npcGetInfoboxRow(char, 'Classe');
-  const origem  = npcGetInfoboxRow(char, 'Origem');
-  const raca    = npcGetInfoboxRow(char, 'Raça') || npcGetInfoboxRow(char, 'Raca');
-  const faccao  = char.faction || npcGetInfoboxRow(char, 'Facção') || npcGetInfoboxRow(char, 'Faccao') || npcGetInfoboxRow(char, 'Filiação');
-  const rows = [
-    classe && { k: 'Classe',    v: classe },
-    origem && { k: 'Origem',    v: origem },
-    raca   && { k: 'Raça',      v: raca },
-    faccao && { k: 'Filiação',  v: faccao },
-  ].filter(Boolean);
-  const campaignShort = (char.campaign || '').split(/[—–-]/)[0].trim();
-
-  return (
-    <article
-      className={`ficha-card ${tagCls}`}
-      onClick={onClick}
-    >
-      <div className="ficha-corner" />
-      {status && <div className={`ficha-stamp ${status.cls}`}>{status.label}</div>}
-
-      <div className="ficha-portrait">
-        <image-slot
-          id={`char-portrait-${char.id}`}
-          shape="rect"
-          placeholder={`Arraste retrato · ${char.name}`}
-        ></image-slot>
-      </div>
-
-      <div className="ficha-body">
-        <div className="ficha-id">
-          FICHA Nº {nr} · DRAMATIS PERSONAE · {char.tag}
-          {campaignShort && <> · {campaignShort.toUpperCase()}</>}
-        </div>
-        <h3 className="ficha-name">{char.name}</h3>
-        {char.role && <p className="ficha-alias">{char.role}</p>}
-
-        {rows.length > 0 && (
-          <dl className="ficha-rows">
-            {rows.map((r, i) => (
-              <div key={i} className="ficha-row">
-                <dt>{r.k}</dt><dd>{r.v}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
-        {char.hero && <p className="ficha-quote">"{char.hero}"</p>}
-      </div>
-
-      {isEditor && (
-        <button
-          className="editor-add-btn"
-          onClick={e => { e.stopPropagation(); onEdit(); }}
-        >
-          Editar
-        </button>
-      )}
-    </article>
-  );
-}
-
-// ============================================================
 // IndiceRow — linha do índice (vista densa)
 // ============================================================
 function IndiceRow({ char, nr, onClick, onEdit, isEditor }) {
@@ -305,7 +238,6 @@ function NpcFilterChips({ label, value, options, onChange }) {
 // ============================================================
 function Npcs({ onNav }) {
   const { isEditor } = useAuth();
-  const [vitral] = useVitralMode();
   const [modal, setModal] = React.useState(null);
   const [view, setView]       = React.useState(() => localStorage.getItem('npc-view') || 'galeria');
   const [query, setQuery]     = React.useState('');
@@ -396,14 +328,11 @@ function Npcs({ onNav }) {
             <div className="page-eyebrow">Dramatis Personae · Figuras do Mundo</div>
             <h1 className="page-title">Pessoas Importantes</h1>
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginLeft: 'auto' }}>
-            <VitralToggle />
-            {isEditor && (
-              <button className="editor-add-btn" onClick={() => setModal('new')}>
-                Nova Pessoa
-              </button>
-            )}
-          </div>
+          {isEditor && (
+            <button className="editor-add-btn" onClick={() => setModal('new')}>
+              Nova Pessoa
+            </button>
+          )}
         </div>
         <p className="page-lede">
           Aliados, antagonistas e figuras neutras que moldaram os eventos —
@@ -480,25 +409,12 @@ function Npcs({ onNav }) {
             ? <>Nenhum resultado para “{query}”.</>
             : <>Nenhum resultado para os filtros atuais.</>}
         </div>
-      ) : view === 'galeria' && vitral ? (
+      ) : view === 'galeria' ? (
         <div className="vt vt-gallery">
           {filtered.map(c => (
             <VitralCard
               key={c.id}
               char={c}
-              onClick={() => onNav('npc:' + c.id)}
-              onEdit={() => setModal(c)}
-              isEditor={isEditor}
-            />
-          ))}
-        </div>
-      ) : view === 'galeria' ? (
-        <div className="ficha-grid">
-          {filtered.map((c, i) => (
-            <FichaCard
-              key={c.id}
-              char={c}
-              nr={String(i + 1).padStart(3, '0')}
               onClick={() => onNav('npc:' + c.id)}
               onEdit={() => setModal(c)}
               isEditor={isEditor}

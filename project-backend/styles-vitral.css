@@ -1,11 +1,12 @@
 /* ================================================================
-   Visual "Vitral sob Holofote" — teste de redesenho
-   Escopo: tudo sob .vt (artigo de personagem + card da galeria).
+   Tema "Vitral sob Holofote"
+   Tokens globais, estrutura geral (header/menu inferior) e componentes
+   .vt (artigo de personagem, card da galeria).
    Referência: design_handoff_vitral_relicario (Claude Design).
    Raio de borda 0 em tudo; filete de chumbo 3px.
    ================================================================ */
 
-.vt {
+:root {
   --vt-bg: #060606;
   --vt-surface: #0b0b0b;
   --vt-lead: #161517;
@@ -34,7 +35,9 @@
   --vt-serif: 'Cormorant Garamond', 'EB Garamond', serif;
   --vt-ui: 'Karla', system-ui, sans-serif;
   --vt-pad: 56px;
+}
 
+.vt {
   background: var(--vt-bg);
   color: var(--vt-ink);
   font-family: var(--vt-serif);
@@ -46,23 +49,6 @@
 .vt a:hover { color: var(--vt-ink); }
 
 .vt-article { min-height: 100%; }
-
-/* ── Botão de alternância (usado também no visual clássico) ───── */
-.vt-toggle {
-  padding: 8px 12px;
-  background: #060606;
-  border: 2px solid #161517;
-  color: #c9a55a;
-  font: 600 10px/1 'Cinzel', serif;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 0;
-  transition: color .15s ease, border-color .15s ease;
-}
-.vt-toggle:hover { color: #e4dccb; border-color: #c9a55a; }
-.vt-toggle.on { color: #7a7263; }
-.vt-toggle.on:hover { color: #e4dccb; }
 
 .vt-btn {
   padding: 8px 12px;
@@ -416,7 +402,7 @@
 
 /* ── Larguras intermediárias ──────────────────────────────────── */
 @container vt (max-width: 1100px) {
-  .vt { --vt-pad: 40px; }
+  .vt > * { --vt-pad: 40px; }
   .vt-hero { grid-template-columns: 300px minmax(0, 1fr); gap: 48px; }
   .vt-hero--pc { grid-template-columns: minmax(0, 1fr) 300px; }
   .vt-portrait { width: 290px; height: 444px; }
@@ -427,7 +413,7 @@
 
 /* ── Mobile / coluna estreita ─────────────────────────────────── */
 @container vt (max-width: 760px) {
-  .vt { --vt-pad: 20px; }
+  .vt > * { --vt-pad: 20px; }
   .vt-topbar { flex-wrap: wrap; }
 
   .vt-hero, .vt-hero--pc {
@@ -442,6 +428,7 @@
   .vt-plaque { display: none; }
   .vt-hero-text { padding-top: 0; gap: 22px; }
   .vt-hero-titles { align-items: center; text-align: center; }
+  .vt-badge-row { justify-content: center; }
   .vt-h1 { font-size: 40px; }
   .vt-epithet { font-size: 22px; }
   .vt-divider { display: none; }
@@ -495,6 +482,281 @@
   .vt-chapter-body p { font-size: 19px; line-height: 1.6; }
   .vt-dropcap::first-letter { font-size: 64px; }
   .vt-inline-quote { font-size: 24px; }
+}
+
+/* ================================================================
+   Estrutura geral — header "✠ VALIRAN ✠", conteúdo, menu inferior
+   ================================================================ */
+.app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  background: var(--vt-bg);
+}
+.main {
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--vt-bg);
+}
+
+.mast {
+  position: relative;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 14px 40px;
+  background: var(--vt-bg);
+  border-bottom: 3px solid var(--vt-lead);
+}
+.mast button { font-family: inherit; }
+
+.mast-nav { display: flex; gap: 30px; }
+.mast-nav-item { position: relative; padding: 8px 0; }
+.mast-nav-link {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: 400 13px/1 var(--vt-display);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--vt-ink-label);
+  transition: color .15s ease;
+}
+.mast-nav-item:hover .mast-nav-link,
+.mast-nav-item.active .mast-nav-link { color: var(--vt-ink); }
+.mast-nav-item.active .mast-nav-link { font-weight: 600; }
+.mast-nav-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: -18px;
+  min-width: 230px;
+  padding: 8px 0;
+  background: var(--vt-surface);
+  border: 3px solid var(--vt-lead);
+  box-shadow: 0 18px 40px rgba(0,0,0,.7);
+}
+.mast-nav-item:hover .mast-nav-menu,
+.mast-nav-item:focus-within .mast-nav-menu { display: block; }
+.mast-nav-menu a {
+  display: block;
+  padding: 11px 18px;
+  cursor: pointer;
+  font: 600 12px/1.3 var(--vt-display);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--vt-ink-muted);
+  transition: color .15s ease, background .15s ease;
+}
+.mast-nav-menu a:hover { color: var(--vt-ink); background: #111012; }
+.mast-nav-menu a.active { color: var(--vt-gold); }
+
+.mast-logo {
+  justify-self: center;
+  cursor: pointer;
+  white-space: nowrap;
+  font: 700 18px/1 var(--vt-display);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--vt-gold);
+  text-decoration: none;
+}
+.mast-logo:hover { color: var(--vt-ink); }
+
+.mast-right { justify-self: end; display: flex; align-items: center; gap: 16px; }
+
+.mast-search-wrap { position: relative; }
+.mast-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 2px solid var(--vt-lead);
+  transition: border-color .15s ease;
+}
+.mast-search:hover, .mast-search.is-open { border-color: #2a282b; }
+.mast-search input {
+  width: 190px;
+  padding: 9px 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font: 400 12px/1 var(--vt-ui);
+  letter-spacing: .06em;
+  color: var(--vt-ink);
+}
+.mast-search input::placeholder { color: var(--vt-ink-label); }
+.mast-search-kbd { font: 400 11px/1 var(--vt-ui); letter-spacing: .06em; color: var(--vt-ink-faint); white-space: nowrap; }
+.mast-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  background: var(--vt-surface);
+  border: 3px solid var(--vt-lead);
+  box-shadow: 0 18px 40px rgba(0,0,0,.7);
+  z-index: 100;
+}
+.mast-search-result {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  column-gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--vt-lead);
+}
+.mast-search-result:last-child { border-bottom: none; }
+.mast-search-result:hover { background: #111012; }
+.mast-search-result-type {
+  grid-row: 1 / 3;
+  align-self: center;
+  font: 600 9px/1.2 var(--vt-display);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--vt-gold);
+}
+.mast-search-result-label { font: 600 14px/1.3 var(--vt-display); color: var(--vt-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mast-search-result-sub { font: italic 400 15px/1.3 var(--vt-serif); color: var(--vt-ink-label); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mast-search-results--empty { padding: 14px; font: italic 400 16px/1.3 var(--vt-serif); color: var(--vt-ink-label); }
+
+.mast-session {
+  cursor: pointer;
+  font: 400 13px/1 var(--vt-display);
+  letter-spacing: .18em;
+  color: var(--vt-ink-label);
+}
+.mast-session:hover { color: var(--vt-ink); }
+
+.mast-icon {
+  display: inline-flex;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--vt-ink-label);
+  transition: color .15s ease;
+}
+.mast-icon:hover { color: var(--vt-ink); }
+.mast-icon svg { width: 18px; height: 18px; }
+
+.mast .auth-btn, .bnav-sheet .auth-btn {
+  padding: 8px 12px;
+  border: 2px solid var(--vt-lead);
+  border-radius: 0;
+  font: 600 10px/1 var(--vt-display);
+  letter-spacing: .2em;
+  color: var(--vt-ink-label);
+}
+.mast .auth-btn:hover, .bnav-sheet .auth-btn:hover { color: var(--vt-ink); border-color: #2a282b; }
+.mast .auth-role-badge, .bnav-sheet .auth-role-badge {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font: 600 10px/1 var(--vt-display);
+  letter-spacing: .2em;
+  color: var(--vt-gold);
+}
+
+.mast-back, .mast-search-toggle, .mast-mobile-search, .bnav, .bnav-sheet { display: none; }
+
+@media (max-width: 1240px) {
+  .mast { padding: 14px 24px; gap: 16px; }
+  .mast-nav { gap: 18px; }
+  .mast-nav-link { font-size: 12px; letter-spacing: .16em; }
+  .mast-search input { width: 130px; }
+  .mast-search-kbd { display: none; }
+  .mast-logo { letter-spacing: .22em; font-size: 16px; }
+}
+
+/* Mobile: barra compacta ← · ✠ VALIRAN · Buscar + menu inferior fixo */
+@media (max-width: 900px) {
+  .mast { grid-template-columns: 44px minmax(0, 1fr) auto; padding: 12px 20px; gap: 8px; }
+  .mast-nav, .mast-right { display: none; }
+  .mast-logo-tail { display: none; }
+  .mast-back, .mast-search-toggle {
+    display: block;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--vt-ink-label);
+  }
+  .mast-back { font-size: 22px; text-align: left; }
+  .mast-search-toggle { font: 500 13px/1 var(--vt-ui); letter-spacing: .06em; }
+  .mast-mobile-search { display: block; grid-column: 1 / -1; padding: 4px 0 6px; }
+  .mast-mobile-search .mast-search input { width: 100%; font-size: 15px; padding: 12px 0; }
+  .mast-mobile-search .mast-search-kbd { display: none; }
+  .mast-mobile-search .mast-search-results { left: 0; width: auto; max-width: none; }
+
+  .main { padding-bottom: 64px; }
+  .page { padding: 32px 20px 64px; }
+  .cast-search { flex-basis: 100%; }
+  .cast-controls { flex-wrap: wrap; }
+
+  .bnav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 60;
+    background: var(--vt-surface);
+    border-top: 3px solid var(--vt-lead);
+  }
+  .bnav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font: 600 10px/1 var(--vt-display);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--vt-ink-label);
+  }
+  .bnav a.active { color: var(--vt-gold); }
+
+  .bnav-sheet {
+    display: block;
+    position: fixed;
+    inset: 0 0 64px 0;
+    z-index: 59;
+    background: rgba(0,0,0,.65);
+  }
+  .bnav-sheet-panel {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    max-height: 78vh;
+    overflow-y: auto;
+    padding: 20px 20px 12px;
+    background: var(--vt-surface);
+    border-top: 3px solid var(--vt-lead);
+  }
+  .bnav-sheet-sec { padding: 6px 0 12px; border-bottom: 1px solid var(--vt-lead); }
+  .bnav-sheet-label {
+    padding: 8px 0 4px;
+    font: 600 10px/1 var(--vt-display);
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    color: var(--vt-ink-faint);
+  }
+  .bnav-sheet-sec a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    cursor: pointer;
+    font: 600 14px/1.2 var(--vt-display);
+    letter-spacing: .08em;
+    color: var(--vt-ink-muted);
+  }
+  .bnav-sheet-sec a.active { color: var(--vt-gold); }
+  .bnav-sheet-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; }
 }
 
 /* ================================================================

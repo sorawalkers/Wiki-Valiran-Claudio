@@ -1,27 +1,33 @@
-// Chrome — banner, topbar, sidebar
+// Chrome — header "Vitral" (navegação em 5 seções), busca, menu inferior mobile
 
 const { useState } = React;
 
-function Banner() {
-  return (
-    <div className="banner">
-      <div className="banner-left">
-        <span className="banner-dot" />
-        <span>Arquivo Aberto · Sessão de Consulta Pública</span>
-      </div>
-      <div className="banner-left">
-        <span>Era Atual · 3ª Era, ano 1281 da Alvorada de Esmir</span>
-      </div>
-      <div className="banner-right">
-        <span>Hora do Arquivo: 22:14</span>
-        <span style={{opacity:0.5}}>·</span>
-        <span>Lua: <span style={{color:'var(--gold-bright)'}}>Vassaela, minguante</span></span>
-      </div>
-    </div>
-  );
+// Rota → seção do header. Rotas compostas ("character:x") usam a parte antes do ":".
+const NAV_SECTION_OF = {
+  pantheon: 'panteao', deity: 'panteao', article: 'panteao',
+  factions: 'casas', faction: 'casas',
+  characters: 'almas', character: 'almas', npcs: 'almas', npc: 'almas',
+  sessions: 'cronicas', session: 'cronicas', timeline: 'cronicas', events: 'cronicas',
+  recent: 'cronicas', campanha1: 'cronicas', campanha2: 'cronicas', campanha3: 'cronicas', rogue1: 'cronicas',
+  map: 'atlas', kingdoms: 'atlas',
+  'house-rules': 'mais', sistema: 'mais',
+};
+
+function navSectionOf(active) {
+  return NAV_SECTION_OF[(active || '').split(':')[0]] || null;
 }
 
-function Topbar({ onNav, active }) {
+function navVisibleItems(items, isAdmin) {
+  return items.filter(it => !it.adminOnly || isAdmin);
+}
+
+function lastSession() {
+  const id = Data.sessionIds && Data.sessionIds[0];
+  return id ? Entities.sessions[id] : null;
+}
+
+// ── Busca ────────────────────────────────────────────────────────
+function useArchiveSearch(onNav) {
   const [query, setQuery] = React.useState('');
   const [open, setOpen]   = React.useState(false);
   const inputRef = React.useRef(null);
@@ -30,8 +36,8 @@ function Topbar({ onNav, active }) {
     function onKey(e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        inputRef.current?.focus();
         setOpen(true);
+        requestAnimationFrame(() => inputRef.current?.focus());
       }
       if (e.key === 'Escape') { setOpen(false); setQuery(''); inputRef.current?.blur(); }
     }
@@ -70,8 +76,6 @@ function Topbar({ onNav, active }) {
     return results.slice(0, 8);
   }
 
-  const results = getResults(query);
-
   function pick(target) {
     onNav(target);
     setQuery('');
@@ -79,132 +83,147 @@ function Topbar({ onNav, active }) {
     inputRef.current?.blur();
   }
 
+  return { query, setQuery, open, setOpen, inputRef, results: getResults(query), pick };
+}
+
+function SearchBox({ search, autoFocus }) {
+  const { query, setQuery, open, setOpen, inputRef, results, pick } = search;
   return (
-    <div className="topbar">
-      <div className="brand" onClick={() => onNav('home')} style={{cursor:'pointer'}}>
-        <div className="brand-seal">
-          <Sigil.Compass style={{width:'100%', height:'100%', color:'var(--gold)'}} />
-        </div>
-        <div className="brand-text">
-          <span className="brand-title">O Arquivo</span>
-          <span className="brand-sub">DE VALIRAN</span>
-        </div>
+    <div className="mast-search-wrap">
+      <div className={'mast-search' + (open ? ' is-open' : '')}>
+        <input
+          ref={inputRef}
+          autoFocus={autoFocus}
+          placeholder="Buscar no arquivo"
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+        />
+        {!query && <span className="mast-search-kbd">Ctrl K</span>}
       </div>
-
-      <div className="search-wrap" style={{position:'relative'}}>
-        <div className={`search${open ? ' search--open' : ''}`}>
-          <Sigil.Search className="search-icon" />
-          <input
-            ref={inputRef}
-            placeholder="Buscar divindades, personagens, sessões…"
-            value={query}
-            onChange={e => { setQuery(e.target.value); setOpen(true); }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => setTimeout(() => setOpen(false), 150)}
-          />
-          {!query && <span className="search-kbd">⌘ K</span>}
+      {open && results.length > 0 && (
+        <div className="mast-search-results">
+          {results.map((r, i) => (
+            <div key={i} className="mast-search-result" onMouseDown={() => pick(r.target)}>
+              <span className="mast-search-result-type">{r.type}</span>
+              <span className="mast-search-result-label">{r.label}</span>
+              {r.sub && <span className="mast-search-result-sub">{r.sub}</span>}
+            </div>
+          ))}
         </div>
-        {open && results.length > 0 && (
-          <div className="search-dropdown">
-            {results.map((r, i) => (
-              <div key={i} className="search-result" onMouseDown={() => pick(r.target)}>
-                <span className="search-result-type">{r.type}</span>
-                <span className="search-result-label">{r.label}</span>
-                {r.sub && <span className="search-result-sub">{r.sub}</span>}
-              </div>
-            ))}
-          </div>
-        )}
-        {open && query.trim() && results.length === 0 && (
-          <div className="search-dropdown search-dropdown--empty">
-            <span>Nenhum resultado para "{query}"</span>
-          </div>
-        )}
-      </div>
-
-      <div className="topbar-right">
-        <button className="icon-btn" title="Exportar página para PDF" onClick={() => window.PdfExport.export(active)}><Sigil.PdfExport /></button>
-        <button className="icon-btn" title="Marcadores"><Sigil.Bookmark /></button>
-        <button className="icon-btn" title="Configurações"><Sigil.Settings /></button>
-        <AuthButton />
-      </div>
+      )}
+      {open && query.trim() && results.length === 0 && (
+        <div className="mast-search-results mast-search-results--empty">Nenhum resultado para "{query}"</div>
+      )}
     </div>
   );
 }
 
-function navBadge(id) {
-  switch (id) {
-    case 'pantheon':   { const n = Object.values(Entities.deities || {}).filter(d => d && d.name).length; return n || null; }
-    case 'characters': { const n = (Data.charIds || []).filter(id => Entities.characters[id]?.tag === 'PC').length; return n || null; }
-    case 'npcs':       { const n = (Data.charIds || []).filter(id => Entities.characters[id]?.tag !== 'PC').length; return n || null; }
-    case 'sessions':   { const n = (Data.sessionIds || []).length; return n || null; }
-    case 'events':     { const n = (Data.events || []).length; return n || null; }
-    case 'timeline':   { const n = (Data.timeline || []).filter(e => e.title).length; return n || null; }
-    default:           return null;
-  }
-}
-
-function Sidebar({ active, onNav }) {
+// ── Header (desktop) + barra compacta (mobile) ──────────────────
+function Topbar({ onNav, active }) {
   const { isAdmin } = useAuth();
-  // Composite IDs like "character:kathryn" map to their root ("characters")
-  const rootMap = { character: 'characters', deity: 'pantheon', session: 'sessions', npc: 'npcs' };
-  const [rootPart] = active.split(':');
-  const activeRoot = rootMap[rootPart] || rootPart;
+  const search = useArchiveSearch(onNav);
+  const [mobileSearch, setMobileSearch] = React.useState(false);
+  const current = navSectionOf(active);
+  const s = lastSession();
+
+  const go = id => { onNav(id); if (document.activeElement) document.activeElement.blur(); };
 
   return (
-    <aside className="sidebar">
-      {Data.nav.map(sec => (
-        <div key={sec.section} className="nav-section">
-          <div className="nav-section-title">{sec.section}</div>
-          <ul className="nav-list">
-            {sec.items.filter(item => !item.adminOnly || isAdmin).map(item => {
-              const Icon = Sigil[item.icon];
-              const isActive = activeRoot === item.id;
-              const badge = navBadge(item.id);
-              return (
-                <li
-                  key={item.id}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
-                  onClick={() => onNav(item.id)}
-                >
-                  <span className="nav-item-icon">
-                    {Icon && <Icon />}
-                  </span>
-                  <span>{item.label}</span>
-                  {badge && <span className="nav-badge">{badge}</span>}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-
-      <div className="sidebar-footer">
-        {(() => {
-          const lastId = Data.sessionIds && Data.sessionIds[0];
-          const s = lastId ? Entities.sessions[lastId] : null;
+    <header className="mast">
+      <nav className="mast-nav">
+        {[...Data.topnav, Data.moreNav].map(sec => {
+          const items = navVisibleItems(sec.items, isAdmin);
           return (
-            <div className="session-callout" onClick={() => onNav('sessions')} style={{cursor:'pointer'}}>
-              <div className="session-callout-eyebrow">↳ Última sessão</div>
-              <div className="session-callout-title">{s ? s.title : '—'}</div>
-              <div className="session-callout-meta">
-                {s ? (
-                  <>
-                    <span>SESSÃO {s.num}</span>
-                    <span>{s.dateShort || s.date || '—'}</span>
-                  </>
-                ) : (
-                  <span>Nenhuma sessão</span>
-                )}
-              </div>
+            <div key={sec.id} className={'mast-nav-item' + (current === sec.id ? ' active' : '')}>
+              <button type="button" className="mast-nav-link" onClick={() => go(sec.home)}>{sec.label}</button>
+              {items.length > 1 && (
+                <div className="mast-nav-menu">
+                  {items.map(it => (
+                    <a key={it.id} className={active === it.id ? 'active' : ''} onClick={() => go(it.id)}>{it.label}</a>
+                  ))}
+                </div>
+              )}
             </div>
           );
-        })()}
+        })}
+      </nav>
+
+      <button type="button" className="mast-back" onClick={() => window.history.back()} aria-label="Voltar">←</button>
+
+      <a className="mast-logo" onClick={() => onNav('home')}>
+        <span aria-hidden="true">✠</span> Valiran <span className="mast-logo-tail" aria-hidden="true">✠</span>
+      </a>
+
+      <div className="mast-right">
+        <SearchBox search={search} />
+        {s && (
+          <a className="mast-session" title={'Última sessão · ' + (s.title || '')} onClick={() => onNav('session:' + s.num)}>
+            S{s.num}
+          </a>
+        )}
+        <button className="mast-icon" title="Exportar página para PDF" onClick={() => window.PdfExport.export(active)}><Sigil.PdfExport /></button>
+        <AuthButton />
       </div>
-    </aside>
+
+      <button type="button" className="mast-search-toggle" onClick={() => setMobileSearch(v => !v)}>
+        {mobileSearch ? 'Fechar' : 'Buscar'}
+      </button>
+      {mobileSearch && (
+        <div className="mast-mobile-search">
+          <SearchBox search={{ ...search, pick: t => { search.pick(t); setMobileSearch(false); } }} autoFocus />
+        </div>
+      )}
+    </header>
   );
 }
 
-window.Banner = Banner;
+// ── Menu inferior (mobile) + folha "Mais" ───────────────────────
+function BottomNav({ onNav, active }) {
+  const { isAdmin } = useAuth();
+  const [sheet, setSheet] = React.useState(false);
+  const current = navSectionOf(active);
+  const [page] = (active || '').split(':');
+  const byId = Object.fromEntries(Data.topnav.map(s => [s.id, s]));
+  const go = id => { setSheet(false); onNav(id); };
+  const tabs = [
+    { id: 'inicio', label: 'Início', home: 'home', on: page === 'home' },
+    { id: 'almas', label: 'Almas', home: byId.almas.home, on: current === 'almas' },
+    { id: 'cronicas', label: 'Crônicas', home: byId.cronicas.home, on: current === 'cronicas' },
+    { id: 'atlas', label: 'Atlas', home: byId.atlas.home, on: current === 'atlas' },
+  ];
+  const moreOn = sheet || current === 'panteao' || current === 'casas' || current === 'mais';
+
+  return (
+    <React.Fragment>
+      {sheet && (
+        <div className="bnav-sheet" onClick={() => setSheet(false)}>
+          <div className="bnav-sheet-panel" onClick={e => e.stopPropagation()}>
+            {[...Data.topnav, Data.moreNav].map(sec => (
+              <div key={sec.id} className="bnav-sheet-sec">
+                <div className="bnav-sheet-label">{sec.label}</div>
+                {navVisibleItems(sec.items, isAdmin).map(it => (
+                  <a key={it.id} className={active === it.id ? 'active' : ''} onClick={() => go(it.id)}>{it.label}</a>
+                ))}
+              </div>
+            ))}
+            <div className="bnav-sheet-foot">
+              <button className="mast-icon" title="Exportar página para PDF" onClick={() => { setSheet(false); window.PdfExport.export(active); }}><Sigil.PdfExport /></button>
+              <AuthButton />
+            </div>
+          </div>
+        </div>
+      )}
+      <nav className="bnav">
+        {tabs.map(t => (
+          <a key={t.id} className={t.on && !sheet ? 'active' : ''} onClick={() => go(t.home)}>{t.label}</a>
+        ))}
+        <a className={moreOn ? 'active' : ''} onClick={() => setSheet(v => !v)}>Mais</a>
+      </nav>
+    </React.Fragment>
+  );
+}
+
 window.Topbar = Topbar;
-window.Sidebar = Sidebar;
+window.BottomNav = BottomNav;

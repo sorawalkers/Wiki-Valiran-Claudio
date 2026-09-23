@@ -47,7 +47,7 @@ Wiki-Valiran-Claudio/
 | Image Storage | Supabase Storage | `media` bucket, drag-drop upload via `image-upload.js` |
 | Routing | Manual | No React Router; page IDs dispatched in `app.jsx` |
 | State | Window namespace | `window.Data`, `window.Entities`, `window.DB` |
-| Styling | CSS | Custom design system in `styles.css` + `styles-extra.css` |
+| Styling | CSS | `styles-vitral.css` (new theme + shell) on top of the legacy `styles.css` + `styles-extra.css` |
 
 **There is no build step.** Editing a `.jsx` file takes effect on the next browser reload. There is no `npm install`, no `package.json`, no compilation pipeline.
 
@@ -73,14 +73,14 @@ Wiki-Valiran-Claudio/
 |------|------|
 | `app.jsx` | Root component. Manual router (dispatches page by ID). Palette/density theme management. Listens for `db-refresh`. |
 | `auth.jsx` | `AuthContext` + `useAuth()` hook. Login modal, session check, role fetch from `profiles` table. |
-| `chrome.jsx` | Header, sidebar, breadcrumbs, search bar — the persistent UI shell. |
+| `chrome.jsx` | Persistent UI shell: header with 5 sections (Panteão · Casas · Almas · Crônicas · Atlas) + "Mais", archive search (Ctrl K), and the mobile bottom nav. Nav structure lives in `Data.topnav` / `Data.moreNav` (`data.jsx`). |
 | `data.jsx` | Global `Data` object (static nav structure) and shared state. |
 | `data-entities.jsx` | Entity type definitions and field schemas used across the app. |
 | `article-editor.jsx` | In-app WYSIWYG editor for campaign articles, deity/character detail pages. |
 | `tweaks-panel.jsx` | Settings panel: palette selector (wine/planar/necro), density (compact/normal/spacious), ornaments toggle. |
 | `deity-sigil.jsx` | Renders a deity sigil SVG by ID. |
 | `sigils.jsx` / `sigils-deities.jsx` | Heraldic sigil definitions and rendering for kingdoms, factions, deities. |
-| `vitral.jsx` + `styles-vitral.css` | **Test redesign "Vitral sob Holofote"** (opt-in). `VitralArticle` (PC/NPC article), `VitralCard` (gallery card, alive/dead), `VitralToggle`, `useVitralMode()`, `ogivePath(w,h)`. Off by default; toggled per browser via the "Visual Vitral" button or `?visual=vitral` / `?visual=classico` (saved in `localStorage` key `valiran.visual`). Reads the same `characters` data — no schema change. Optional section JSONB keys it understands: `confiabilidade` (`confirmado`/`relato`/`suspeita`), `fase`, `corrompida`, `quote`. |
+| `vitral.jsx` + `styles-vitral.css` | **"Vitral sob Holofote" theme** (the redesign being rolled out page by page). `styles-vitral.css` holds the global `--vt-*` tokens, the header / mobile bottom-nav shell, and the `.vt` components. `vitral.jsx` has `VitralArticle` (PC/NPC article), `VitralCard` (gallery card, alive/dead) and `ogivePath(w,h)`. Optional section JSONB keys it understands: `confiabilidade` (`confirmado`/`relato`/`suspeita`), `fase`, `corrompida`, `quote`. |
 
 ### Pages (`pages/`)
 
@@ -173,7 +173,8 @@ Example: "Annabella Whiteflame" → "annabella-whiteflame"
 
 ## 7. Design System
 
-- **Color scheme**: Dark theme — `ardósia` (#16161b) background, `pergamino` (#e8dcc4) text, `dourado` (#b89968) accents, `vinho` (#6b1a26) highlights.
+- **Redesign in progress — "Vitral sob Holofote"** (gothic stained glass + museum spotlight): near-black `#060606` background, `#e4dccb` ink, `#c9a55a` gold, 3px `#161517` "lead" rules, zero border radius, ogive arches for portraits. Fonts: Cinzel (display), Cormorant Garamond (body), Karla (utility UI). Tokens are the `--vt-*` custom properties in `styles-vitral.css`; the legacy tokens in `styles.css` are remapped toward this palette until each page is migrated. Done so far: shell (header + mobile bottom nav, responsive viewport) and the Almas section (PC/NPC articles and galleries).
+- **Legacy color scheme** (pages not yet migrated): `ardósia` background, `pergamino` text, `dourado` accents, `vinho` highlights.
 - **Palettes**: Three switchable palettes — `wine` (default), `planar`, `necro`. Controlled by `tweaks-panel.jsx` and persisted in `localStorage`.
 - **Typography**: Cinzel (display headings), EB Garamond (body), JetBrains Mono (metadata/code labels).
 - **Density modes**: `compact`, `normal`, `spacious` — toggle from the tweaks panel.
@@ -227,4 +228,4 @@ These files provide deeper guidance for specific tasks:
 - **JSONB field shapes are load-bearing.** `db.js` and the page components expect exact key names (`rows`, `k`, `v`, `sections`, `title`, `body`, etc.). Changing the shape of a JSONB field breaks both read and write paths.
 - **Do not refactor the global state pattern** (`window.DB`, `window.Data`, `window.Entities`) without updating every file that references it — there is no module system, so namespace changes break silently.
 - **Script load order matters.** `index.html` loads files in a specific order. If you add a new file, verify it is inserted after its dependencies and before its consumers.
-- **Routing is manual.** To add a new page: add a component to `pages/`, import it in `app.jsx`, add it to the page registry in `app.jsx`, and add a nav link in `chrome.jsx` and/or `data.jsx`.
+- **Routing is manual.** To add a new page: add a component to `pages/`, import it in `app.jsx`, add it to the page registry in `app.jsx`, add a nav entry in `Data.topnav`/`Data.moreNav` (`data.jsx`), and map its route to a header section in `NAV_SECTION_OF` (`chrome.jsx`).

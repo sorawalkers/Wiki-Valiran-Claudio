@@ -138,8 +138,8 @@ function App() {
     <React.Fragment>
       <div className="app">
         <Topbar onNav={navigate} active={active} />
-        <Sidebar active={active} onNav={navigate} />
         <main className="main">{renderPage()}</main>
+        <BottomNav onNav={navigate} active={active} />
       </div>
 
       <TweaksPanel title="Tweaks · Arquivo">
