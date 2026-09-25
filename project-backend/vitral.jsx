@@ -303,7 +303,7 @@ function VtChapter({ sec, idx, isPC, onNav, refFn }) {
   const paras = sec.paras || [];
   const half = Math.ceil(paras.length / 2);
   const renderP = (p, i) => (
-    <p key={i} className={isPC && i === 0 ? 'vt-dropcap' : ''}>{sec.redacted ? vtRedact(p) : p}</p>
+    <p key={i}>{sec.redacted ? vtRedact(p) : p}</p>
   );
 
   return (
@@ -314,13 +314,9 @@ function VtChapter({ sec, idx, isPC, onNav, refFn }) {
       className={'vt-chapter' + (isPC ? ' vt-chapter--pc' : '') + (corrupt ? ' vt-chapter--corrupt' : '')}
     >
       <header className="vt-chapter-head">
-        {!isPC && (
-          <VtOgive className="vt-chapter-icon" inset={4} shoulder={0.417} curve={0.117}>
-            <span className="vt-chapter-numeral">{vtRoman(idx + 1)}</span>
-          </VtOgive>
-        )}
         <div className="vt-chapter-titles">
           <div className="vt-eyebrow">
+            {!isPC && <span className="vt-chapter-numeral">{vtRoman(idx + 1)}</span>}
             {isPC && sec.eyebrow
               ? <><span className="vt-eyebrow-lead">{sec.eyebrow}</span>{meta.length > 0 && <span>{meta.join(' · ')}</span>}</>
               : <span>{[sec.eyebrow, ...meta].filter(Boolean).join(' · ')}</span>}
