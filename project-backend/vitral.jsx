@@ -297,11 +297,23 @@ function VtQuote({ quote }) {
   );
 }
 
-function VtChapter({ sec, idx, isPC, onNav, refFn }) {
+// Janelinha em arco com 4 vidros: acende quando o capítulo está aberto.
+const VT_LANCET_CLIP = `path('${ogivePath(34, 48, 0.5, 0.15)}')`;
+
+function VtLancet() {
+  return (
+    <span className="vt-lancet" aria-hidden="true">
+      <span className="vt-lancet-glass" style={{ clipPath: VT_LANCET_CLIP }}><i /><i /><i /><i /></span>
+    </span>
+  );
+}
+
+function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
   const corrupt = vtIsCorrupt(sec);
   const meta = [sec.location, sec.date].filter(Boolean);
   const paras = sec.paras || [];
   const half = Math.ceil(paras.length / 2);
+  const bodyId = 'vt-ch-body-' + idx;
   const renderP = (p, i) => (
     <p key={i}>{sec.redacted ? vtRedact(p) : p}</p>
   );
@@ -311,36 +323,44 @@ function VtChapter({ sec, idx, isPC, onNav, refFn }) {
       ref={refFn}
       data-idx={idx}
       id={'vt-ch-' + idx}
-      className={'vt-chapter' + (isPC ? ' vt-chapter--pc' : '') + (corrupt ? ' vt-chapter--corrupt' : '')}
+      className={'vt-chapter' + (isPC ? ' vt-chapter--pc' : '') + (corrupt ? ' vt-chapter--corrupt' : '') + (isOpen ? ' is-open' : '')}
     >
-      <header className="vt-chapter-head">
-        <div className="vt-chapter-titles">
-          <div className="vt-eyebrow">
-            {!isPC && <span className="vt-chapter-numeral">{vtRoman(idx + 1)}</span>}
-            {isPC && sec.eyebrow
-              ? <><span className="vt-eyebrow-lead">{sec.eyebrow}</span>{meta.length > 0 && <span>{meta.join(' · ')}</span>}</>
-              : <span>{[sec.eyebrow, ...meta].filter(Boolean).join(' · ')}</span>}
-            {!isPC && <VtSeal kind={sec.confiabilidade} />}
+      <h2 className="vt-chapter-h">
+        <button type="button" className="vt-chapter-head" aria-expanded={isOpen} aria-controls={bodyId} onClick={onToggle}>
+          <VtLancet />
+          <span className="vt-chapter-titles">
+            <span className="vt-eyebrow">
+              {!isPC && <span className="vt-chapter-numeral">{vtRoman(idx + 1)}</span>}
+              {isPC && sec.eyebrow
+                ? <><span className="vt-eyebrow-lead">{sec.eyebrow}</span>{meta.length > 0 && <span>{meta.join(' · ')}</span>}</>
+                : <span>{[sec.eyebrow, ...meta].filter(Boolean).join(' · ')}</span>}
+              {!isPC && <VtSeal kind={sec.confiabilidade} />}
+            </span>
+            <span className="vt-chapter-title">{sec.title}</span>
+          </span>
+          <span className="vt-chapter-toggle" aria-hidden="true">{isOpen ? '−' : '+'}</span>
+        </button>
+      </h2>
+
+      {isOpen && (
+        <div className="vt-chapter-content" id={bodyId}>
+          <div className="vt-chapter-body">
+            {sec.quote ? paras.slice(0, half).map(renderP) : paras.map(renderP)}
+            <VtQuote quote={sec.quote} />
+            {sec.quote && paras.slice(half).map((p, i) => renderP(p, half + i))}
           </div>
-          <h2 className="vt-h2">{sec.title}</h2>
+
+          {((sec.tags && sec.tags.length) || sec.session) && (
+            <footer className="vt-chapter-foot">
+              <div className="vt-tags">
+                {(sec.tags || []).map(t => (
+                  <span key={t} className={'vt-tag' + (/corrup/i.test(t) ? ' vt-tag--red' : '')}>{t}</span>
+                ))}
+              </div>
+              {vtSessionFoot(sec, onNav)}
+            </footer>
+          )}
         </div>
-      </header>
-
-      <div className="vt-chapter-body">
-        {sec.quote ? paras.slice(0, half).map(renderP) : paras.map(renderP)}
-        <VtQuote quote={sec.quote} />
-        {sec.quote && paras.slice(half).map((p, i) => renderP(p, half + i))}
-      </div>
-
-      {((sec.tags && sec.tags.length) || sec.session) && (
-        <footer className="vt-chapter-foot">
-          <div className="vt-tags">
-            {(sec.tags || []).map(t => (
-              <span key={t} className={'vt-tag' + (/corrup/i.test(t) ? ' vt-tag--red' : '')}>{t}</span>
-            ))}
-          </div>
-          {vtSessionFoot(sec, onNav)}
-        </footer>
       )}
     </article>
   );
@@ -358,7 +378,18 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   const plaqueSub = [origin.split(/[—–(]/)[0].trim(), campaignShort].filter(Boolean).join(' · ');
   const firstName = (c.name || '').split(' ')[0];
 
-  const pick = i => { setActive(i); vtScrollTo(refs.current[i]); };
+  const [openSet, setOpenSet] = useVtState(() => new Set([0]));
+  const toggle = i => setOpenSet(prev => {
+    const next = new Set(prev);
+    if (next.has(i)) next.delete(i); else next.add(i);
+    return next;
+  });
+  const pick = i => {
+    setActive(i);
+    setOpenSet(prev => new Set(prev).add(i));
+    requestAnimationFrame(() => vtScrollTo(refs.current[i]));
+  };
+  const allOpen = sections.length > 0 && openSet.size === sections.length;
 
   const hero = (
     <div className="vt-hero-text">
@@ -435,8 +466,28 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
           </div>
 
           <div className="vt-chapters">
+            {sections.length > 1 && (
+              <div className="vt-chapters-tools">
+                <button
+                  type="button"
+                  className="vt-link-btn"
+                  onClick={() => setOpenSet(allOpen ? new Set() : new Set(sections.map((_, i) => i)))}
+                >
+                  {allOpen ? '− Fechar todos' : '+ Abrir todos'}
+                </button>
+              </div>
+            )}
             {sections.map((sec, i) => (
-              <VtChapter key={i} sec={sec} idx={i} isPC={isPC} onNav={onNav} refFn={el => { refs.current[i] = el; }} />
+              <VtChapter
+                key={i}
+                sec={sec}
+                idx={i}
+                isPC={isPC}
+                isOpen={openSet.has(i)}
+                onToggle={() => toggle(i)}
+                onNav={onNav}
+                refFn={el => { refs.current[i] = el; }}
+              />
             ))}
           </div>
         </section>
