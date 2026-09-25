@@ -118,14 +118,15 @@ function useVtSize() {
   return [ref, size];
 }
 
-// Moldura em arco: arco externo (chumbo) + arco interno recuado com o conteúdo.
-function VtOgive({ className = '', inset = 8, shoulder, curve, innerClass = '', innerStyle, children }) {
+// Arco com anel de vidro (rosácea): chumbo externo → vidros em raios → chumbo → imagem.
+function VtGlassArch({ className = '', ring = 14, lead = 3, shoulder, curve, children }) {
   const [ref, size] = useVtSize();
-  const outer = size ? `path('${ogivePath(size.w, size.h, shoulder, curve)}')` : undefined;
-  const inner = size ? `path('${ogivePath(size.w - 2 * inset, size.h - 2 * inset, shoulder, curve)}')` : undefined;
+  const clip = d => size ? `path('${ogivePath(size.w - 2 * d, size.h - 2 * d, shoulder, curve)}')` : undefined;
   return (
-    <div ref={ref} className={'vt-ogive ' + className} style={{ clipPath: outer, visibility: size ? 'visible' : 'hidden' }}>
-      <div className={'vt-ogive-inner ' + innerClass} style={{ inset, clipPath: inner, ...innerStyle }}>
+    <div ref={ref} className={'vt-ogive vt-glass-arch ' + className} style={{ clipPath: clip(0), visibility: size ? 'visible' : 'hidden' }}>
+      <div className="vt-glass-arch-ring" style={{ inset: lead, clipPath: clip(lead) }} />
+      <div className="vt-glass-arch-lead" style={{ inset: ring, clipPath: clip(ring) }} />
+      <div className="vt-ogive-inner" style={{ inset: ring + lead, clipPath: clip(ring + lead) }}>
         {children}
       </div>
     </div>
@@ -135,7 +136,7 @@ function VtOgive({ className = '', inset = 8, shoulder, curve, innerClass = '', 
 function VtPortrait({ c, className = '' }) {
   return (
     <div className={'vt-portrait-shadow ' + className}>
-      <VtOgive className="vt-portrait" inset={8}>
+      <VtGlassArch className="vt-portrait" ring={16}>
         <image-slot
           id={'char-portrait-' + c.id}
           shape="rect"
@@ -143,13 +144,13 @@ function VtPortrait({ c, className = '' }) {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         ></image-slot>
         <div className="vt-portrait-vignette" />
-      </VtOgive>
+      </VtGlassArch>
     </div>
   );
 }
 
 function VtDivider() {
-  return <div className="vt-divider"><span /><i /><span /></div>;
+  return <div className="vt-divider" aria-hidden="true"><span /><i /><span /></div>;
 }
 
 function VtBadge({ c, isPC }) {
@@ -175,10 +176,13 @@ function VtFicha({ c, onNav }) {
 
   return (
     <div className={'vt-ficha' + (open ? ' is-open' : '')}>
-      <button type="button" className="vt-ficha-toggle" onClick={() => setOpen(o => !o)}>
-        <span>Ficha</span>
-        <span className="vt-ficha-toggle-act">{open ? '− Recolher' : '+ Ver tudo'}</span>
-      </button>
+      <div className="vt-ficha-head">
+        <VtLancet lit />
+        <span className="vt-ficha-title">Ficha</span>
+        <button type="button" className="vt-ficha-toggle" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          {open ? '− Recolher' : '+ Ver tudo'}
+        </button>
+      </div>
       <dl className="vt-ficha-grid">
         {packed.map((cell, i) => {
           const r = cell.row;
@@ -300,9 +304,9 @@ function VtQuote({ quote }) {
 // Janelinha em arco com 4 vidros: acende quando o capítulo está aberto.
 const VT_LANCET_CLIP = `path('${ogivePath(34, 48, 0.5, 0.15)}')`;
 
-function VtLancet() {
+function VtLancet({ lit = false }) {
   return (
-    <span className="vt-lancet" aria-hidden="true">
+    <span className={'vt-lancet' + (lit ? ' vt-lancet--lit' : '')} aria-hidden="true">
       <span className="vt-lancet-glass" style={{ clipPath: VT_LANCET_CLIP }}><i /><i /><i /><i /></span>
     </span>
   );
@@ -522,7 +526,7 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 
   return (
     <article className={'vt-card' + (dead ? ' vt-card--dead' : '')} onClick={onClick}>
-      <VtOgive className="vt-card-arch" inset={6} shoulder={0.4545} curve={0.127}>
+      <VtGlassArch className="vt-card-arch" ring={9} shoulder={0.4545} curve={0.127}>
         <image-slot
           id={'char-portrait-' + char.id}
           shape="rect"
@@ -530,7 +534,7 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         ></image-slot>
         {dead && <div className="vt-card-crack" />}
-      </VtOgive>
+      </VtGlassArch>
       <div className="vt-card-plaque">{char.name}</div>
       {sub && <div className="vt-card-sub">{sub}</div>}
       {isEditor && (
