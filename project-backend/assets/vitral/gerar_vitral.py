@@ -1,4 +1,6 @@
-"""Gera os assets SVG do vitral gótico (janela, rosácea, divisor de vinhas, vidro quebrado).
+"""Gera os assets SVG do vitral (rosácea, divisor de vinhas, vidro quebrado). As molduras de janela
+gótica do retrato são PNG/WebP feitos à parte (janela-viva / janela-misterio); a função janela()
+abaixo gera a versão vetorial antiga, mantida só como alternativa e não exportada.
 
 Uso: python3 gerar_vitral.py [pasta_de_saida]   (padrão: a pasta deste script)
 """
@@ -299,7 +301,6 @@ def quebrado(W=200, H=300, seed=13):
     return ''.join(p)
 
 files = {
-    'janela-gotica.svg': janela(),
     'rosacea.svg': rosacea(),
     'divisor-vinhas.svg': divisor(),
     'vidro-quebrado.svg': quebrado(),

@@ -101,29 +101,39 @@ function vtPackCells(cells, cols = 3) {
 // ── Assets de vitral (SVG em assets/vitral/, gerados por script) ──
 const VT_ASSETS = 'assets/vitral/';
 
-// clipPath do "furo" da janela gótica, em unidades relativas à caixa: o retrato
-// fica recortado na mesma ogiva que a moldura SVG deixa aberta, em qualquer tamanho.
-(function vtInjectDefs() {
-  if (document.getElementById('vt-svg-defs')) return;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.id = 'vt-svg-defs';
-  svg.setAttribute('width', '0');
-  svg.setAttribute('height', '0');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.style.position = 'absolute';
-  svg.innerHTML = '<defs><clipPath id="vt-window-hole" clipPathUnits="objectBoundingBox">'
-    + '<path d="M0.0824 0.9462 L0.0824 0.3269 Q0.0824 0.1341 0.5 0.0538 Q0.9176 0.1341 0.9176 0.3269 L0.9176 0.9462 Z"/>'
-    + '</clipPath></defs>';
-  document.body.appendChild(svg);
-})();
+// Molduras de janela gótica (PNG com vão e fundo transparentes, 2:3), por estado:
+// viva → vivos; misterio (rosas densas) → desaparecido/cativo/foragido/desconhecido;
+// morto → a janela viva apagada, em cinza, com o vidro do vão rachado.
+const VT_WINDOWS = {
+  viva:     { lg: 'janela-viva.webp',     sm: 'janela-viva-sm.webp' },
+  misterio: { lg: 'janela-misterio.webp', sm: 'janela-misterio-sm.webp' },
+};
 
-// Janela gótica: moldura de vitral (aduelas, vinhas com rosas, rosácea no fecho)
-// sobre o conteúdo recortado na ogiva interna. Proporção da moldura: 340×520.
-function VtGothicWindow({ className = '', children }) {
+function vtWindowKind(c) {
+  const st = vtRow(c, /^status$/i).trim();
+  if (/^(MORT|FALEC)/i.test(st)) return 'morto';
+  if (/DESAPAREC|CATIV|PRISIONEIR|REF[EÉ]M|FUGA|FORAGID|DESCONHEC|INCERT|\?/i.test(st)) return 'misterio';
+  return 'viva';
+}
+
+// Retrato no vão da janela + moldura por cima. `sizes` escolhe entre as duas resoluções.
+function VtGothicWindow({ kind = 'viva', className = '', sizes = '400px', children }) {
+  const w = VT_WINDOWS[kind] || VT_WINDOWS.viva;
   return (
-    <div className={'vt-window ' + className}>
-      <div className="vt-window-hole">{children}</div>
-      <img className="vt-window-frame" src={VT_ASSETS + 'janela-gotica.svg'} alt="" aria-hidden="true" draggable="false" />
+    <div className={'vt-window vt-window--' + kind + ' ' + className}>
+      <div className="vt-window-hole">
+        {children}
+        {kind === 'morto' && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
+      </div>
+      <img
+        className="vt-window-frame"
+        src={VT_ASSETS + w.lg}
+        srcSet={VT_ASSETS + w.sm + ' 480w, ' + VT_ASSETS + w.lg + ' 960w'}
+        sizes={sizes}
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+      />
     </div>
   );
 }
@@ -131,7 +141,7 @@ function VtGothicWindow({ className = '', children }) {
 function VtPortrait({ c, className = '' }) {
   return (
     <div className={'vt-portrait-shadow ' + className}>
-      <VtGothicWindow className="vt-portrait">
+      <VtGothicWindow kind={vtWindowKind(c)} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
         <image-slot
           id={'char-portrait-' + c.id}
           shape="rect"
@@ -426,7 +436,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   );
 
   return (
-    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '')} data-screen-label={(isPC ? 'PC · ' : 'NPC · ') + c.name}>
+    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '') + (vtWindowKind(c) === 'morto' ? ' vt-article--morto' : '')} data-screen-label={(isPC ? 'PC · ' : 'NPC · ') + c.name}>
       <div className="vt-topbar">
         <nav className="vt-breadcrumb">
           <a onClick={() => onNav(backTo)}>{backLabel}</a>
@@ -525,14 +535,13 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 
   return (
     <article className={'vt-card' + (dead ? ' vt-card--dead' : '')} onClick={onClick}>
-      <VtGothicWindow className="vt-card-arch">
+      <VtGothicWindow kind={vtWindowKind(char)} className="vt-card-arch" sizes="240px">
         <image-slot
           id={'char-portrait-' + char.id}
           shape="rect"
           placeholder={'retrato 3:4 · ' + char.name}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         ></image-slot>
-        {dead && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
       </VtGothicWindow>
       <div className="vt-card-plaque">{char.name}</div>
       {sub && <div className="vt-card-sub">{sub}</div>}
