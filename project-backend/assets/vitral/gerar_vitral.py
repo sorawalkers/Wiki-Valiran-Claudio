@@ -25,7 +25,10 @@ def glass_defs():
     """Gradientes de 'vidro' (luz atravessando) para cada cor."""
     out = []
     for name, (hi, lo) in {'ruby': (RUBY, RUBY_D), 'cobalt': (COBALT, COBALT_D), 'amber': (AMBER, AMBER_D),
-                           'emerald': (EMERALD, EMERALD_D), 'violet': ('#5a3f7c', '#1e1430')}.items():
+                           'emerald': (EMERALD, EMERALD_D), 'violet': ('#5a3f7c', '#1e1430'),
+                           # grisalha: vidros de fumaça, sépia e mel escuro (janela dos vivos)
+                           'smoke': ('#3e3a35', '#110f0d'), 'umber': ('#5a4629', '#170f07'),
+                           'honey': ('#7e6030', '#231808'), 'olive': ('#56673a', '#18200e')}.items():
         out.append(f'<radialGradient id="g-{name}" cx="35%" cy="28%" r="75%"><stop offset=".1" stop-color="{hi}"/>'
                    f'<stop offset="1" stop-color="{lo}"/></radialGradient>')
     out.append('<linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/>'
@@ -33,6 +36,8 @@ def glass_defs():
     return ''.join(out)
 
 CYCLE = ['ruby', 'cobalt', 'amber', 'emerald', 'cobalt', 'violet', 'amber', 'ruby', 'emerald', 'cobalt']
+# Janela: vitral sóbrio — as rosas vermelhas são o único destaque de cor.
+CYCLE_J = ['smoke', 'umber', 'smoke', 'honey', 'umber', 'smoke', 'honey', 'umber']
 
 # ── rosa (flor) e folha em vitral ──────────────────────────────────
 def rose(cx, cy, r=10):
@@ -50,7 +55,7 @@ def leaf(x, y, ang, size=9):
     d = math.degrees(ang)
     return (f'<g transform="translate({f(x)} {f(y)}) rotate({f(d)})">'
             f'<path d="M0 0 Q{f(size*.55)} {f(-size*.45)} {f(size*1.3)} 0 Q{f(size*.55)} {f(size*.45)} 0 0Z" '
-            f'fill="url(#g-emerald)" stroke="{LEAD}" stroke-width="1.3"/>'
+            f'fill="url(#g-olive)" stroke="{LEAD}" stroke-width="1.3"/>'
             f'<path d="M1 0 L{f(size*1.1)} 0" stroke="{LEAD}" stroke-width=".8"/></g>')
 
 def vine_along(pts, seed, amp=5.5, freq=0.09, leaf_every=26, roses_at=(), thorn=True):
@@ -80,7 +85,7 @@ def vine_along(pts, seed, amp=5.5, freq=0.09, leaf_every=26, roses_at=(), thorn=
         s += step
     d = 'M' + ' L'.join(f'{f(x)} {f(y)}' for x, y in path)
     out = [f'<path d="{d}" fill="none" stroke="{LEAD}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>',
-           f'<path d="{d}" fill="none" stroke="#557f3f" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>']
+           f'<path d="{d}" fill="none" stroke="#4a5a34" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>']
     # folhas e espinhos
     s = leaf_every * .6; side = 1
     while s < total - 6:
@@ -102,11 +107,11 @@ def vine_along(pts, seed, amp=5.5, freq=0.09, leaf_every=26, roses_at=(), thorn=
     return ''.join(out)
 
 def small_rosette(cx, cy, r, petals=8):
-    out = [f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{f(r)}" fill="url(#g-cobalt)" stroke="{LEAD}" stroke-width="3"/>']
+    out = [f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{f(r)}" fill="url(#g-smoke)" stroke="{LEAD}" stroke-width="3"/>']
     for k in range(petals):
         a = k * 2 * math.pi / petals
         px, py = cx + math.cos(a) * r * .55, cy + math.sin(a) * r * .55
-        col = 'ruby' if k % 2 == 0 else 'amber'
+        col = 'ruby' if k % 2 == 0 else 'honey'
         out.append(f'<circle cx="{f(px)}" cy="{f(py)}" r="{f(r*.3)}" fill="url(#g-{col})" stroke="{LEAD}" stroke-width="1.6"/>')
     out.append(f'<circle cx="{f(cx)}" cy="{f(cy)}" r="{f(r*.24)}" fill="{GOLD}" stroke="{LEAD}" stroke-width="1.6"/>')
     return ''.join(out)
@@ -142,14 +147,14 @@ def janela(W=340, H=520, band=28, seed=7):
         so = side_samples(O, NJ, NA, left); si = side_samples(I, NJ, NA, left)
         for i in range(len(so) - 1):
             q = [so[i], so[i + 1], si[i + 1], si[i]]
-            col = CYCLE[(k + (0 if left else 3)) % len(CYCLE)]; k += 1
+            col = CYCLE_J[(k + (0 if left else 3)) % len(CYCLE_J)]; k += 1
             d = 'M' + ' L'.join(f'{f(x)} {f(y)}' for x, y in q) + 'Z'
             parts.append(f'<path d="{d}" fill="url(#g-{col})" stroke="{LEAD}" stroke-width="3" stroke-linejoin="round"/>')
     # peitoril (entre o furo e a base)
     ny = 6; y0 = H - band
     for i in range(ny):
         x0 = band + (W - 2 * band) * i / ny; x1 = band + (W - 2 * band) * (i + 1) / ny
-        col = ['amber', 'ruby', 'cobalt'][i % 3]
+        col = ['umber', 'smoke', 'honey'][i % 3]
         parts.append(f'<rect x="{f(x0)}" y="{f(y0)}" width="{f(x1-x0)}" height="{band}" fill="url(#g-{col})" stroke="{LEAD}" stroke-width="3"/>')
     # brilho de cima (luz)
     parts.append(f'<path d="{ogive_d(O)} {ogive_d(I)}" fill="url(#sheen)" fill-rule="evenodd"/>')
