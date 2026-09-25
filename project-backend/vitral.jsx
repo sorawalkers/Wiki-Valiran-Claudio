@@ -8,7 +8,7 @@
 //   corrompida:     boolean                              → vidro rachado (também deriva da tag "Corrupção")
 //   quote:          string | { text, by }                → citação entre filetes
 
-const { useState: useVtState, useEffect: useVtEffect, useRef: useVtRef, useLayoutEffect: useVtLayoutEffect } = React;
+const { useState: useVtState, useEffect: useVtEffect, useRef: useVtRef } = React;
 
 // ── Helpers ──────────────────────────────────────────────────────
 
@@ -98,37 +98,32 @@ function vtPackCells(cells, cols = 3) {
   return out;
 }
 
-// Mede o próprio tamanho para gerar o clip-path.
-function useVtSize() {
-  const ref = useVtRef(null);
-  const [size, setSize] = useVtState(null);
-  useVtLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const upd = () => setSize(prev => {
-      const w = el.offsetWidth, h = el.offsetHeight;
-      return prev && prev.w === w && prev.h === h ? prev : { w, h };
-    });
-    upd();
-    if (typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(upd);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  return [ref, size];
-}
+// ── Assets de vitral (SVG em assets/vitral/, gerados por script) ──
+const VT_ASSETS = 'assets/vitral/';
 
-// Arco com anel de vidro (rosácea): chumbo externo → vidros em raios → chumbo → imagem.
-function VtGlassArch({ className = '', ring = 14, lead = 3, shoulder, curve, children }) {
-  const [ref, size] = useVtSize();
-  const clip = d => size ? `path('${ogivePath(size.w - 2 * d, size.h - 2 * d, shoulder, curve)}')` : undefined;
+// clipPath do "furo" da janela gótica, em unidades relativas à caixa: o retrato
+// fica recortado na mesma ogiva que a moldura SVG deixa aberta, em qualquer tamanho.
+(function vtInjectDefs() {
+  if (document.getElementById('vt-svg-defs')) return;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'vt-svg-defs';
+  svg.setAttribute('width', '0');
+  svg.setAttribute('height', '0');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.style.position = 'absolute';
+  svg.innerHTML = '<defs><clipPath id="vt-window-hole" clipPathUnits="objectBoundingBox">'
+    + '<path d="M0.0824 0.9462 L0.0824 0.3269 Q0.0824 0.1341 0.5 0.0538 Q0.9176 0.1341 0.9176 0.3269 L0.9176 0.9462 Z"/>'
+    + '</clipPath></defs>';
+  document.body.appendChild(svg);
+})();
+
+// Janela gótica: moldura de vitral (aduelas, vinhas com rosas, rosácea no fecho)
+// sobre o conteúdo recortado na ogiva interna. Proporção da moldura: 340×520.
+function VtGothicWindow({ className = '', children }) {
   return (
-    <div ref={ref} className={'vt-ogive vt-glass-arch ' + className} style={{ clipPath: clip(0), visibility: size ? 'visible' : 'hidden' }}>
-      <div className="vt-glass-arch-ring" style={{ inset: lead, clipPath: clip(lead) }} />
-      <div className="vt-glass-arch-lead" style={{ inset: ring, clipPath: clip(ring) }} />
-      <div className="vt-ogive-inner" style={{ inset: ring + lead, clipPath: clip(ring + lead) }}>
-        {children}
-      </div>
+    <div className={'vt-window ' + className}>
+      <div className="vt-window-hole">{children}</div>
+      <img className="vt-window-frame" src={VT_ASSETS + 'janela-gotica.svg'} alt="" aria-hidden="true" draggable="false" />
     </div>
   );
 }
@@ -136,7 +131,7 @@ function VtGlassArch({ className = '', ring = 14, lead = 3, shoulder, curve, chi
 function VtPortrait({ c, className = '' }) {
   return (
     <div className={'vt-portrait-shadow ' + className}>
-      <VtGlassArch className="vt-portrait" ring={16}>
+      <VtGothicWindow className="vt-portrait">
         <image-slot
           id={'char-portrait-' + c.id}
           shape="rect"
@@ -144,13 +139,17 @@ function VtPortrait({ c, className = '' }) {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         ></image-slot>
         <div className="vt-portrait-vignette" />
-      </VtGlassArch>
+      </VtGothicWindow>
     </div>
   );
 }
 
 function VtDivider() {
-  return <div className="vt-divider" aria-hidden="true"><span /><i /><span /></div>;
+  return (
+    <div className="vt-divider" aria-hidden="true">
+      <img src={VT_ASSETS + 'divisor-vinhas.svg'} alt="" draggable="false" />
+    </div>
+  );
 }
 
 function VtBadge({ c, isPC }) {
@@ -331,6 +330,7 @@ function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
     >
       <h2 className="vt-chapter-h">
         <button type="button" className="vt-chapter-head" aria-expanded={isOpen} aria-controls={bodyId} onClick={onToggle}>
+          {corrupt && <img className="vt-cracks vt-cracks--chapter" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" aria-hidden="true" draggable="false" />}
           <VtLancet />
           <span className="vt-chapter-titles">
             <span className="vt-eyebrow">
@@ -405,7 +405,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
         <h1 className="vt-h1">{c.name}</h1>
         {c.role && <div className="vt-epithet">{c.role}</div>}
       </div>
-      {!isPC && <VtDivider />}
+      <VtDivider />
       {c.hero && (
         <blockquote className={'vt-hero-quote' + (isPC ? ' vt-hero-quote--pc' : '')}>“{c.hero}”</blockquote>
       )}
@@ -416,9 +416,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   const portrait = (
     <div className="vt-hero-portrait">
       <VtPortrait c={c} />
-      {isPC ? (
-        <div className="vt-glass" aria-hidden="true"><i /><i /><i /></div>
-      ) : (
+      {!isPC && (
         <div className="vt-plaque">
           <div className="vt-plaque-name">{c.name}</div>
           {plaqueSub && <div className="vt-plaque-sub">{plaqueSub}</div>}
@@ -442,6 +440,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       </div>
 
       <section className={'vt-hero' + (isPC ? ' vt-hero--pc' : '')}>
+        <img className="vt-hero-rose" src={VT_ASSETS + 'rosacea.svg'} alt="" aria-hidden="true" draggable="false" />
         {isPC ? <>{hero}{portrait}</> : <>{portrait}{hero}</>}
       </section>
 
@@ -526,15 +525,15 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 
   return (
     <article className={'vt-card' + (dead ? ' vt-card--dead' : '')} onClick={onClick}>
-      <VtGlassArch className="vt-card-arch" ring={9} shoulder={0.4545} curve={0.127}>
+      <VtGothicWindow className="vt-card-arch">
         <image-slot
           id={'char-portrait-' + char.id}
           shape="rect"
           placeholder={'retrato 3:4 · ' + char.name}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         ></image-slot>
-        {dead && <div className="vt-card-crack" />}
-      </VtGlassArch>
+        {dead && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
+      </VtGothicWindow>
       <div className="vt-card-plaque">{char.name}</div>
       {sub && <div className="vt-card-sub">{sub}</div>}
       {isEditor && (

@@ -99,6 +99,8 @@
 
 /* ── Hero ─────────────────────────────────────────────────────── */
 .vt-hero {
+  position: relative;
+  overflow: hidden;
   padding: 32px var(--vt-pad) 72px;
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
@@ -119,20 +121,11 @@
 .vt-hero-portrait { display: flex; flex-direction: column; align-items: center; gap: 26px; }
 .vt-portrait-shadow { filter: drop-shadow(0 0 22px rgba(201,165,90,.16)) drop-shadow(0 30px 50px rgba(0,0,0,.9)); }
 
-/* ── Arco com anel de vidro (rosácea) ─────────────────────────── */
-.vt-glass-arch { background: var(--vt-lead); }
-.vt-glass-arch-ring {
-  position: absolute;
-  background:
-    radial-gradient(ellipse at 50% 18%, rgba(255,232,190,.22), transparent 55%),
-    repeating-conic-gradient(from -90deg at 50% 62%,
-      #8f6f2c 0deg 9deg, #161517 9deg 10.5deg,
-      #2f4b5e 10.5deg 19deg, #161517 19deg 20.5deg,
-      #6b2019 20.5deg 27deg, #161517 27deg 28.5deg,
-      #a4824a 28.5deg 36deg, #161517 36deg 37.5deg);
-  transition: filter .2s ease;
-}
-.vt-glass-arch-lead { position: absolute; background: var(--vt-lead); }
+/* ── Janela gótica (moldura SVG + retrato recortado na ogiva) ── */
+.vt-window { position: relative; }
+.vt-window-hole { position: absolute; inset: 0; clip-path: url(#vt-window-hole); background: #0e0d0c; }
+.vt-window-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.vt-cracks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
 .vt-portrait { width: 340px; height: 520px; }
 .vt-portrait-vignette {
   position: absolute; inset: 0; pointer-events: none;
@@ -150,12 +143,18 @@
 .vt-plaque-name { font: 600 18px/1.1 var(--vt-display); letter-spacing: .08em; }
 .vt-plaque-sub { margin-top: 6px; font: 500 11px/1.3 var(--vt-ui); letter-spacing: .2em; text-transform: uppercase; }
 
-.vt-glass { display: flex; gap: 8px; }
-.vt-glass i { width: 18px; height: 18px; border: 3px solid var(--vt-lead-frame); display: block; }
-.vt-glass i:nth-child(1) { background: var(--vt-blood); }
-.vt-glass i:nth-child(2) { background: var(--vt-gold); }
-.vt-glass i:nth-child(3) { background: var(--vt-glass-blue); }
-
+.vt-hero > :not(.vt-hero-rose) { position: relative; z-index: 1; }
+.vt-hero-rose {
+  position: absolute;
+  top: -140px;
+  right: -150px;
+  width: 620px;
+  opacity: .09;
+  pointer-events: none;
+  user-select: none;
+  filter: blur(.5px);
+}
+.vt-hero--pc .vt-hero-rose { right: auto; left: -170px; }
 .vt-hero-text { display: flex; flex-direction: column; gap: 30px; padding-top: 24px; min-width: 0; }
 .vt-hero--pc .vt-hero-text { padding-top: 0; gap: 26px; }
 .vt-hero-titles { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
@@ -180,22 +179,8 @@
 }
 .vt-epithet { font: italic 400 26px/1.2 var(--vt-serif); color: var(--vt-gold); }
 
-.vt-divider { display: flex; align-items: center; gap: 16px; }
-.vt-divider span { flex: 1; height: 3px; opacity: .75; background: repeating-linear-gradient(90deg,
-    var(--vt-gold) 0 34px, var(--vt-lead) 34px 37px,
-    #4f7890 37px 58px, var(--vt-lead) 58px 61px,
-    #a8352b 61px 78px, var(--vt-lead) 78px 81px,
-    #b08a45 81px 104px, var(--vt-lead) 104px 107px); }
-.vt .vt-divider i {
-  flex: none;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  border: 3px solid var(--vt-lead);
-  background:
-    radial-gradient(circle, var(--vt-gold) 0 3px, var(--vt-lead) 3px 5px, transparent 5px),
-    repeating-conic-gradient(#a8352b 0 30deg, var(--vt-lead) 30deg 36deg, #4f7890 36deg 66deg, var(--vt-lead) 66deg 72deg);
-  box-shadow: 0 0 14px rgba(236,200,130,.25);
-}
+.vt-divider { display: flex; justify-content: center; margin: -6px 0; }
+.vt-divider img { width: 100%; max-width: 560px; height: auto; display: block; filter: drop-shadow(0 0 10px rgba(201,165,90,.12)); }
 
 .vt-hero-quote {
   margin: 0;
@@ -268,7 +253,17 @@
 .vt-cell dd em { font-size: 17px; color: var(--vt-ink-muted); }
 .vt-cell.vt-cell--danger {
   --pane: #a8352b;
+  overflow: hidden;
   background: linear-gradient(135deg, #1f0e0d, var(--vt-surface) 60%);
+}
+.vt-cell--danger::after {
+  content: "";
+  position: absolute;
+  top: -70px; right: -30px;
+  width: 190px; height: 280px;
+  background: url('assets/vitral/vidro-quebrado.svg') center / 100% 100% no-repeat;
+  opacity: .28;
+  pointer-events: none;
 }
 .vt-cell--danger::before {
   background:
@@ -366,6 +361,7 @@
 
 /* Capítulo em acordeão: a faixa do título é o botão */
 .vt-chapter { scroll-margin-top: 24px; border-top: 3px solid var(--vt-lead); }
+.vt-cracks--chapter { left: auto; width: 46%; opacity: .35; }
 .vt-chapter--corrupt { background: linear-gradient(90deg, rgba(60,20,26,.28), transparent 65%); }
 .vt-chapter-h { margin: 0; font: inherit; }
 .vt-chapter-head {
@@ -591,14 +587,14 @@
     background: radial-gradient(ellipse 260px 420px at 50% 0, rgba(236,210,160,.15), transparent 72%);
   }
   .vt-hero--pc .vt-hero-portrait { order: -1; }
-  .vt-portrait { width: 240px; height: 340px; }
+  .vt-portrait { width: 240px; height: 367px; }
+  .vt-hero-rose, .vt-hero--pc .vt-hero-rose { width: 380px; top: -90px; right: -170px; left: auto; opacity: .06; }
   .vt-plaque { display: none; }
   .vt-hero-text { padding-top: 0; gap: 22px; }
   .vt-hero-titles { align-items: center; text-align: center; }
   .vt-badge-row { justify-content: center; }
   .vt-h1 { font-size: 40px; }
   .vt-epithet { font-size: 22px; }
-  .vt-divider { display: none; }
   .vt-hero-quote, .vt-hero-quote--pc { font-size: 22px; text-align: center; border-left: none; padding-left: 0; }
 
   .vt-ficha { border: 3px solid var(--vt-lead); background: var(--vt-lead); }
@@ -951,7 +947,9 @@
   pointer-events: none;
 }
 .vt-card:hover::before { opacity: 1; background: radial-gradient(ellipse 170px 280px at 50% 0, rgba(236,210,160,.18), transparent 72%); }
-.vt-card-arch { width: 220px; height: 310px; }
+.vt-card-arch { width: 220px; height: 336px; }
+.vt-card-arch .vt-window-frame { transition: filter .2s ease; }
+.vt-card:hover .vt-window-frame { filter: brightness(1.2) saturate(1.1); }
 .vt-card-plaque {
   position: relative;
   padding: 8px 14px;
@@ -974,15 +972,8 @@
 .vt-card-edit { position: relative; margin-top: 4px; }
 
 .vt-card--dead::before { display: none; }
-.vt-card:hover .vt-glass-arch-ring { filter: brightness(1.25) saturate(1.1); }
-.vt-card--dead .vt-glass-arch-ring { filter: grayscale(1) brightness(.3); }
-.vt-card--dead:hover .vt-glass-arch-ring { filter: grayscale(1) brightness(.4); }
+.vt-card--dead .vt-window-frame { filter: grayscale(1) brightness(.32); }
+.vt-card--dead:hover .vt-window-frame { filter: grayscale(1) brightness(.42); }
 .vt-card--dead image-slot { filter: grayscale(1) brightness(.22); }
-.vt-card-crack {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(118deg, transparent 48%, #141315 48.6%, transparent 49.4%),
-    linear-gradient(64deg, transparent 58%, #141315 58.5%, transparent 59.2%);
-}
 .vt-card--dead .vt-card-plaque { background: #2a2620; color: #8a8070; box-shadow: none; }
 .vt-card--dead .vt-card-sub { color: var(--vt-ink-faint); }
