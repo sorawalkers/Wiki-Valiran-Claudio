@@ -263,6 +263,36 @@
 }
 
 /* ── Ficha ────────────────────────────────────────────────────── */
+/* Ficha como registro preservado: moldura ornamental em peças (VtArchiveFrame).
+   --fs = escala da moldura (peças medidas no PNG 2304×1536: cantos 540 de largura,
+   ornamento central 604, faixa de cima 520 e de baixo 480 de altura). */
+.vt-ficha {
+  --fs: .3;
+  position: relative;
+  padding: calc(150px * var(--fs) + 16px) calc(120px * var(--fs) + 16px) calc(150px * var(--fs) + 14px);
+  min-height: calc(1000px * var(--fs));
+}
+.vt-ficha::before {   /* fundo escuro só dentro dos trilhos */
+  content: "";
+  position: absolute;
+  inset: calc(115px * var(--fs)) calc(90px * var(--fs));
+  background: radial-gradient(ellipse at 50% 0, rgba(201,165,90,.05), transparent 65%), #0a0909;
+}
+.vt-archive-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: calc(540px * var(--fs)) 1fr calc(604px * var(--fs)) 1fr calc(540px * var(--fs));
+  grid-template-rows: calc(520px * var(--fs)) 1fr calc(480px * var(--fs));
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.7));
+}
+.vt-af { display: block; background-repeat: no-repeat; background-size: 100% 100%; }
+.vt-af--rail-top, .vt-af--rail-bottom { background-repeat: repeat-x; background-size: auto 100%; }
+.vt-af--rail-left, .vt-af--rail-right { background-repeat: repeat-y; background-size: 100% auto; }
+.vt-ficha-head, .vt-ficha-grid { position: relative; z-index: 2; }
+
 .vt-ficha-head { position: relative; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
 .vt-ficha-title {
   font: 600 12px/1 var(--vt-display);
@@ -652,7 +682,7 @@
   .vt-epithet { font-size: 22px; }
   .vt-hero-quote, .vt-hero-quote--pc { font-size: 22px; text-align: center; border-left: none; padding-left: 0; }
 
-  .vt-ficha { border: 3px solid var(--vt-lead); background: var(--vt-lead); }
+  .vt-ficha { --fs: .17; }
   .vt-ficha-head { min-height: 56px; margin: 0; padding: 0 18px 0 14px; background: var(--vt-surface); }
   .vt-ficha-toggle {
     display: block; margin-left: auto; padding: 0;

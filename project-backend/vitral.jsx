@@ -102,7 +102,7 @@ function vtPackCells(cells, cols = 3) {
 const VT_ASSETS = 'assets/vitral/';
 // Suba este número sempre que regerar/substituir um asset com o mesmo nome:
 // o `?v=` força o navegador a baixar a versão nova em vez de usar o cache.
-const VT_ASSETS_VERSION = 2;
+const VT_ASSETS_VERSION = 3;
 const vtAsset = name => VT_ASSETS + name + '?v=' + VT_ASSETS_VERSION;
 
 // Catálogo de molduras de janela gótica. Cada `file` tem, em assets/vitral/:
@@ -236,6 +236,25 @@ function VtBadge({ c, isPC }) {
 
 // ── Ficha (infobox) ──────────────────────────────────────────────
 
+// Moldura ornamental da ficha, montada em peças (assets/vitral/ficha/, geradas por
+// processar_ficha.py): cantos e ornamentos centrais fixos, trilhos lisos repetindo —
+// assim ela acompanha qualquer quantidade de campos sem deformar.
+const VT_FICHA_PIECES = [
+  'tl', 'rail-top', 'top', 'rail-top', 'tr',
+  'rail-left', null, null, null, 'rail-right',
+  'bl', 'rail-bottom', 'bottom', 'rail-bottom', 'br',
+];
+
+function VtArchiveFrame() {
+  return (
+    <div className="vt-archive-frame" aria-hidden="true">
+      {VT_FICHA_PIECES.map((p, i) => p
+        ? <i key={i} className={'vt-af vt-af--' + p} style={{ backgroundImage: `url('${vtAsset('ficha/' + p + '.webp')}')` }} />
+        : <i key={i} />)}
+    </div>
+  );
+}
+
 function VtFicha({ c, onNav }) {
   const [open, setOpen] = useVtState(false);
   const rows = (c.infobox?.rows || []).filter(r => r && r.k && (r.v || r.v === 0));
@@ -251,6 +270,7 @@ function VtFicha({ c, onNav }) {
 
   return (
     <div className={'vt-ficha' + (open ? ' is-open' : '')}>
+      <VtArchiveFrame />
       <div className="vt-ficha-head">
         <VtLancet lit />
         <span className="vt-ficha-title">Ficha</span>
