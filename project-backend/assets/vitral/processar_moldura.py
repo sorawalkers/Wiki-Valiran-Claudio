@@ -17,7 +17,8 @@ A máscara é o preenchimento da área transparente a partir do centro, depois d
 
 Uso:
   python3 processar_moldura.py origem.png janela-nome [--fechar 7] [--alargar-vao 1.3]
-Depois, registre a moldura em VT_FRAMES (vitral.jsx).
+Depois, registre a moldura em VT_FRAMES (vitral.jsx). Se substituiu um arquivo que já existia,
+suba VT_ASSETS_VERSION em vitral.jsx para o navegador não usar a versão antiga em cache.
 """
 import argparse
 import os

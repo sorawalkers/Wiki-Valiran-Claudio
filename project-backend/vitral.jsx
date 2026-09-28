@@ -100,6 +100,10 @@ function vtPackCells(cells, cols = 3) {
 
 // ── Assets de vitral (SVG em assets/vitral/, gerados por script) ──
 const VT_ASSETS = 'assets/vitral/';
+// Suba este número sempre que regerar/substituir um asset com o mesmo nome:
+// o `?v=` força o navegador a baixar a versão nova em vez de usar o cache.
+const VT_ASSETS_VERSION = 2;
+const vtAsset = name => VT_ASSETS + name + '?v=' + VT_ASSETS_VERSION;
 
 // Catálogo de molduras de janela gótica. Cada `file` tem, em assets/vitral/:
 //   <file>.webp (960px) e <file>-sm.webp (480px): a moldura 2:3 com vão e fundo transparentes;
@@ -142,20 +146,20 @@ function vtFrameFor(c, override) {
 // Morto: retrato em cinza; se a moldura não for "quebrada", ela também apaga e o vão racha.
 function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', sizes = '400px', children }) {
   const greyFrame = dead && !frame.quebrada;
-  const mask = `url('${VT_ASSETS + frame.file}-vao.png')`;
+  const mask = `url('${vtAsset(frame.file + '-vao.png')}')`;
   const [l, t, r, b] = frame.box;
   return (
     <div className={'vt-window' + (dead ? ' vt-window--dead' : '') + (greyFrame ? ' vt-window--morto' : '') + ' ' + className}>
       <div className="vt-window-hole" style={{ WebkitMaskImage: mask, maskImage: mask }}>
         <div className="vt-window-pane" style={{ left: l + '%', top: t + '%', right: r + '%', bottom: b + '%' }}>
           {children}
-          {greyFrame && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
+          {greyFrame && <img className="vt-cracks" src={vtAsset('vidro-quebrado.svg')} alt="" draggable="false" />}
         </div>
       </div>
       <img
         className="vt-window-frame"
-        src={VT_ASSETS + frame.file + '.webp'}
-        srcSet={VT_ASSETS + frame.file + '-sm.webp 480w, ' + VT_ASSETS + frame.file + '.webp 960w'}
+        src={vtAsset(frame.file + '.webp')}
+        srcSet={vtAsset(frame.file + '-sm.webp') + ' 480w, ' + vtAsset(frame.file + '.webp') + ' 960w'}
         sizes={sizes}
         alt=""
         aria-hidden="true"
@@ -214,7 +218,7 @@ function VtPortrait({ c, frameOverride, className = '' }) {
 function VtDivider() {
   return (
     <div className="vt-divider" aria-hidden="true">
-      <img src={VT_ASSETS + 'divisor-vinhas.svg'} alt="" draggable="false" />
+      <img src={vtAsset('divisor-vinhas.svg')} alt="" draggable="false" />
     </div>
   );
 }
@@ -397,7 +401,7 @@ function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
     >
       <h2 className="vt-chapter-h">
         <button type="button" className="vt-chapter-head" aria-expanded={isOpen} aria-controls={bodyId} onClick={onToggle}>
-          {corrupt && <img className="vt-cracks vt-cracks--chapter" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" aria-hidden="true" draggable="false" />}
+          {corrupt && <img className="vt-cracks vt-cracks--chapter" src={vtAsset('vidro-quebrado.svg')} alt="" aria-hidden="true" draggable="false" />}
           <VtLancet />
           <span className="vt-chapter-titles">
             <span className="vt-eyebrow">
@@ -550,7 +554,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       </div>
 
       <section className={'vt-hero' + (isPC ? ' vt-hero--pc' : '')}>
-        <img className="vt-hero-rose" src={VT_ASSETS + 'rosacea.svg'} alt="" aria-hidden="true" draggable="false" />
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
         {isPC ? <>{hero}{portrait}</> : <>{portrait}{hero}</>}
       </section>
 
