@@ -271,13 +271,6 @@ function VtFicha({ c, onNav }) {
   return (
     <div className={'vt-ficha' + (open ? ' is-open' : '')}>
       <VtArchiveFrame />
-      <div className="vt-ficha-head">
-        <VtLancet lit />
-        <span className="vt-ficha-title">Ficha</span>
-        <button type="button" className="vt-ficha-toggle" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-          {open ? '− Recolher' : '+ Ver tudo'}
-        </button>
-      </div>
       <dl className="vt-ficha-grid">
         {packed.map((cell, i) => {
           const r = cell.row;
@@ -301,6 +294,12 @@ function VtFicha({ c, onNav }) {
           );
         })}
       </dl>
+      {/* só no celular, e só se houver campos recolhidos */}
+      {packed.some(cell => !cell.pinned) && (
+        <button type="button" className="vt-ficha-toggle" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          {open ? '− Recolher' : '+ Ver tudo'}
+        </button>
+      )}
     </div>
   );
 }

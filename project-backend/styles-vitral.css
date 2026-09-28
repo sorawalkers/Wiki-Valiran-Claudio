@@ -266,22 +266,27 @@
 /* Ficha como registro preservado: moldura ornamental em peças (VtArchiveFrame).
    --fs = escala da moldura (peças medidas no PNG 2304×1536: cantos 540 de largura,
    ornamento central 604, faixa de cima 520 e de baixo 480 de altura). */
+/* Os campos encaixam colados por dentro dos trilhos (bordas internas medidas no PNG:
+   ~98px nas laterais, ~136px em cima, ~132px embaixo); a moldura fica por cima, então
+   rosáceas dos cantos e losangos centrais se sobrepõem de leve aos vidros. */
 .vt-ficha {
   --fs: .3;
   position: relative;
-  padding: calc(150px * var(--fs) + 16px) calc(120px * var(--fs) + 16px) calc(150px * var(--fs) + 14px);
+  display: flex;
+  flex-direction: column;
+  padding: calc(136px * var(--fs)) calc(98px * var(--fs)) calc(132px * var(--fs));
   min-height: calc(1000px * var(--fs));
 }
 .vt-ficha::before {   /* fundo escuro só dentro dos trilhos */
   content: "";
   position: absolute;
-  inset: calc(115px * var(--fs)) calc(90px * var(--fs));
-  background: radial-gradient(ellipse at 50% 0, rgba(201,165,90,.05), transparent 65%), #0a0909;
+  inset: calc(120px * var(--fs)) calc(90px * var(--fs));
+  background: #0a0909;
 }
 .vt-archive-frame {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   grid-template-columns: calc(540px * var(--fs)) 1fr calc(604px * var(--fs)) 1fr calc(540px * var(--fs));
   grid-template-rows: calc(520px * var(--fs)) 1fr calc(480px * var(--fs));
@@ -291,24 +296,19 @@
 .vt-af { display: block; background-repeat: no-repeat; background-size: 100% 100%; }
 .vt-af--rail-top, .vt-af--rail-bottom { background-repeat: repeat-x; background-size: auto 100%; }
 .vt-af--rail-left, .vt-af--rail-right { background-repeat: repeat-y; background-size: 100% auto; }
-.vt-ficha-head, .vt-ficha-grid { position: relative; z-index: 2; }
+.vt-ficha-grid, .vt-ficha-toggle { position: relative; z-index: 2; }
 
-.vt-ficha-head { position: relative; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.vt-ficha-title {
-  font: 600 12px/1 var(--vt-display);
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--vt-ink);
-}
 .vt-ficha-toggle { display: none; }
 .vt-ficha-grid {
+  flex: 1;
   margin: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 3px;
-  border: 3px solid var(--vt-lead);
   background: var(--vt-lead);
 }
+/* recuo maior: as rosáceas dos cantos da moldura avançam ~35px sobre os vidros */
+.vt-ficha .vt-cell { padding: 20px 38px 16px; }
 /* Cada campo é um vidro: borda superior colorida e leve tinta da cor */
 .vt-cell {
   --pane: var(--vt-gold);
@@ -683,15 +683,14 @@
   .vt-hero-quote, .vt-hero-quote--pc { font-size: 22px; text-align: center; border-left: none; padding-left: 0; }
 
   .vt-ficha { --fs: .17; }
-  .vt-ficha-head { min-height: 56px; margin: 0; padding: 0 18px 0 14px; background: var(--vt-surface); }
   .vt-ficha-toggle {
-    display: block; margin-left: auto; padding: 0;
-    background: none; border: none; cursor: pointer;
+    display: block; width: 100%; min-height: 44px; padding: 0;
+    background: var(--vt-surface); border: none; border-top: 1px solid var(--vt-lead); cursor: pointer;
     font: 600 12px/1 var(--vt-display); letter-spacing: .2em; text-transform: uppercase;
     color: var(--vt-gold);
   }
-  .vt-ficha-toggle::after { content: ""; position: absolute; inset: 0; }
-  .vt-ficha-grid { display: block; border: none; margin-top: 3px; background: var(--vt-surface); }
+  .vt-ficha-grid { display: block; background: var(--vt-surface); }
+  .vt-ficha .vt-cell { padding: 14px 24px; }
   .vt-cell {
     display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; align-items: baseline;
     border-top: 1px solid var(--vt-lead);
