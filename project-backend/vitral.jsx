@@ -205,6 +205,22 @@ function vtDeityTier(d) {
   return 'deus';
 }
 
+// Espelho oval (teste): moldura alternativa para as divindades, no lugar das rosáceas.
+// VT_DEITY_SHAPE = 'rosa' volta para as rosáceas por nível.
+const VT_DEITY_SHAPE = 'oval';
+const VT_DEITY_MIRROR = { id: 'espelho-oval', file: 'espelho-oval', box: [21.0, 18.2, 20.8, 18.6] };
+
+function VtDeityFrame({ tier, className = '', sizes, children }) {
+  if (VT_DEITY_SHAPE === 'oval') {
+    return (
+      <VtGothicWindow frame={VT_DEITY_MIRROR} className={'vt-mirror vt-mirror--' + tier + ' ' + className} sizes={sizes}>
+        {children}
+      </VtGothicWindow>
+    );
+  }
+  return <VtRoseWindow tier={tier} className={className} sizes={sizes}>{children}</VtRoseWindow>;
+}
+
 function VtRoseWindow({ tier = 'deus', className = '', sizes = '400px', children }) {
   const rose = VT_ROSES[tier] || VT_ROSES.deus;
   const d = rose.r * 2;
@@ -327,11 +343,11 @@ function VtPortrait({ c, slotId, frameOverride, framing, onPan, fallback, rose =
   if (rose) {
     return (
       <div className={'vt-portrait-shadow ' + className}>
-        <VtRoseWindow tier={vtDeityTier(c)} className="vt-portrait vt-portrait--rose" sizes="(max-width: 900px) 320px, 460px">
+        <VtDeityFrame tier={vtDeityTier(c)} className="vt-portrait vt-portrait--rose" sizes="(max-width: 900px) 320px, 460px">
           {!url && fallback
             ? fallback
             : <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem arte · ' + c.name} onPan={onPan} />}
-        </VtRoseWindow>
+        </VtDeityFrame>
       </div>
     );
   }
@@ -899,7 +915,7 @@ function VitralDeityCard({ deity, tone, onClick }) {
   const tier = tone || vtDeityTier(deity);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
-      <VtRoseWindow tier={tier} className="vt-rose-card" sizes="280px">
+      <VtDeityFrame tier={tier} className="vt-rose-card" sizes="280px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
@@ -907,7 +923,7 @@ function VitralDeityCard({ deity, tone, onClick }) {
               <DeitySigilImage deity={deity} size="card" />
             </div>
           )}
-      </VtRoseWindow>
+      </VtDeityFrame>
       {/* placa votiva: metal escuro com filete dourado, pontas em flecha e um vidro na cor do nível */}
       <div className="vt-votive">
         <span className="vt-votive-gem" aria-hidden="true" />

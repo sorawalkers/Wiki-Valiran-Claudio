@@ -1435,3 +1435,21 @@
   .vt-votive-name { font-size: 13px; }
   .vt-votive-title { font-size: 13px; }
 }
+
+/* ── Espelho oval (teste, VT_DEITY_SHAPE = 'oval') ─────────────── */
+.vt-mirror.vt-portrait--rose { width: 360px; height: 540px; }
+.vt-hero--deity:has(.vt-mirror) { grid-template-columns: 400px minmax(0, 1fr); }
+.vt-mirror.vt-rose-card { width: 200px; height: 300px; }
+.vt-mirror .vt-deity-sigil-glass { padding: 22% 14%; }
+.vt-deity-card:has(.vt-mirror) .vt-votive { margin-top: -6px; }
+@container vt (max-width: 1100px) {
+  .vt-hero--deity:has(.vt-mirror) { grid-template-columns: 320px minmax(0, 1fr); }
+  .vt-mirror.vt-portrait--rose { width: 300px; height: 450px; }
+}
+@container vt (max-width: 760px) {
+  .vt-hero--deity:has(.vt-mirror) { grid-template-columns: minmax(0, 1fr); }
+  .vt-mirror.vt-portrait--rose { width: 260px; height: 390px; }
+}
+@media (max-width: 900px) {
+  .vt-deity-gallery .vt-mirror.vt-rose-card { width: 150px; height: 225px; }
+}
