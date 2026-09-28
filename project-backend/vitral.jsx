@@ -448,6 +448,18 @@ function vtGroupByPhase(sections) {
   return groups;
 }
 
+// Cor do vidro de cada ligação em "Ligados a…", pelo tipo (tag) ou pelo destino.
+function vtRelatedColor(r) {
+  const t = String(r.tag || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const target = String(r.target || '');
+  if (/fac|casa|ordem|guilda/.test(t) || target.startsWith('faction')) return '#9a2a24';   // rubi
+  if (/local|reino|cidade|regiao|atlas/.test(t) || target === 'map') return '#3f6a86';     // cobalto
+  if (/divin|deus|deusa|panteao/.test(t) || target.startsWith('deity')) return '#7a5aa8';   // violeta
+  if (/evento|sessao|cronica/.test(t) || target.startsWith('session') || target === 'timeline') return '#56673a'; // verde
+  if (/misterio|segredo/.test(t)) return '#5a4a7a';
+  return '#b8873a';                                                                        // âmbar: personagens e o resto
+}
+
 function VtIndex({ c, isPC, sections, active, onPick }) {
   const firstName = (c.name || '').split(' ')[0];
   const groups = isPC ? vtGroupByPhase(sections) : [{ label: null, items: sections.map((sec, i) => ({ sec, i })) }];
@@ -746,7 +758,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
           <div className="vt-label">Ligados a {firstName}</div>
           <div className="vt-related-grid">
             {c.related.map((r, i) => (
-              <a key={i} className="vt-related-cell" onClick={() => r.target && onNav(r.target)}>
+              <a key={i} className="vt-related-cell" style={{ '--pane': vtRelatedColor(r) }} onClick={() => r.target && onNav(r.target)}>
                 <span className="vt-related-tag">{r.tag}</span>
                 <span className="vt-related-title">{r.title}</span>
               </a>

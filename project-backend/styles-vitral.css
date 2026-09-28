@@ -436,39 +436,67 @@
   flex-direction: column;
   gap: 32px;
 }
-.vt-index-list {
-  display: flex;
-  flex-direction: column;
-  border-left: 3px solid var(--vt-lead);
-  padding-left: 28px;
+/* Índice "História" como vitral vertical: um painel de vidro escuro, cada capítulo
+   é um vidro separado por chumbo, com uma tira colorida à esquerda (apagada) que
+   acende no capítulo visível. Mesma linguagem dos painéis dos capítulos. */
+.vt-index-list, .vt-legend {
+  position: relative;
+  border: 1px solid rgba(201,165,90,.16);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.02) 46px 48px),
+    linear-gradient(170deg, rgba(92,40,38,.18), rgba(9,9,11,.94) 40%, rgba(9,9,11,.94) 70%, rgba(40,60,74,.16));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), 0 10px 26px rgba(0,0,0,.45);
 }
-.vt-index-list > .vt-label { margin-bottom: 14px; }
+.vt-index-list { display: flex; flex-direction: column; padding: 18px 0 8px; }
+.vt-index-list::after {   /* faixa de vitral na base, como nos capítulos */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; opacity: .7;
+  background: linear-gradient(90deg, #9a2a24 0 20%, #161517 20% 22%, #3f6a86 22% 48%, #161517 48% 50%,
+    #b8873a 50% 70%, #161517 70% 72%, #56673a 72% 88%, #161517 88% 90%, #9a2a24 90% 100%);
+}
+.vt-index-list > .vt-label { margin: 0 20px 10px; }
 .vt-index-phase {
-  margin: 16px 0 2px;
+  margin: 12px 20px 4px;
   font: 600 10px/1.4 var(--vt-display);
   letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--vt-ink-faint);
 }
 .vt .vt-index-item {
+  --pane: #b8873a;
+  position: relative;
   display: grid;
-  grid-template-columns: 36px 1fr;
-  gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--vt-lead);
+  grid-template-columns: 30px 1fr;
+  gap: 8px;
+  padding: 12px 18px 12px 22px;
+  border-top: 1px solid rgba(0,0,0,.7);
+  box-shadow: inset 0 1px 0 rgba(201,165,90,.07);   /* filete de chumbo entre os vidros */
   color: inherit;
+  transition: background .2s ease;
 }
-.vt-index-item:last-child { border-bottom: none; }
-.vt-article--pc .vt-index-item { grid-template-columns: 1fr; padding: 8px 0; border-bottom: none; }
-.vt-index-num { font: 700 18px/1 var(--vt-display); color: var(--vt-ink-label); }
-.vt-index-title { display: block; font: 600 16px/1.2 var(--vt-display); color: var(--vt-ink-muted); transition: color .15s ease; }
+.vt .vt-index-item:nth-of-type(4n+2) { --pane: #3f6a86; }
+.vt .vt-index-item:nth-of-type(4n+3) { --pane: #9a2a24; }
+.vt .vt-index-item:nth-of-type(4n)   { --pane: #56673a; }
+.vt .vt-index-item.corrupt { --pane: #a8352b; }
+.vt-index-item::before {   /* tira de vidro colorido à esquerda */
+  content: ""; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 4px;
+  background: var(--pane); opacity: .25; transition: opacity .2s ease, box-shadow .2s ease;
+}
+.vt-index-item:hover::before { opacity: .55; }
+.vt .vt-index-item.active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--pane) 18%, transparent), transparent 85%);
+}
+.vt-index-item.active::before { opacity: 1; box-shadow: 0 0 10px var(--pane); }
+.vt-article--pc .vt-index-item { grid-template-columns: 1fr; padding: 9px 18px 9px 22px; }
+.vt-index-num { font: 700 17px/1 var(--vt-display); color: var(--vt-ink-label); }
+.vt-index-title { display: block; font: 600 15px/1.25 var(--vt-display); color: var(--vt-ink-muted); transition: color .15s ease, text-shadow .15s ease; }
 .vt-index-sub { font-size: 14px; font-style: italic; color: var(--vt-ink-label); }
-.vt-index-item:hover .vt-index-title,
-.vt-index-item.active .vt-index-title { color: var(--vt-ink); }
+.vt-index-item:hover .vt-index-title { color: var(--vt-ink); }
+.vt-index-item.active .vt-index-title { color: var(--vt-ink); text-shadow: 0 0 16px rgba(236,200,130,.25); }
 .vt-index-item.active .vt-index-num { color: var(--vt-gold); }
 .vt-index-item.corrupt .vt-index-num { color: var(--vt-corrupt-dim2); }
+.vt-index-item.corrupt.active .vt-index-num { color: var(--vt-corrupt); }
 
-.vt-legend { display: flex; flex-direction: column; gap: 8px; padding-left: 31px; }
+.vt-legend { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 18px; }
 .vt-legend > .vt-label { margin-bottom: 6px; }
 .vt-legend-row { display: flex; gap: 10px; align-items: center; font-size: 16px; color: var(--vt-ink-muted); }
 
@@ -672,23 +700,47 @@
   flex-direction: column;
   gap: 28px;
 }
+/* "Ligados a…" como um vitral de vários vidros: cada ligação é um vidro tingido
+   pela cor do tipo (facção, local, personagem…), separado por chumbo; o vidro
+   acende ao passar o mouse, com a faixa da base brilhando. */
 .vt-related-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 3px;
-  border: 3px solid var(--vt-lead);
-  background: var(--vt-lead);
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  background: #0c0b0d;
+  border: 1px solid rgba(201,165,90,.2);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.7), 0 12px 30px rgba(0,0,0,.5);
 }
 .vt .vt-related-cell {
-  background: var(--vt-surface);
-  padding: 18px;
+  --pane: #b8873a;
+  position: relative;
+  min-height: 92px;
+  padding: 18px 20px 22px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: background .15s ease;
+  justify-content: flex-end;
+  gap: 7px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 38px, rgba(255,255,255,.02) 38px 40px),
+    linear-gradient(160deg, color-mix(in srgb, var(--pane) 20%, transparent), rgba(10,10,12,.95) 60%),
+    #0a0a0c;
+  box-shadow: inset 0 0 0 1px rgba(201,165,90,.08);
+  transition: background .2s ease, box-shadow .2s ease;
 }
-.vt .vt-related-cell:hover { background: #111012; }
-.vt-related-tag { font: 600 10px/1 var(--vt-display); letter-spacing: .2em; text-transform: uppercase; color: var(--vt-ink-label); }
+.vt .vt-related-cell::after {   /* faixa de vidro na base */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: var(--pane); opacity: .35; transition: opacity .2s ease, box-shadow .2s ease;
+}
+.vt .vt-related-cell:hover {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 38px, rgba(255,255,255,.025) 38px 40px),
+    linear-gradient(160deg, color-mix(in srgb, var(--pane) 34%, transparent), rgba(12,11,12,.92) 65%),
+    #0c0b0c;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pane) 45%, transparent), 0 0 22px color-mix(in srgb, var(--pane) 18%, transparent);
+}
+.vt .vt-related-cell:hover::after { opacity: 1; box-shadow: 0 0 10px var(--pane); }
+.vt-related-tag { font: 600 10px/1 var(--vt-display); letter-spacing: .2em; text-transform: uppercase; color: color-mix(in srgb, var(--pane) 70%, #e4dccb); }
 .vt-related-title { font: 600 17px/1.2 var(--vt-display); color: var(--vt-ink); }
 
 /* ── Larguras intermediárias ──────────────────────────────────── */
