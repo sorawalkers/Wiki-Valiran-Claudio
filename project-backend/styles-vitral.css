@@ -123,7 +123,7 @@
 
 /* ── Janela gótica (moldura SVG + retrato recortado na ogiva) ── */
 .vt-window { position: relative; }
-.vt-window { aspect-ratio: 2 / 3; }
+.vt-window { aspect-ratio: 2 / 3; transform-origin: 50% 99%; }
 /* Vão da moldura (medido no PNG 1536×2304); as bordas ficam por baixo do metal */
 /* o vão é a caixa inteira recortada pela máscara de cada moldura (VT_FRAMES → <file>-vao.png) */
 .vt-window-hole {

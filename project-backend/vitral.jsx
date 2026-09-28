@@ -112,13 +112,15 @@ const vtAsset = name => VT_ASSETS + name + '?v=' + VT_ASSETS_VERSION;
 // `box`: retângulo do vão em % da caixa [esquerda, topo, direita, base] (o script imprime);
 //   o retrato é enquadrado nele e a máscara recorta o contorno exato.
 // `quebrada`: a moldura já é um vitral estilhaçado (dispensa o efeito extra de morto).
+// `scale`: compensa o peso visual — molduras com folhagem saindo das colunas parecem
+//   maiores; a escala é √(largura da silhueta da viva-fina ÷ largura desta), com a base fixa.
 const VT_FRAMES = [
   { id: 'viva-fina',            label: 'Viva · fina',                file: 'janela-viva-fina',            box: [23.1, 18.1, 23.1, 6.1] },
-  { id: 'misterio-finas',       label: 'Mistério · rosas finas',     file: 'janela-misterio-finas',       box: [22.7, 18.2, 22.9, 6.1] },
-  { id: 'misterio-murchas',     label: 'Mistério · rosas murchas',   file: 'janela-misterio-murchas',     box: [22.7, 18.3, 23.3, 6.7] },
-  { id: 'quebrada-estilhacada', label: 'Quebrada · estilhaçada',     file: 'janela-quebrada-estilhacada', box: [22.3, 20.0, 22.3, 7.2], quebrada: true },
-  { id: 'quebrada-musgo',       label: 'Quebrada · musgo e heras',   file: 'janela-quebrada-musgo',       box: [22.9, 20.0, 22.1, 8.1], quebrada: true },
-  { id: 'quebrada-morta',       label: 'Quebrada · vegetação morta', file: 'janela-quebrada-morta',       box: [23.5, 19.9, 21.9, 7.9], quebrada: true },
+  { id: 'misterio-finas',       label: 'Mistério · rosas finas',     file: 'janela-misterio-finas',       box: [22.7, 18.2, 22.9, 6.1], scale: 0.965 },
+  { id: 'misterio-murchas',     label: 'Mistério · rosas murchas',   file: 'janela-misterio-murchas',     box: [22.7, 18.3, 23.3, 6.7], scale: 0.971 },
+  { id: 'quebrada-estilhacada', label: 'Quebrada · estilhaçada',     file: 'janela-quebrada-estilhacada', box: [22.3, 20.0, 22.3, 7.2], scale: 0.969, quebrada: true },
+  { id: 'quebrada-musgo',       label: 'Quebrada · musgo e heras',   file: 'janela-quebrada-musgo',       box: [22.9, 20.0, 22.1, 8.1], scale: 0.947, quebrada: true },
+  { id: 'quebrada-morta',       label: 'Quebrada · vegetação morta', file: 'janela-quebrada-morta',       box: [23.5, 19.9, 21.9, 7.9], scale: 0.937, quebrada: true },
 ];
 const VT_FRAME_BY_ID = Object.fromEntries(VT_FRAMES.map(f => [f.id, f]));
 // Molduras antigas (grossas, removidas) → equivalente fina, para escolhas já salvas.
@@ -149,7 +151,10 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
   const mask = `url('${vtAsset(frame.file + '-vao.png')}')`;
   const [l, t, r, b] = frame.box;
   return (
-    <div className={'vt-window' + (dead ? ' vt-window--dead' : '') + (greyFrame ? ' vt-window--morto' : '') + ' ' + className}>
+    <div
+      className={'vt-window' + (dead ? ' vt-window--dead' : '') + (greyFrame ? ' vt-window--morto' : '') + ' ' + className}
+      style={frame.scale ? { transform: 'scale(' + frame.scale + ')' } : undefined}
+    >
       <div className="vt-window-hole" style={{ WebkitMaskImage: mask, maskImage: mask }}>
         <div className="vt-window-pane" style={{ left: l + '%', top: t + '%', right: r + '%', bottom: b + '%' }}>
           {children}
