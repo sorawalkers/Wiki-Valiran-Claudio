@@ -686,8 +686,8 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       <div className="vt-topbar">
         <nav className="vt-breadcrumb">
           <a onClick={() => onNav(backTo)}>{backLabel}</a>
-          {campaignShort && <><span>/</span><span>{campaignShort}</span></>}
-          <span>/</span>
+          {campaignShort && <><span className="vt-bc-sep" aria-hidden="true" /><span>{campaignShort}</span></>}
+          <span className="vt-bc-sep" aria-hidden="true" />
           <span className="vt-breadcrumb-current">{c.name}</span>
         </nav>
         <div className="vt-topbar-actions">

@@ -72,25 +72,42 @@
 }
 
 /* ── Topo: breadcrumb + ações ─────────────────────────────────── */
+/* Faixa do breadcrumb: um friso de vidro mais fino sob o cabeçalho, com os
+   níveis separados por losangos de chumbo e vidro. */
 .vt-topbar {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 14px var(--vt-pad);
-  border-bottom: 3px solid var(--vt-lead);
+  padding: 12px var(--vt-pad) 13px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.015) 58px 60px),
+    linear-gradient(90deg, rgba(20,16,12,.9), rgba(10,10,11,.9) 60%);
+  border-bottom: 1px solid rgba(201,165,90,.12);
 }
 .vt-breadcrumb {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 8px 12px;
   font: 400 12px/1.4 var(--vt-display);
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--vt-ink-faint);
+  color: var(--vt-ink-label);
 }
 .vt-breadcrumb a { color: var(--vt-ink-label); }
-.vt-breadcrumb-current { color: var(--vt-ink-muted); }
+.vt .vt-breadcrumb a:hover { color: var(--vt-gold); }
+.vt-bc-sep {
+  flex: none;
+  width: 7px; height: 7px;
+  transform: rotate(45deg);
+  background: #3f6a86;
+  border: 1px solid #0c0b0d;
+  box-shadow: 0 0 0 1px rgba(201,165,90,.35);
+  opacity: .8;
+}
+.vt-breadcrumb-current { color: var(--vt-gold); text-shadow: 0 0 12px rgba(201,165,90,.25); }
 .vt-topbar-actions { display: flex; gap: 10px; align-items: center; }
 
 /* ── Arco ogival ──────────────────────────────────────────────── */
@@ -846,51 +863,97 @@
   background: var(--vt-bg);
 }
 
+/* Cabeçalho como uma faixa de vitral: vidro escuro com filetes de chumbo, luz
+   quente à esquerda e fria à direita, e a faixa de vidros coloridos na base. Cada
+   seção do menu é um vidro com a sua cor, que acende no hover e fica acesa na ativa. */
 .mast {
   position: relative;
   z-index: 50;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 24px;
-  padding: 14px 40px;
-  background: var(--vt-bg);
-  border-bottom: 3px solid var(--vt-lead);
+  gap: 20px;
+  padding: 10px 32px 12px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.018) 58px 60px),
+    linear-gradient(100deg, rgba(92,40,38,.2), rgba(8,8,9,.96) 32%, rgba(8,8,9,.96) 68%, rgba(40,60,74,.18)),
+    var(--vt-bg);
+  box-shadow: inset 0 -1px 0 rgba(201,165,90,.14), 0 10px 26px rgba(0,0,0,.55);
+}
+.mast::after {   /* faixa de vitral na base, acesa */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; opacity: .75;
+  background: repeating-linear-gradient(90deg,
+    #9a2a24 0 70px, #161517 70px 73px, #3f6a86 73px 150px, #161517 150px 153px,
+    #b8873a 153px 205px, #161517 205px 208px, #56673a 208px 262px, #161517 262px 265px,
+    #7a5aa8 265px 312px, #161517 312px 315px);
 }
 .mast button { font-family: inherit; }
 
-.mast-nav { display: flex; gap: 30px; }
-.mast-nav-item { position: relative; padding: 8px 0; }
-.mast-nav-link {
+.mast-nav { display: flex; gap: 4px; min-width: 0; }
+.mast-nav-item {
+  --pane: #b8873a;
+  position: relative;
   padding: 0;
+}
+.mast-nav-item:nth-child(1) { --pane: #7a5aa8; }   /* Panteão · violeta */
+.mast-nav-item:nth-child(2) { --pane: #9a2a24; }   /* Casas · rubi */
+.mast-nav-item:nth-child(3) { --pane: #b8873a; }   /* Almas · âmbar */
+.mast-nav-item:nth-child(4) { --pane: #56673a; }   /* Crônicas · verde */
+.mast-nav-item:nth-child(5) { --pane: #3f6a86; }   /* Atlas · cobalto */
+.mast-nav-item:nth-child(6) { --pane: #8a8070; }   /* Mais · grisalha */
+.mast-nav-link {
+  position: relative;
+  padding: 13px 14px 14px;
   background: none;
   border: none;
   cursor: pointer;
   font: 400 13px/1 var(--vt-display);
-  letter-spacing: .22em;
+  letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--vt-ink-label);
-  transition: color .15s ease;
+  transition: color .15s ease, background .2s ease, text-shadow .2s ease;
 }
-.mast-nav-item:hover .mast-nav-link,
-.mast-nav-item.active .mast-nav-link { color: var(--vt-ink); }
-.mast-nav-item.active .mast-nav-link { font-weight: 600; }
+.mast-nav-link::after {   /* vidro da seção, sob o nome */
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 4px; height: 3px;
+  background: var(--pane); opacity: 0; transition: opacity .2s ease, box-shadow .2s ease;
+}
+.mast-nav-item:hover .mast-nav-link {
+  color: var(--vt-ink);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--pane) 14%, transparent));
+}
+.mast-nav-item:hover .mast-nav-link::after { opacity: .5; }
+.mast-nav-item.active .mast-nav-link {
+  color: var(--vt-ink);
+  font-weight: 600;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--pane) 55%, transparent);
+  background: linear-gradient(180deg, transparent 20%, color-mix(in srgb, var(--pane) 20%, transparent));
+}
+.mast-nav-item.active .mast-nav-link::after { opacity: 1; box-shadow: 0 0 10px var(--pane); }
+
+/* menu suspenso: painel de vidro, cada página um vidro com a cor da seção */
 .mast-nav-menu {
   display: none;
   position: absolute;
   top: 100%;
-  left: -18px;
-  min-width: 230px;
-  padding: 8px 0;
-  background: var(--vt-surface);
-  border: 3px solid var(--vt-lead);
-  box-shadow: 0 18px 40px rgba(0,0,0,.7);
+  left: 0;
+  min-width: 240px;
+  padding: 6px 0 9px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.02) 46px 48px),
+    linear-gradient(170deg, color-mix(in srgb, var(--pane) 16%, transparent), rgba(9,9,11,.97) 45%),
+    #09090b;
+  border: 1px solid rgba(201,165,90,.2);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), 0 18px 40px rgba(0,0,0,.75);
+}
+.mast-nav-menu::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--pane); opacity: .8;
 }
 .mast-nav-item:hover .mast-nav-menu,
 .mast-nav-item:focus-within .mast-nav-menu { display: block; }
 .mast-nav-menu a {
+  position: relative;
   display: block;
-  padding: 11px 18px;
+  padding: 11px 18px 11px 24px;
   cursor: pointer;
   font: 600 12px/1.3 var(--vt-display);
   letter-spacing: .14em;
@@ -898,33 +961,47 @@
   color: var(--vt-ink-muted);
   transition: color .15s ease, background .15s ease;
 }
-.mast-nav-menu a:hover { color: var(--vt-ink); background: #111012; }
+.mast-nav-menu a::before {
+  content: ""; position: absolute; left: 10px; top: 10px; bottom: 10px; width: 3px;
+  background: var(--pane); opacity: .25; transition: opacity .15s ease;
+}
+.mast-nav-menu a:hover { color: var(--vt-ink); background: color-mix(in srgb, var(--pane) 12%, transparent); }
+.mast-nav-menu a:hover::before { opacity: .7; }
 .mast-nav-menu a.active { color: var(--vt-gold); }
+.mast-nav-menu a.active::before { opacity: 1; box-shadow: 0 0 8px var(--pane); }
 
+/* logo: letra gravada em metal, iluminada como o nome dos personagens */
 .mast-logo {
   justify-self: center;
   cursor: pointer;
   white-space: nowrap;
-  font: 700 18px/1 var(--vt-display);
+  font: 700 19px/1 var(--vt-display);
   letter-spacing: .3em;
   text-transform: uppercase;
   color: var(--vt-gold);
   text-decoration: none;
+  text-shadow: 0 1px 0 #000, 0 0 18px rgba(201,165,90,.35);
+  transition: color .2s ease, text-shadow .2s ease;
 }
-.mast-logo:hover { color: var(--vt-ink); }
+.mast-logo:hover { color: #e6c98a; text-shadow: 0 1px 0 #000, 0 0 24px rgba(201,165,90,.55); }
 
 .mast-right { justify-self: end; display: flex; align-items: center; gap: 16px; }
 
 .mast-search-wrap { position: relative; }
+/* busca: um vidro escuro embutido, que acende em cobalto quando ativo */
 .mast-search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  border: 2px solid var(--vt-lead);
-  transition: border-color .15s ease;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(20,22,26,.6));
+  border: 1px solid rgba(201,165,90,.18);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,.8);
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
-.mast-search:hover, .mast-search.is-open { border-color: #2a282b; }
+.mast-search:hover { border-color: rgba(201,165,90,.32); }
+.mast-search.is-open { border-color: rgba(63,106,134,.8); box-shadow: inset 0 1px 4px rgba(0,0,0,.8), 0 0 14px rgba(63,106,134,.3); }
 .mast-search input {
   width: 190px;
   padding: 9px 0;
@@ -943,9 +1020,11 @@
   right: 0;
   width: 380px;
   max-width: calc(100vw - 40px);
-  background: var(--vt-surface);
-  border: 3px solid var(--vt-lead);
-  box-shadow: 0 18px 40px rgba(0,0,0,.7);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.02) 46px 48px),
+    linear-gradient(170deg, rgba(40,60,74,.2), rgba(9,9,11,.97) 45%), #09090b;
+  border: 1px solid rgba(201,165,90,.2);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), 0 18px 40px rgba(0,0,0,.75);
   z-index: 100;
 }
 .mast-search-result {
@@ -992,13 +1071,14 @@
 
 .mast .auth-btn, .bnav-sheet .auth-btn {
   padding: 8px 12px;
-  border: 2px solid var(--vt-lead);
+  background: linear-gradient(180deg, rgba(201,165,90,.06), transparent);
+  border: 1px solid rgba(201,165,90,.22);
   border-radius: 0;
   font: 600 10px/1 var(--vt-display);
   letter-spacing: .2em;
   color: var(--vt-ink-label);
 }
-.mast .auth-btn:hover, .bnav-sheet .auth-btn:hover { color: var(--vt-ink); border-color: #2a282b; }
+.mast .auth-btn:hover, .bnav-sheet .auth-btn:hover { color: var(--vt-ink); border-color: rgba(201,165,90,.5); box-shadow: 0 0 12px rgba(201,165,90,.18); }
 .mast .auth-role-badge, .bnav-sheet .auth-role-badge {
   border: none;
   border-radius: 0;
@@ -1010,13 +1090,21 @@
 
 .mast-back, .mast-search-toggle, .mast-mobile-search, .bnav, .bnav-sheet { display: none; }
 
-@media (max-width: 1240px) {
-  .mast { padding: 14px 24px; gap: 16px; }
-  .mast-nav { gap: 18px; }
-  .mast-nav-link { font-size: 12px; letter-spacing: .16em; }
+/* telas médias: o menu, o logo e a direita não podem se sobrepor */
+@media (max-width: 1400px) {
+  .mast { padding-left: 20px; padding-right: 20px; gap: 14px; }
+  .mast-nav { gap: 0; }
+  .mast-nav-link { padding-left: 10px; padding-right: 10px; font-size: 12px; letter-spacing: .15em; }
   .mast-search input { width: 130px; }
   .mast-search-kbd { display: none; }
-  .mast-logo { letter-spacing: .22em; font-size: 16px; }
+  .mast-right { gap: 12px; }
+}
+@media (max-width: 1240px) {
+  .mast-nav-link { padding-left: 7px; padding-right: 7px; font-size: 11px; letter-spacing: .12em; }
+  .mast-logo { letter-spacing: .2em; font-size: 16px; }
+  .mast-logo [aria-hidden] { display: none; }
+  .mast-search input { width: 112px; }
+  .mast-search input::placeholder { font-size: 11px; }
 }
 
 /* Mobile: barra compacta ← · ✠ VALIRAN · Buscar + menu inferior fixo */

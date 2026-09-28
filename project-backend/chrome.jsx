@@ -94,7 +94,7 @@ function SearchBox({ search, autoFocus }) {
         <input
           ref={inputRef}
           autoFocus={autoFocus}
-          placeholder="Buscar no arquivo"
+          placeholder="Buscar…"
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
