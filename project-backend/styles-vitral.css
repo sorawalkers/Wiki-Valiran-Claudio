@@ -1354,27 +1354,71 @@
   .vt-tier-desc { font-size: 16px; }
   .vt-tier-count { display: none; }
   .vt-tier-name { font-size: 22px; }
-  .vt-deity-gallery { padding: 24px 8px 32px; grid-template-columns: repeat(auto-fit, 160px); gap: 32px 8px; }
-  .vt-deity-gallery .vt-card-plaque { font-size: 12px; }
-  .vt-deity-gallery .vt-deity-epithet { font-size: 14px; }
+  .vt-deity-gallery { padding: 24px 8px 32px; gap: 32px 8px; }
 }
 
-/* ── Rosácea-relicário (divindades) ───────────────────────────── */
+/* ── Rosáceas-relicário (divindades, uma por nível) ─────────── */
 .vt-rose { position: relative; aspect-ratio: 1; }
-.vt-rose-hole {
-  position: absolute;
-  left: 26.6%; top: 26.6%; width: 46.8%; height: 46.8%;   /* círculo r = 23.4% */
-  border-radius: 50%;
-  overflow: hidden;
-  background: #0b0b0d;
-}
-.vt-rose-hole .vt-deity-sigil-glass { padding: 20%; }
+.vt-rose-hole { position: absolute; border-radius: 50%; overflow: hidden; background: #0b0b0d; }   /* posição inline (VT_ROSES) */
+.vt-rose-hole .vt-deity-sigil-glass { padding: 24%; }
 .vt-portrait--rose { width: 460px; height: 460px; }
 .vt-hero--deity { grid-template-columns: 460px minmax(0, 1fr); align-items: center; }
 .vt-hero--deity > .vt-hero-portrait { align-self: center; }
-.vt-rose-card { width: 250px; height: 250px; transition: filter .2s ease; }
+.vt-rose-card { width: 270px; height: 270px; transition: filter .2s ease; }
 .vt-deity-card:hover .vt-rose-card { filter: brightness(1.15) drop-shadow(0 0 18px color-mix(in srgb, var(--pane) 45%, transparent)); }
-.vt-deity-card { gap: 10px; }
+.vt-deity-card { gap: 4px; }
+.vt-deity-gallery { grid-template-columns: repeat(auto-fit, 290px) !important; }
+
+/* placa votiva do nome + título */
+.vt-votive {
+  position: relative;
+  z-index: 1;
+  margin-top: -18px;       /* encosta na base da rosácea */
+  min-width: 220px;
+  max-width: 270px;
+  padding: 14px 34px 12px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), transparent 40%),
+    repeating-linear-gradient(90deg, transparent 0 24px, rgba(255,255,255,.02) 24px 25px),
+    linear-gradient(180deg, #221c14, #120f0b);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%);
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,.7));
+}
+.vt-votive::before {   /* filete dourado interno seguindo o formato */
+  content: "";
+  position: absolute; inset: 3px;
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+  background: linear-gradient(180deg, #c9a55a, #6f5c3a);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  padding: 1px;
+  pointer-events: none;
+}
+.vt-votive-gem {
+  position: absolute; left: 50%; top: -1px;
+  width: 12px; height: 12px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--pane);
+  border: 2px solid #c9a55a;
+  box-shadow: 0 0 10px var(--pane);
+}
+.vt-votive-name {
+  font: 700 16px/1.15 var(--vt-display);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #e9d7a8;
+  text-shadow: 0 1px 0 #000, 0 0 12px rgba(201,165,90,.3);
+}
+.vt-votive-title {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(201,165,90,.25);
+  font: italic 400 15px/1.25 var(--vt-serif);
+  color: var(--vt-gold);
+}
+.vt-deity-card .vt-card-sub { margin-top: 8px; }
+.vt-deity-card:hover .vt-votive-name { color: #fff1cc; }
 
 @container vt (max-width: 1100px) {
   .vt-hero--deity { grid-template-columns: 360px minmax(0, 1fr); }
@@ -1385,5 +1429,9 @@
   .vt-portrait--rose { width: 300px; height: 300px; }
 }
 @media (max-width: 900px) {
-  .vt-deity-gallery .vt-rose-card { width: 160px; height: 160px; }
+  .vt-deity-gallery { grid-template-columns: repeat(auto-fit, 170px) !important; }
+  .vt-deity-gallery .vt-rose-card { width: 170px; height: 170px; }
+  .vt-votive { min-width: 0; max-width: 170px; padding: 10px 22px 9px; margin-top: -10px; }
+  .vt-votive-name { font-size: 13px; }
+  .vt-votive-title { font-size: 13px; }
 }

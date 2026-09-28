@@ -117,7 +117,7 @@ function vtCellSpan(r) {
 const VT_ASSETS = 'assets/vitral/';
 // Suba este número sempre que regerar/substituir um asset com o mesmo nome:
 // o `?v=` força o navegador a baixar a versão nova em vez de usar o cache.
-const VT_ASSETS_VERSION = 4;
+const VT_ASSETS_VERSION = 5;
 const vtAsset = name => VT_ASSETS + name + '?v=' + VT_ASSETS_VERSION;
 
 // Catálogo de molduras de janela gótica. Cada `file` tem, em assets/vitral/:
@@ -189,17 +189,32 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
   );
 }
 
-// Rosácea-relicário (divindades): moldura redonda com o vão circular no centro.
-// O vão (círculo de raio 23.4% da caixa, medido no PNG 1920²) fica por baixo do
-// metal; a moldura por cima cobre as bordas.
-function VtRoseWindow({ className = '', sizes = '400px', children }) {
+// Rosáceas-relicário (divindades), uma por nível. `r` = raio do vão circular em %
+// da caixa (medido no PNG 1920²); o vão fica por baixo do metal, que cobre a borda.
+const VT_ROSES = {
+  tita:      { file: 'rosacea-titas',      r: 28.0 },
+  deus:      { file: 'rosacea-deuses',     r: 27.2 },
+  ascendido: { file: 'rosacea-ascendidos', r: 26.9 },
+};
+
+// Nível da divindade pelo "Tipo" da ficha (mesma regra da página do Panteão).
+function vtDeityTier(d) {
+  const t = vtRow(d, /^tipo$/i);
+  if (/^tit[ãa]/i.test(t)) return 'tita';
+  if (/ascend|anjo|pseudo/i.test(t)) return 'ascendido';
+  return 'deus';
+}
+
+function VtRoseWindow({ tier = 'deus', className = '', sizes = '400px', children }) {
+  const rose = VT_ROSES[tier] || VT_ROSES.deus;
+  const d = rose.r * 2;
   return (
-    <div className={'vt-rose ' + className}>
-      <div className="vt-rose-hole">{children}</div>
+    <div className={'vt-rose vt-rose--' + tier + ' ' + className}>
+      <div className="vt-rose-hole" style={{ left: (50 - rose.r) + '%', top: (50 - rose.r) + '%', width: d + '%', height: d + '%' }}>{children}</div>
       <img
         className="vt-window-frame"
-        src={vtAsset('rosacea-relicario.webp')}
-        srcSet={vtAsset('rosacea-relicario-sm.webp') + ' 480w, ' + vtAsset('rosacea-relicario.webp') + ' 960w'}
+        src={vtAsset(rose.file + '.webp')}
+        srcSet={vtAsset(rose.file + '-sm.webp') + ' 480w, ' + vtAsset(rose.file + '.webp') + ' 960w'}
         sizes={sizes}
         alt=""
         aria-hidden="true"
@@ -312,7 +327,7 @@ function VtPortrait({ c, slotId, frameOverride, framing, onPan, fallback, rose =
   if (rose) {
     return (
       <div className={'vt-portrait-shadow ' + className}>
-        <VtRoseWindow className="vt-portrait vt-portrait--rose" sizes="(max-width: 900px) 320px, 460px">
+        <VtRoseWindow tier={vtDeityTier(c)} className="vt-portrait vt-portrait--rose" sizes="(max-width: 900px) 320px, 460px">
           {!url && fallback
             ? fallback
             : <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem arte · ' + c.name} onPan={onPan} />}
@@ -881,9 +896,10 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 function VitralDeityCard({ deity, tone, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
   const dominio = vtRow(deity, /^dom[ií]nio/i);
+  const tier = tone || vtDeityTier(deity);
   return (
-    <article className={'vt-card vt-deity-card vt-deity-card--' + (tone || 'deus')} onClick={onClick}>
-      <VtRoseWindow className="vt-rose-card" sizes="260px">
+    <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
+      <VtRoseWindow tier={tier} className="vt-rose-card" sizes="280px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
@@ -892,8 +908,12 @@ function VitralDeityCard({ deity, tone, onClick }) {
             </div>
           )}
       </VtRoseWindow>
-      <div className="vt-card-plaque">{deity.name}</div>
-      {deity.epithet && <div className="vt-deity-epithet">{deity.epithet}</div>}
+      {/* placa votiva: metal escuro com filete dourado, pontas em flecha e um vidro na cor do nível */}
+      <div className="vt-votive">
+        <span className="vt-votive-gem" aria-hidden="true" />
+        <div className="vt-votive-name">{deity.name}</div>
+        {deity.epithet && <div className="vt-votive-title">{deity.epithet}</div>}
+      </div>
       {dominio && <div className="vt-card-sub">{dominio}</div>}
     </article>
   );
