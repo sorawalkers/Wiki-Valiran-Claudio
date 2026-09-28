@@ -101,34 +101,61 @@ function vtPackCells(cells, cols = 3) {
 // ── Assets de vitral (SVG em assets/vitral/, gerados por script) ──
 const VT_ASSETS = 'assets/vitral/';
 
-// Molduras de janela gótica (PNG com vão e fundo transparentes, 2:3), por estado:
-// viva → vivos; misterio (rosas densas) → desaparecido/cativo/foragido/desconhecido;
-// morto → a janela viva apagada, em cinza, com o vidro do vão rachado.
-const VT_WINDOWS = {
-  viva:     { lg: 'janela-viva.webp',     sm: 'janela-viva-sm.webp' },
-  misterio: { lg: 'janela-misterio.webp', sm: 'janela-misterio-sm.webp' },
-};
+// Catálogo de molduras de janela gótica. Cada `file` tem, em assets/vitral/:
+//   <file>.webp (960px) e <file>-sm.webp (480px): a moldura 2:3 com vão e fundo transparentes;
+//   <file>-vao.png: máscara do vão (alfa = onde o retrato aparece), gerada por
+//   processar_moldura.py — funciona também com bordas irregulares (vitrais quebrados).
+// `box`: retângulo do vão em % da caixa [esquerda, topo, direita, base] (o script imprime);
+//   o retrato é enquadrado nele e a máscara recorta o contorno exato.
+// `quebrada`: a moldura já é um vitral estilhaçado (dispensa o efeito extra de morto).
+const VT_FRAMES = [
+  { id: 'viva',                 label: 'Viva',                       file: 'janela-viva',                 box: [24.0, 19.2, 23.8, 7.5] },
+  { id: 'viva-fina',            label: 'Viva · fina',                file: 'janela-viva-fina',            box: [27.3, 16.9, 27.3, 7.8] },
+  { id: 'misterio',             label: 'Mistério · rosas densas',    file: 'janela-misterio',             box: [24.2, 19.2, 24.0, 7.4] },
+  { id: 'misterio-finas',       label: 'Mistério · rosas finas',     file: 'janela-misterio-finas',       box: [22.7, 17.2, 22.7, 6.7] },
+  { id: 'misterio-murchas',     label: 'Mistério · rosas murchas',   file: 'janela-misterio-murchas',     box: [22.7, 17.4, 22.7, 6.8] },
+  { id: 'quebrada-estilhacada', label: 'Quebrada · estilhaçada',     file: 'janela-quebrada-estilhacada', box: [22.9, 19.2, 20.6, 6.9], quebrada: true },
+  { id: 'quebrada-musgo',       label: 'Quebrada · musgo e heras',   file: 'janela-quebrada-musgo',       box: [23.3, 19.0, 20.4, 7.2], quebrada: true },
+  { id: 'quebrada-morta',       label: 'Quebrada · vegetação morta', file: 'janela-quebrada-morta',       box: [23.3, 19.0, 20.6, 7.1], quebrada: true },
+];
+const VT_FRAME_BY_ID = Object.fromEntries(VT_FRAMES.map(f => [f.id, f]));
 
-function vtWindowKind(c) {
+// Moldura automática por status, usada quando o personagem não tem `infobox.vitral`.
+const VT_AUTO_FRAME = { viva: 'viva', misterio: 'misterio', morto: 'viva' };
+
+function vtStatusKind(c) {
   const st = vtRow(c, /^status$/i).trim();
   if (/^(MORT|FALEC)/i.test(st)) return 'morto';
   if (/DESAPAREC|CATIV|PRISIONEIR|REF[EÉ]M|FUGA|FORAGID|DESCONHEC|INCERT|\?/i.test(st)) return 'misterio';
   return 'viva';
 }
 
+// `override` permite pré-visualizar outra moldura sem salvar.
+function vtFrameFor(c, override) {
+  const kind = vtStatusKind(c);
+  const chosen = override !== undefined ? override : c.infobox?.vitral;
+  const frame = VT_FRAME_BY_ID[chosen] || VT_FRAME_BY_ID[VT_AUTO_FRAME[kind]] || VT_FRAMES[0];
+  return { frame, dead: kind === 'morto' };
+}
+
 // Retrato no vão da janela + moldura por cima. `sizes` escolhe entre as duas resoluções.
-function VtGothicWindow({ kind = 'viva', className = '', sizes = '400px', children }) {
-  const w = VT_WINDOWS[kind] || VT_WINDOWS.viva;
+// Morto: retrato em cinza; se a moldura não for "quebrada", ela também apaga e o vão racha.
+function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', sizes = '400px', children }) {
+  const greyFrame = dead && !frame.quebrada;
+  const mask = `url('${VT_ASSETS + frame.file}-vao.png')`;
+  const [l, t, r, b] = frame.box;
   return (
-    <div className={'vt-window vt-window--' + kind + ' ' + className}>
-      <div className="vt-window-hole">
-        {children}
-        {kind === 'morto' && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
+    <div className={'vt-window' + (dead ? ' vt-window--dead' : '') + (greyFrame ? ' vt-window--morto' : '') + ' ' + className}>
+      <div className="vt-window-hole" style={{ WebkitMaskImage: mask, maskImage: mask }}>
+        <div className="vt-window-pane" style={{ left: l + '%', top: t + '%', right: r + '%', bottom: b + '%' }}>
+          {children}
+          {greyFrame && <img className="vt-cracks" src={VT_ASSETS + 'vidro-quebrado.svg'} alt="" draggable="false" />}
+        </div>
       </div>
       <img
         className="vt-window-frame"
-        src={VT_ASSETS + w.lg}
-        srcSet={VT_ASSETS + w.sm + ' 480w, ' + VT_ASSETS + w.lg + ' 960w'}
+        src={VT_ASSETS + frame.file + '.webp'}
+        srcSet={VT_ASSETS + frame.file + '-sm.webp 480w, ' + VT_ASSETS + frame.file + '.webp 960w'}
         sizes={sizes}
         alt=""
         aria-hidden="true"
@@ -138,10 +165,40 @@ function VtGothicWindow({ kind = 'viva', className = '', sizes = '400px', childr
   );
 }
 
-function VtPortrait({ c, className = '' }) {
+// Seletor de moldura: "Automático" + miniaturas do catálogo com o retrato dentro.
+function VitralFramePicker({ value = '', onChange, portraitUrl, compact = false }) {
+  const options = [{ id: '', label: 'Automático (pelo status)' }, ...VT_FRAMES];
+  return (
+    <div className={'vt-picker' + (compact ? ' vt-picker--compact' : '')} role="radiogroup" aria-label="Moldura de vitral">
+      {options.map(o => (
+        <button
+          key={o.id || 'auto'}
+          type="button"
+          role="radio"
+          aria-checked={value === o.id}
+          className={'vt-picker-opt' + (value === o.id ? ' active' : '')}
+          onClick={() => onChange(o.id)}
+          title={o.label}
+        >
+          {o.id ? (
+            <VtGothicWindow frame={o} className="vt-picker-thumb" sizes="120px">
+              {portraitUrl && <img className="vt-picker-portrait" src={portraitUrl} alt="" />}
+            </VtGothicWindow>
+          ) : (
+            <span className="vt-picker-thumb vt-picker-auto">Auto</span>
+          )}
+          <span className="vt-picker-label">{o.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function VtPortrait({ c, frameOverride, className = '' }) {
+  const { frame, dead } = vtFrameFor(c, frameOverride);
   return (
     <div className={'vt-portrait-shadow ' + className}>
-      <VtGothicWindow kind={vtWindowKind(c)} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
+      <VtGothicWindow frame={frame} dead={dead} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
         <image-slot
           id={'char-portrait-' + c.id}
           shape="rect"
@@ -405,6 +462,24 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   };
   const allOpen = sections.length > 0 && openSet.size === sections.length;
 
+  // Teste de molduras (só editores): pré-visualiza sem salvar; "Salvar" grava infobox.vitral.
+  const savedFrame = c.infobox?.vitral || '';
+  const [framePreview, setFramePreview] = useVtState(undefined);
+  const [frameSaving, setFrameSaving] = useVtState(false);
+  const [frameTestOpen, setFrameTestOpen] = useVtState(false);
+  const frameDirty = framePreview !== undefined && framePreview !== savedFrame;
+  async function saveFrame() {
+    setFrameSaving(true);
+    try {
+      await window.DB.saveCharacter({ ...c, infobox: { ...(c.infobox || {}), vitral: framePreview || undefined } });
+      setFramePreview(undefined);
+    } catch (e) {
+      alert('Não foi possível salvar a moldura: ' + (e.message || e));
+    } finally {
+      setFrameSaving(false);
+    }
+  }
+
   const hero = (
     <div className="vt-hero-text">
       <div className="vt-hero-titles">
@@ -425,7 +500,32 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
 
   const portrait = (
     <div className="vt-hero-portrait">
-      <VtPortrait c={c} />
+      <VtPortrait c={c} frameOverride={framePreview} />
+      {isEditor && (
+        <div className="vt-frame-test">
+          <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
+            {frameTestOpen ? '− Fechar molduras' : '✠ Testar molduras'}
+          </button>
+          {frameTestOpen && (
+            <React.Fragment>
+              <VitralFramePicker
+                compact
+                value={framePreview !== undefined ? framePreview : savedFrame}
+                onChange={setFramePreview}
+                portraitUrl={window._imageSlotGet && window._imageSlotGet('char-portrait-' + c.id)?.u}
+              />
+              {frameDirty && (
+                <div className="vt-frame-test-actions">
+                  <button type="button" className="vt-btn" onClick={() => setFramePreview(undefined)}>Descartar</button>
+                  <button type="button" className="vt-btn vt-btn--gold" disabled={frameSaving} onClick={saveFrame}>
+                    {frameSaving ? 'Salvando…' : 'Salvar moldura'}
+                  </button>
+                </div>
+              )}
+            </React.Fragment>
+          )}
+        </div>
+      )}
       {!isPC && (
         <div className="vt-plaque">
           <div className="vt-plaque-name">{c.name}</div>
@@ -436,7 +536,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   );
 
   return (
-    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '') + (vtWindowKind(c) === 'morto' ? ' vt-article--morto' : '')} data-screen-label={(isPC ? 'PC · ' : 'NPC · ') + c.name}>
+    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '') + (vtStatusKind(c) === 'morto' ? ' vt-article--morto' : '')} data-screen-label={(isPC ? 'PC · ' : 'NPC · ') + c.name}>
       <div className="vt-topbar">
         <nav className="vt-breadcrumb">
           <a onClick={() => onNav(backTo)}>{backLabel}</a>
@@ -535,7 +635,7 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 
   return (
     <article className={'vt-card' + (dead ? ' vt-card--dead' : '')} onClick={onClick}>
-      <VtGothicWindow kind={vtWindowKind(char)} className="vt-card-arch" sizes="240px">
+      <VtGothicWindow {...vtFrameFor(char)} className="vt-card-arch" sizes="240px">
         <image-slot
           id={'char-portrait-' + char.id}
           shape="rect"
@@ -555,3 +655,5 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 window.ogivePath     = ogivePath;
 window.VitralArticle = VitralArticle;
 window.VitralCard    = VitralCard;
+window.VitralFramePicker = VitralFramePicker;
+window.VT_FRAMES     = VT_FRAMES;

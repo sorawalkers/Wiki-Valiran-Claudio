@@ -13,6 +13,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
   const [sigil, setSigil] = React.useState(entity.sigil || '');
   const [sections, setSections] = React.useState(
     (entity.sections || []).map(s => ({
+      _orig:    s,  // preserva campos que o editor não mostra (fase, confiabilidade, quote…)
       title:    s.title    || '',
       paras:    (s.paras || []).join('\n\n'),
       eyebrow:  s.eyebrow  || '',
@@ -27,6 +28,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
     (entity.infobox?.rows || []).map(r => ({ ...r }))
   );
   const [statusNote, setStatusNote] = React.useState(entity.infobox?.statusNote || '');
+  const [vitral, setVitral] = React.useState(entity.infobox?.vitral || '');
   const [related, setRelated] = React.useState(
     (entity.related || []).map(r => ({ ...r }))
   );
@@ -111,7 +113,8 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
         hero,
         epithet: type === 'deity' ? epithet : entity.epithet,
         sigil: type === 'deity' ? sigil : entity.sigil,
-        sections: sections.map(s => ({
+        sections: sections.map(({ _orig, ...s }) => ({
+          ...(_orig || {}),
           title:    s.title,
           paras:    s.paras.split('\n\n').map(p => p.trim()).filter(Boolean),
           eyebrow:  s.eyebrow  || undefined,
@@ -125,6 +128,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
           ...(entity.infobox || {}),
           rows: rows.filter(r => r.k || r.v),
           statusNote: statusNote || undefined,
+          vitral: type === 'character' ? (vitral || undefined) : entity.infobox?.vitral,
         },
         related: related.filter(r => r.title),
         placeholder,
@@ -259,6 +263,14 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
               </div>
             </div>
           </div>
+
+          {/* Moldura de vitral do retrato (personagens) */}
+          {type === 'character' && window.VitralFramePicker && (
+            <div className="modal-field">
+              <label className="modal-label">Moldura de vitral</label>
+              <VitralFramePicker value={vitral} onChange={setVitral} portraitUrl={imgPreview} />
+            </div>
+          )}
 
           {/* Hero quote */}
           <div className="modal-field">
