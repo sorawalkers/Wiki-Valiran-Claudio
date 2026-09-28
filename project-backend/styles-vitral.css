@@ -703,9 +703,10 @@
 /* "Ligados a…" como um vitral de vários vidros: cada ligação é um vidro tingido
    pela cor do tipo (facção, local, personagem…), separado por chumbo; o vidro
    acende ao passar o mouse, com a faixa da base brilhando. */
+/* flex em vez de grid: os vidros sempre preenchem a largura, inclusive a última linha */
 .vt-related-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   padding: 4px;
   background: #0c0b0d;
@@ -715,6 +716,7 @@
 .vt .vt-related-cell {
   --pane: #b8873a;
   position: relative;
+  flex: 1 1 200px;
   min-height: 92px;
   padding: 18px 20px 22px;
   display: flex;
@@ -742,6 +744,7 @@
 .vt .vt-related-cell:hover::after { opacity: 1; box-shadow: 0 0 10px var(--pane); }
 .vt-related-tag { font: 600 10px/1 var(--vt-display); letter-spacing: .2em; text-transform: uppercase; color: color-mix(in srgb, var(--pane) 70%, #e4dccb); }
 .vt-related-title { font: 600 17px/1.2 var(--vt-display); color: var(--vt-ink); }
+.vt-related-note { font: italic 400 15px/1.2 var(--vt-serif); color: var(--vt-ink-muted); }
 
 /* ── Larguras intermediárias ──────────────────────────────────── */
 @container vt (max-width: 1100px) {

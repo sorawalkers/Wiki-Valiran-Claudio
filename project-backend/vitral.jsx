@@ -760,7 +760,13 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
             {c.related.map((r, i) => (
               <a key={i} className="vt-related-cell" style={{ '--pane': vtRelatedColor(r) }} onClick={() => r.target && onNav(r.target)}>
                 <span className="vt-related-tag">{r.tag}</span>
-                <span className="vt-related-title">{r.title}</span>
+                {(() => {
+                  // "Thale Vans Loupd'or (mentor)" → nome + papel em itálico embaixo
+                  const m = /^(.*?)\s*\(([^)]+)\)\s*$/.exec(r.title || '');
+                  return m
+                    ? <><span className="vt-related-title">{m[1]}</span><span className="vt-related-note">{m[2]}</span></>
+                    : <span className="vt-related-title">{r.title}</span>;
+                })()}
               </a>
             ))}
           </div>
