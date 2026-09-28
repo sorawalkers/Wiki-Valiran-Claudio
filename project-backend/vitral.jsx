@@ -501,17 +501,6 @@ function VtQuote({ quote }) {
   );
 }
 
-// Janelinha em arco com 4 vidros: acende quando o capítulo está aberto.
-const VT_LANCET_CLIP = `path('${ogivePath(34, 48, 0.5, 0.15)}')`;
-
-function VtLancet({ lit = false }) {
-  return (
-    <span className={'vt-lancet' + (lit ? ' vt-lancet--lit' : '')} aria-hidden="true">
-      <span className="vt-lancet-glass" style={{ clipPath: VT_LANCET_CLIP }}><i /><i /><i /><i /></span>
-    </span>
-  );
-}
-
 function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
   const corrupt = vtIsCorrupt(sec);
   const meta = [sec.location, sec.date].filter(Boolean);
@@ -532,7 +521,6 @@ function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
       <h2 className="vt-chapter-h">
         <button type="button" className="vt-chapter-head" aria-expanded={isOpen} aria-controls={bodyId} onClick={onToggle}>
           {corrupt && <img className="vt-cracks vt-cracks--chapter" src={vtAsset('vidro-quebrado.svg')} alt="" aria-hidden="true" draggable="false" />}
-          <VtLancet />
           <span className="vt-chapter-titles">
             <span className="vt-eyebrow">
               {!isPC && <span className="vt-chapter-numeral">{vtRoman(idx + 1)}</span>}
@@ -579,8 +567,6 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   const refs = useVtRef({});
   const [active, setActive] = useVtActiveChapter(sections.length, refs);
   const campaignShort = vtShortCampaign(c);
-  const origin = vtRow(c, /^origem$/i) || vtRow(c, /filia|fac[cç]/i);
-  const plaqueSub = [origin.split(/[—–(]/)[0].trim(), campaignShort].filter(Boolean).join(' · ');
   const firstName = (c.name || '').split(' ')[0];
 
   const [openSet, setOpenSet] = useVtState(() => new Set([0]));
@@ -650,7 +636,12 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
         framing={framing}
         onPan={frameTestOpen && portraitUrl ? p => setFramingPreview({ ...framing, ...p }) : undefined}
       />
-      {isEditor && (
+    </div>
+  );
+
+  // Painel de ajuste (editores) fica numa linha própria sob a janela, fora do bloco
+  // alinhado, para não empurrar a janela para cima quando aberto.
+  const tools = isEditor && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
             {frameTestOpen ? '− Fechar ajuste' : '✠ Ajustar vitral e retrato'}
@@ -676,14 +667,6 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
             </React.Fragment>
           )}
         </div>
-      )}
-      {!isPC && (
-        <div className="vt-plaque">
-          <div className="vt-plaque-name">{c.name}</div>
-          {plaqueSub && <div className="vt-plaque-sub">{plaqueSub}</div>}
-        </div>
-      )}
-    </div>
   );
 
   return (
@@ -703,6 +686,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       <section className={'vt-hero' + (isPC ? ' vt-hero--pc' : '')}>
         <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
         {isPC ? <>{hero}{portrait}</> : <>{portrait}{hero}</>}
+        {tools}
       </section>
 
       {c.placeholder && (

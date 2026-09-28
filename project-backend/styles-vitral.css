@@ -104,7 +104,10 @@
   padding: 32px var(--vt-pad) 72px;
   display: grid;
   grid-template-columns: 400px minmax(0, 1fr);
-  gap: 72px;
+  grid-template-areas: "portrait text" "tools .";
+  /* janela e ficha alinhadas pela base: os dois blocos terminam na mesma linha */
+  align-items: end;
+  gap: 0 72px;
   --vt-lx: calc(var(--vt-pad) + 200px);
   background:
     radial-gradient(ellipse 120px 40px at calc(var(--vt-lx) - 90px) 690px, rgba(79,120,144,.16), transparent 70%),
@@ -114,9 +117,13 @@
 }
 .vt-hero--pc {
   grid-template-columns: minmax(0, 1fr) 400px;
+  grid-template-areas: "text portrait" ". tools";
   padding-top: 56px;
   --vt-lx: calc(100% - var(--vt-pad) - 200px);
 }
+.vt-hero > .vt-hero-portrait { grid-area: portrait; }
+.vt-hero > .vt-hero-text { grid-area: text; }
+.vt-hero > .vt-frame-test { grid-area: tools; justify-self: center; margin-top: 18px; }
 
 .vt-hero-portrait { display: flex; flex-direction: column; align-items: center; gap: 26px; }
 .vt-portrait-shadow { filter: drop-shadow(0 30px 40px rgba(0,0,0,.85)); }
@@ -203,7 +210,7 @@
 .vt-picker--compact { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
 .vt-picker--compact .vt-picker-thumb { width: 60px; height: 90px; }
 
-.vt-frame-test { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; margin-top: -8px; }
+.vt-frame-test { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; }
 .vt-frame-test > .vt-link-btn { align-self: center; }
 .vt-frame-test-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .vt-btn--gold { color: var(--vt-gold); border-color: var(--vt-gold); }
@@ -216,17 +223,6 @@
   background: radial-gradient(ellipse at 50% 0, transparent 45%, rgba(6,6,6,.6) 100%);
 }
 
-.vt-plaque {
-  width: 290px;
-  padding: 14px 18px;
-  background: linear-gradient(180deg, var(--vt-brass-top), var(--vt-brass-bottom));
-  color: var(--vt-brass-text);
-  text-align: center;
-  box-shadow: 0 2px 0 var(--vt-brass-shadow);
-}
-.vt-article--morto .vt-plaque { background: #2a2620; color: #8a8070; box-shadow: none; }
-.vt-plaque-name { font: 600 18px/1.1 var(--vt-display); letter-spacing: .08em; }
-.vt-plaque-sub { margin-top: 6px; font: 500 11px/1.3 var(--vt-ui); letter-spacing: .2em; text-transform: uppercase; }
 
 .vt-hero > :not(.vt-hero-rose) { position: relative; z-index: 1; }
 .vt-hero-rose {
@@ -574,55 +570,6 @@
 }
 .vt-chapter-head:focus-visible { outline: 2px solid var(--vt-gold); outline-offset: -2px; }
 
-/* Janela de lanceta estreita: 4 vidros empilhados, apagados fechado, acesos aberto */
-.vt-lancet { flex: none; width: 34px; height: 48px; transition: filter .2s ease; }
-.vt-chapter .vt-lancet { width: 14px; height: 46px; }
-.vt-chapter .vt-lancet-glass {
-  clip-path: path('M0 46 L0 7 Q0 2 7 0 Q14 2 14 7 L14 46 Z') !important;
-  grid-template: repeat(4, 1fr) / 1fr;
-  padding: 2px;
-}
-.vt-lancet-glass {
-  display: grid;
-  grid-template: 1fr 1fr / 1fr 1fr;
-  gap: 2px;
-  width: 100%; height: 100%;
-  padding: 3px;
-  background: var(--vt-lead-frame);
-}
-.vt-lancet-glass i { display: block; transition: background-color .2s ease; }
-.vt-lancet-glass i:nth-child(1) { background: #5b4a26; }
-.vt-lancet-glass i:nth-child(2) { background: #243039; }
-.vt-lancet-glass i:nth-child(3) { background: #3e1814; }
-.vt-lancet-glass i:nth-child(4) { background: #4c3e22; }
-.vt-chapter-head:hover .vt-lancet,
-.vt-chapter.is-open .vt-lancet { filter: drop-shadow(0 0 10px rgba(236,200,130,.35)); }
-.vt-chapter-head:hover .vt-lancet-glass i:nth-child(1),
-.vt-chapter.is-open .vt-lancet-glass i:nth-child(1) { background: var(--vt-gold); }
-.vt-chapter-head:hover .vt-lancet-glass i:nth-child(2),
-.vt-chapter.is-open .vt-lancet-glass i:nth-child(2) { background: #4f7890; }
-.vt-chapter-head:hover .vt-lancet-glass i:nth-child(3),
-.vt-chapter.is-open .vt-lancet-glass i:nth-child(3) { background: #a8352b; }
-.vt-chapter-head:hover .vt-lancet-glass i:nth-child(4),
-.vt-chapter.is-open .vt-lancet-glass i:nth-child(4) { background: #d8b36a; }
-/* corrompido: vidros vermelhos com rachadura */
-.vt-chapter--corrupt .vt-lancet-glass { background: var(--vt-corrupt-lead); }
-.vt-chapter--corrupt .vt-lancet-glass i { background: #3a1216 !important; }
-.vt-chapter--corrupt.is-open .vt-lancet-glass i,
-.vt-chapter--corrupt .vt-chapter-head:hover .vt-lancet-glass i {
-  background:
-    linear-gradient(118deg, transparent 44%, var(--vt-corrupt-lead) 45%, transparent 56%),
-    #8a2a22 !important;
-}
-.vt-chapter--corrupt.is-open .vt-lancet,
-.vt-chapter--corrupt .vt-chapter-head:hover .vt-lancet { filter: drop-shadow(0 0 10px rgba(194,88,74,.4)); }
-
-.vt-lancet--lit { filter: drop-shadow(0 0 10px rgba(236,200,130,.35)); }
-.vt-lancet--lit .vt-lancet-glass i:nth-child(1) { background: var(--vt-gold); }
-.vt-lancet--lit .vt-lancet-glass i:nth-child(2) { background: #4f7890; }
-.vt-lancet--lit .vt-lancet-glass i:nth-child(3) { background: #a8352b; }
-.vt-lancet--lit .vt-lancet-glass i:nth-child(4) { background: #d8b36a; }
-
 .vt-chapter-numeral { font: 700 14px/1 var(--vt-display); letter-spacing: .08em; color: var(--vt-gold); }
 .vt-chapter--corrupt .vt-chapter-numeral { color: var(--vt-corrupt); }
 
@@ -662,7 +609,7 @@
 .vt-chapter-content {
   display: flex; flex-direction: column; gap: 20px;
   margin: 0 26px;
-  padding: 26px 30px 40px 38px;
+  padding: 26px 30px 40px 0;
   border-top: 1px solid rgba(201,165,90,.16);
 }
 
@@ -750,7 +697,6 @@
   .vt-hero { grid-template-columns: 330px minmax(0, 1fr); gap: 48px; }
   .vt-hero--pc { grid-template-columns: minmax(0, 1fr) 330px; }
   .vt-portrait { width: 330px; height: 495px; }
-  .vt-plaque { width: 260px; }
   .vt-passages { grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; }
 }
 
@@ -766,10 +712,10 @@
     padding-bottom: 40px;
     background: radial-gradient(ellipse 260px 420px at 50% 0, rgba(236,210,160,.15), transparent 72%);
   }
-  .vt-hero--pc .vt-hero-portrait { order: -1; }
+  .vt-hero, .vt-hero--pc { grid-template-areas: "portrait" "tools" "text"; align-items: start; row-gap: 28px; }
+  .vt-hero > .vt-frame-test { margin-top: 0; }
   .vt-portrait { width: 280px; height: 420px; }
   .vt-hero-rose, .vt-hero--pc .vt-hero-rose { width: 380px; top: -90px; right: -170px; left: auto; opacity: .06; }
-  .vt-plaque { display: none; }
   .vt-hero-text { padding-top: 0; gap: 22px; }
   .vt-hero-titles { align-items: center; text-align: center; }
   .vt-badge-row { justify-content: center; }
