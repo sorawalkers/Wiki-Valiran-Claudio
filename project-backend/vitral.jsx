@@ -286,13 +286,15 @@ function VtFramedImage({ url, framing, placeholder, onPan }) {
   );
 }
 
-function VtPortrait({ c, frameOverride, framing, onPan, className = '' }) {
+function VtPortrait({ c, slotId, frameOverride, framing, onPan, fallback, className = '' }) {
   const { frame, dead } = vtFrameFor(c, frameOverride);
-  const url = useVtSlotUrl('char-portrait-' + c.id);
+  const url = useVtSlotUrl(slotId || 'char-portrait-' + c.id);
   return (
     <div className={'vt-portrait-shadow ' + className}>
       <VtGothicWindow frame={frame} dead={dead} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
-        <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem retrato · ' + c.name} onPan={onPan} />
+        {!url && fallback
+          ? fallback
+          : <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem retrato · ' + c.name} onPan={onPan} />}
         <div className="vt-portrait-vignette" />
       </VtGothicWindow>
     </div>
@@ -332,6 +334,13 @@ function VtDivider() {
       <img src={vtAsset('divisor-vinhas.svg')} alt="" draggable="false" />
     </div>
   );
+}
+
+// Badge da divindade pelo "Tipo" da ficha: Titã (violeta), Ascendido/Anjo (cobalto), Deus (dourado).
+function VtDeityBadge({ d }) {
+  const tipo = vtRow(d, /^tipo$/i) || 'Divindade';
+  const cls = /tit[ãa]/i.test(tipo) ? 'tita' : /ascend|anjo|pseudo/i.test(tipo) ? 'ascendido' : 'deus';
+  return <span className={'vt-badge vt-badge--' + cls}>{tipo}</span>;
 }
 
 function VtBadge({ c, isPC }) {
@@ -460,14 +469,14 @@ function vtRelatedColor(r) {
   return '#b8873a';                                                                        // âmbar: personagens e o resto
 }
 
-function VtIndex({ c, isPC, sections, active, onPick }) {
+function VtIndex({ c, isPC, label, sections, active, onPick }) {
   const firstName = (c.name || '').split(' ')[0];
   const groups = isPC ? vtGroupByPhase(sections) : [{ label: null, items: sections.map((sec, i) => ({ sec, i })) }];
   const seals = !isPC && sections.some(s => VT_SEALS[s.confiabilidade]);
   return (
     <nav className="vt-index">
       <div className="vt-index-list">
-        <div className="vt-label">{isPC ? 'A história de ' + firstName : 'História'}</div>
+        <div className="vt-label">{isPC ? 'A história de ' + firstName : (label || 'História')}</div>
         {groups.map((g, gi) => (
           <React.Fragment key={gi}>
             {g.label && <div className="vt-index-phase">{g.label}</div>}
@@ -573,13 +582,38 @@ function VtChapter({ sec, idx, isPC, isOpen, onToggle, onNav, refFn }) {
 
 // ── Artigo ───────────────────────────────────────────────────────
 
-function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
-  const isPC = c.tag === 'PC';
+// Perfis do artigo: o mesmo layout serve personagens e divindades.
+const VT_KINDS = {
+  character: {
+    slot: c => 'char-portrait-' + c.id,
+    save: e => window.DB.saveCharacter(e),
+    subtitle: c => c.role,
+    context: c => c.campaign,
+    indexLabel: () => 'História',
+    empty: 'Esta entrada ainda está sendo transcrita. Os capítulos serão acrescentados nas próximas sessões.',
+  },
+  deity: {
+    slot: d => 'deity-hero-' + d.id,
+    save: e => window.DB.saveDeity(e),
+    subtitle: d => d.epithet,
+    context: d => vtRow(d, /^dom[ií]nio/i),
+    indexLabel: () => 'Escrituras',
+    empty: 'O arquivista ainda reúne os testemunhos. Origem, dogmas, manifestações e culto serão acrescentados em breve.',
+  },
+};
+
+function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit }) {
+  const K = VT_KINDS[kind] || VT_KINDS.character;
+  const isDeity = kind === 'deity';
+  const isPC = !isDeity && c.tag === 'PC';
   const sections = c.placeholder ? [] : (c.sections || []);
   const refs = useVtRef({});
   const [active, setActive] = useVtActiveChapter(sections.length, refs);
-  const campaignShort = vtShortCampaign(c);
+  const campaignShort = isDeity ? '' : vtShortCampaign(c);
   const firstName = (c.name || '').split(' ')[0];
+  const slotId = K.slot(c);
+  const context = K.context(c);
+  const subtitle = K.subtitle(c);
 
   const [openSet, setOpenSet] = useVtState(() => new Set([0]));
   const toggle = i => setOpenSet(prev => {
@@ -605,7 +639,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   const framing = framingPreview || savedFraming;
   const frameDirty = (framePreview !== undefined && framePreview !== savedFrame)
     || (framingPreview !== undefined && JSON.stringify(framingPreview) !== JSON.stringify(savedFraming));
-  const portraitUrl = useVtSlotUrl('char-portrait-' + c.id);
+  const portraitUrl = useVtSlotUrl(slotId);
   function discardFrame() { setFramePreview(undefined); setFramingPreview(undefined); }
   async function saveFrame() {
     setFrameSaving(true);
@@ -613,7 +647,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       const infobox = { ...(c.infobox || {}) };
       if (framePreview !== undefined) infobox.vitral = framePreview || undefined;
       if (framingPreview !== undefined) infobox.retrato = framingPreview;
-      await window.DB.saveCharacter({ ...c, infobox });
+      await K.save({ ...c, infobox });
       discardFrame();
     } catch (e) {
       alert('Não foi possível salvar o vitral: ' + (e.message || e));
@@ -625,12 +659,17 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   const hero = (
     <div className="vt-hero-text">
       <div className="vt-hero-titles">
+        {isDeity && (
+          <div className="vt-sigil-medallion">
+            <DeitySigilImage deity={c} size="infobox" interactive />
+          </div>
+        )}
         <div className="vt-badge-row">
-          <VtBadge c={c} isPC={isPC} />
-          {c.campaign && <span className="vt-badge-campaign">{c.campaign}</span>}
+          {isDeity ? <VtDeityBadge d={c} /> : <VtBadge c={c} isPC={isPC} />}
+          {context && <span className="vt-badge-campaign">{context}</span>}
         </div>
         <h1 className="vt-h1">{c.name}</h1>
-        {c.role && <div className="vt-epithet">{c.role}</div>}
+        {subtitle && <div className="vt-epithet">{subtitle}</div>}
       </div>
       <VtDivider />
       {c.hero && (
@@ -644,6 +683,8 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
     <div className="vt-hero-portrait">
       <VtPortrait
         c={c}
+        slotId={slotId}
+        fallback={isDeity ? <div className="vt-deity-sigil-glass"><DeitySigilImage deity={c} size="card" /></div> : null}
         frameOverride={framePreview}
         framing={framing}
         onPan={frameTestOpen && portraitUrl ? p => setFramingPreview({ ...framing, ...p }) : undefined}
@@ -682,7 +723,7 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   );
 
   return (
-    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '') + (vtStatusKind(c) === 'morto' ? ' vt-article--morto' : '')} data-screen-label={(isPC ? 'PC · ' : 'NPC · ') + c.name}>
+    <div className={'vt vt-article' + (isPC ? ' vt-article--pc' : '') + (isDeity ? ' vt-article--deity' : '') + (vtStatusKind(c) === 'morto' ? ' vt-article--morto' : '')} data-screen-label={(isDeity ? 'Divindade · ' : isPC ? 'PC · ' : 'NPC · ') + c.name}>
       <div className="vt-topbar">
         <nav className="vt-breadcrumb">
           <a onClick={() => onNav(backTo)}>{backLabel}</a>
@@ -704,13 +745,13 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
       {c.placeholder && (
         <section className="vt-passages vt-passages--empty">
           <div className="vt-label">Em compilação</div>
-          <p>Esta entrada ainda está sendo transcrita. Os capítulos serão acrescentados nas próximas sessões.</p>
+          <p>{K.empty}</p>
         </section>
       )}
 
       {sections.length > 0 && (
         <section className="vt-passages">
-          <VtIndex c={c} isPC={isPC} sections={sections} active={active} onPick={pick} />
+          <VtIndex c={c} isPC={isPC} label={K.indexLabel(c)} sections={sections} active={active} onPick={pick} />
 
           <div className="vt-chips" role="tablist">
             {sections.map((sec, i) => (
@@ -802,8 +843,33 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
   );
 }
 
+// ── Card do panteão ──────────────────────────────────────────────
+// A divindade na janela gótica: a arte de destaque enquadrada; sem arte, o sigilo
+// dela aceso no centro do vão, sobre vidro escuro.
+function VitralDeityCard({ deity, tone, onClick }) {
+  const url = useVtSlotUrl('deity-hero-' + deity.id);
+  const dominio = vtRow(deity, /^dom[ií]nio/i);
+  return (
+    <article className={'vt-card vt-deity-card vt-deity-card--' + (tone || 'deus')} onClick={onClick}>
+      <VtGothicWindow {...vtFrameFor(deity)} className="vt-card-arch" sizes="240px">
+        {url
+          ? <VtFramedImage url={url} framing={vtFraming(deity)} />
+          : (
+            <div className="vt-deity-sigil-glass">
+              <DeitySigilImage deity={deity} size="card" />
+            </div>
+          )}
+      </VtGothicWindow>
+      <div className="vt-card-plaque">{deity.name}</div>
+      {deity.epithet && <div className="vt-deity-epithet">{deity.epithet}</div>}
+      {dominio && <div className="vt-card-sub">{dominio}</div>}
+    </article>
+  );
+}
+
 window.ogivePath     = ogivePath;
 window.VitralArticle = VitralArticle;
 window.VitralCard    = VitralCard;
+window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;

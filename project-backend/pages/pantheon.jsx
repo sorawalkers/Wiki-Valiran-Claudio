@@ -1,4 +1,6 @@
-// Pantheon page — tiered grid of deities (DB-driven)
+// Pantheon page — tiers de divindades em vitral (DB-driven)
+
+function vtRomanNum(n) { return ['','I','II','III','IV','V','VI','VII','VIII','IX','X'][n] || String(n); }
 
 const SIGIL_OPTIONS = ['Dragon','Dawn','Chain','Sun','Moon','Skull','Eye','Flame','Wave','Tree','Crown','Sword'];
 
@@ -127,81 +129,60 @@ function Pantheon({ onNav }) {
   });
 
   const tiers = [
-    { tier: 'Os Titãs',               tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',          gods: titas },
-    { tier: 'Deuses do Panteão',       tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                           gods: estabelecidos },
-    { tier: 'Ascendidos & Especiais',  tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.',        gods: ascendidos },
+    { tone: 'tita',      tier: 'Os Titãs',              tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',   gods: titas },
+    { tone: 'deus',      tier: 'Deuses do Panteão',      tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                    gods: estabelecidos },
+    { tone: 'ascendido', tier: 'Ascendidos & Especiais', tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.', gods: ascendidos },
   ].filter(t => t.gods.length > 0);
 
   const total = tiers.length;
 
   return (
-    <div className="pantheon" data-screen-label="02 Panteão">
-      <header className="page-header">
-        <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16}}>
-          <div>
-            <div className="page-eyebrow">Cosmologia · Volume II · Os Deuses</div>
-            <h1 className="page-title">O Panteão de Valiran</h1>
-            <p className="page-lede">
-              Em Valiran, os deuses não são metáforas. Caminham, sangram, e às vezes
-              são presos. Aqui se catalogam os nomes que recebem oração — os Titãs
-              que ergueram o mundo, os Deuses do panteão estabelecido, e os Ascendidos:
-              mortais que provaram-se grandes demais para a morte.
-            </p>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" style={{flexShrink:0, marginTop:4}} onClick={() => setModal(true)}>
-              + Nova Divindade
-            </button>
-          )}
+    <div className="vt vt-pantheon" data-screen-label="02 Panteão">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src="assets/vitral/rosacea.svg?v=3" alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Cosmologia · Volume II · Os Deuses</div>
+          <h1 className="vt-h1">O Panteão de Valiran</h1>
+          <div className="vt-epithet">Os nomes que recebem oração</div>
+          <p className="vt-pantheon-lede">
+            Em Valiran, os deuses não são metáforas. Caminham, sangram, e às vezes
+            são presos. Aqui se catalogam os Titãs que ergueram o mundo, os Deuses do
+            panteão estabelecido, e os Ascendidos: mortais que provaram-se grandes
+            demais para a morte.
+          </p>
         </div>
-      </header>
+        {isEditor && (
+          <button className="vt-btn vt-btn--gold vt-pantheon-add" onClick={() => setModal(true)}>+ Nova divindade</button>
+        )}
+      </section>
 
       {allDeities.length === 0 && (
-        <p style={{ fontFamily:'EB Garamond,serif', fontStyle:'italic', color:'var(--foam-dim)', textAlign:'center', marginTop:60 }}>
-          Nenhuma divindade registrada ainda.
-        </p>
+        <p className="vt-pantheon-empty">Nenhuma divindade registrada ainda.</p>
       )}
 
       {tiers.map((tier, ti) => (
-        <section key={tier.tier} className="pantheon-tier">
-          <div className="tier-header">
-            <span className="tier-num">{String(ti + 1).padStart(2,'0')} / {String(total).padStart(2,'0')}</span>
-            <h2 className="tier-name">{tier.tier}</h2>
-            <p className="tier-desc">{tier.tierDesc}</p>
-          </div>
-
-          <div className="deity-grid">
-            {tier.gods.map(g => {
-              return (
-                <article key={g.id} className="deity" onClick={() => onNav('deity:' + g.id)}>
-                  <div className="deity-sigil">
-                    <DeitySigilImage deity={g} size="card" />
-                  </div>
-                  <h3 className="deity-name">{g.name}</h3>
-                  <p className="deity-epithet">{g.epithet}</p>
-                  <div className="deity-meta">
-                    <span>{getRow(g,'Domínio')}</span>
-                    <span>{getRow(g,'Alinhamento')}</span>
-                  </div>
-                </article>
-              );
-            })}
+        <section key={tier.tier} className={'vt-tier vt-tier--' + tier.tone}>
+          <header className="vt-tier-head">
+            <span className="vt-tier-num">{vtRomanNum(ti + 1)} <small>/ {vtRomanNum(total)}</small></span>
+            <div>
+              <h2 className="vt-tier-name">{tier.tier}</h2>
+              <p className="vt-tier-desc">{tier.tierDesc}</p>
+            </div>
+            <span className="vt-tier-count">{tier.gods.length} {tier.gods.length === 1 ? 'nome' : 'nomes'}</span>
+          </header>
+          <div className="vt-gallery vt-deity-gallery">
+            {tier.gods.map(g => (
+              <VitralDeityCard key={g.id} deity={g} tone={tier.tone} onClick={() => onNav('deity:' + g.id)} />
+            ))}
           </div>
         </section>
       ))}
 
-      <div style={{
-        marginTop: 80, padding: '32px 0',
-        borderTop: '1px solid var(--ink-line-soft)',
-        textAlign: 'center', fontFamily: 'EB Garamond, serif',
-        fontStyle: 'italic', color: 'var(--foam-dim)', fontSize: 15,
-      }}>
-        "Conta-se que existem outros. Aqueles cujos nomes foram apagados
-        pelos próprios crentes — para que nenhum culto pudesse jamais ressurgir."
-        <div style={{marginTop:8, fontSize:11, fontStyle:'normal', letterSpacing:'0.22em', fontFamily:'JetBrains Mono'}}>
-          — ARQUIVISTA CAEL, NOTA DE RODAPÉ DESCONHECIDA
-        </div>
-      </div>
+      <footer className="vt-pantheon-foot">
+        “Conta-se que existem outros. Aqueles cujos nomes foram apagados
+        pelos próprios crentes — para que nenhum culto pudesse jamais ressurgir.”
+        <div className="vt-quote-src">— Arquivista Cael, nota de rodapé desconhecida</div>
+      </footer>
 
       {modal && <DeityModal onClose={() => setModal(false)} />}
     </div>
