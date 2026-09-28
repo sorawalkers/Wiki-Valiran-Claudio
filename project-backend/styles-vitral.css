@@ -1357,5 +1357,33 @@
   .vt-deity-gallery { padding: 24px 8px 32px; grid-template-columns: repeat(auto-fit, 160px); gap: 32px 8px; }
   .vt-deity-gallery .vt-card-plaque { font-size: 12px; }
   .vt-deity-gallery .vt-deity-epithet { font-size: 14px; }
-  .vt-deity-gallery .vt-card-arch { width: 150px; height: 225px; }
+}
+
+/* ── Rosácea-relicário (divindades) ───────────────────────────── */
+.vt-rose { position: relative; aspect-ratio: 1; }
+.vt-rose-hole {
+  position: absolute;
+  left: 26.6%; top: 26.6%; width: 46.8%; height: 46.8%;   /* círculo r = 23.4% */
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0b0b0d;
+}
+.vt-rose-hole .vt-deity-sigil-glass { padding: 20%; }
+.vt-portrait--rose { width: 460px; height: 460px; }
+.vt-hero--deity { grid-template-columns: 460px minmax(0, 1fr); align-items: center; }
+.vt-hero--deity > .vt-hero-portrait { align-self: center; }
+.vt-rose-card { width: 250px; height: 250px; transition: filter .2s ease; }
+.vt-deity-card:hover .vt-rose-card { filter: brightness(1.15) drop-shadow(0 0 18px color-mix(in srgb, var(--pane) 45%, transparent)); }
+.vt-deity-card { gap: 10px; }
+
+@container vt (max-width: 1100px) {
+  .vt-hero--deity { grid-template-columns: 360px minmax(0, 1fr); }
+  .vt-portrait--rose { width: 360px; height: 360px; }
+}
+@container vt (max-width: 760px) {
+  .vt-hero--deity { grid-template-columns: minmax(0, 1fr); }
+  .vt-portrait--rose { width: 300px; height: 300px; }
+}
+@media (max-width: 900px) {
+  .vt-deity-gallery .vt-rose-card { width: 160px; height: 160px; }
 }

@@ -89,8 +89,8 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | File | Page | Description |
 |------|------|-------------|
 | `portal.jsx` | Home / Dashboard | Recent activity feed |
-| `pantheon.jsx` | Pantheon | Deity directory in 3 tiers (Titãs, Deuses, Ascendidos), each a stained-glass panel; deities shown with `VitralDeityCard` |
-| `deity-detail.jsx` | Deity article | Vitral article (`VitralArticle kind="deity"`): hero art in the gothic window (sigil when no art), sigil medallion, badge from the `Tipo` row, ficha, chapters, related |
+| `pantheon.jsx` | Pantheon | Deity directory in 3 tiers (Titãs, Deuses, Ascendidos), each a stained-glass panel; deities shown with `VitralDeityCard` (rose-window reliquary) |
+| `deity-detail.jsx` | Deity article | Vitral article (`VitralArticle kind="deity"`): hero art in the round rose-window reliquary (`assets/vitral/rosacea-relicario*.webp`, circular opening; sigil when no art), sigil medallion, badge from the `Tipo` row, ficha, chapters, related |
 | `characters.jsx` | Characters | PC + NPC directory, filterable by campaign/tag |
 | `npcs.jsx` | NPCs | NPC-only directory |
 | `character-detail.jsx` | Character article | Full character profile with infobox and sections |

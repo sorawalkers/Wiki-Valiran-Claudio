@@ -117,7 +117,7 @@ function vtCellSpan(r) {
 const VT_ASSETS = 'assets/vitral/';
 // Suba este número sempre que regerar/substituir um asset com o mesmo nome:
 // o `?v=` força o navegador a baixar a versão nova em vez de usar o cache.
-const VT_ASSETS_VERSION = 3;
+const VT_ASSETS_VERSION = 4;
 const vtAsset = name => VT_ASSETS + name + '?v=' + VT_ASSETS_VERSION;
 
 // Catálogo de molduras de janela gótica. Cada `file` tem, em assets/vitral/:
@@ -180,6 +180,26 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
         className="vt-window-frame"
         src={vtAsset(frame.file + '.webp')}
         srcSet={vtAsset(frame.file + '-sm.webp') + ' 480w, ' + vtAsset(frame.file + '.webp') + ' 960w'}
+        sizes={sizes}
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+      />
+    </div>
+  );
+}
+
+// Rosácea-relicário (divindades): moldura redonda com o vão circular no centro.
+// O vão (círculo de raio 23.4% da caixa, medido no PNG 1920²) fica por baixo do
+// metal; a moldura por cima cobre as bordas.
+function VtRoseWindow({ className = '', sizes = '400px', children }) {
+  return (
+    <div className={'vt-rose ' + className}>
+      <div className="vt-rose-hole">{children}</div>
+      <img
+        className="vt-window-frame"
+        src={vtAsset('rosacea-relicario.webp')}
+        srcSet={vtAsset('rosacea-relicario-sm.webp') + ' 480w, ' + vtAsset('rosacea-relicario.webp') + ' 960w'}
         sizes={sizes}
         alt=""
         aria-hidden="true"
@@ -286,9 +306,20 @@ function VtFramedImage({ url, framing, placeholder, onPan }) {
   );
 }
 
-function VtPortrait({ c, slotId, frameOverride, framing, onPan, fallback, className = '' }) {
+function VtPortrait({ c, slotId, frameOverride, framing, onPan, fallback, rose = false, className = '' }) {
   const { frame, dead } = vtFrameFor(c, frameOverride);
   const url = useVtSlotUrl(slotId || 'char-portrait-' + c.id);
+  if (rose) {
+    return (
+      <div className={'vt-portrait-shadow ' + className}>
+        <VtRoseWindow className="vt-portrait vt-portrait--rose" sizes="(max-width: 900px) 320px, 460px">
+          {!url && fallback
+            ? fallback
+            : <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem arte · ' + c.name} onPan={onPan} />}
+        </VtRoseWindow>
+      </div>
+    );
+  }
   return (
     <div className={'vt-portrait-shadow ' + className}>
       <VtGothicWindow frame={frame} dead={dead} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
@@ -684,6 +715,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
       <VtPortrait
         c={c}
         slotId={slotId}
+        rose={isDeity}
         fallback={isDeity ? <div className="vt-deity-sigil-glass"><DeitySigilImage deity={c} size="card" /></div> : null}
         frameOverride={framePreview}
         framing={framing}
@@ -697,18 +729,18 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
   const tools = isEditor && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
-            {frameTestOpen ? '− Fechar ajuste' : '✠ Ajustar vitral e retrato'}
+            {frameTestOpen ? '− Fechar ajuste' : (isDeity ? '✠ Ajustar arte na rosácea' : '✠ Ajustar vitral e retrato')}
           </button>
           {frameTestOpen && (
             <React.Fragment>
               {portraitUrl && <VtFramingControls value={framing} onChange={setFramingPreview} />}
-              <VitralFramePicker
+              {!isDeity && <VitralFramePicker
                 compact
                 value={framePreview !== undefined ? framePreview : savedFrame}
                 onChange={setFramePreview}
                 portraitUrl={portraitUrl}
                 framing={framing}
-              />
+              />}
               {frameDirty && (
                 <div className="vt-frame-test-actions">
                   <button type="button" className="vt-btn" onClick={discardFrame}>Descartar</button>
@@ -736,7 +768,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
         </div>
       </div>
 
-      <section className={'vt-hero' + (isPC ? ' vt-hero--pc' : '')}>
+      <section className={'vt-hero' + (isPC ? ' vt-hero--pc' : '') + (isDeity ? ' vt-hero--deity' : '')}>
         <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
         {isPC ? <>{hero}{portrait}</> : <>{portrait}{hero}</>}
         {tools}
@@ -844,14 +876,14 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 }
 
 // ── Card do panteão ──────────────────────────────────────────────
-// A divindade na janela gótica: a arte de destaque enquadrada; sem arte, o sigilo
-// dela aceso no centro do vão, sobre vidro escuro.
+// A divindade na rosácea: a arte de destaque enquadrada; sem arte, o sigilo
+// dela aceso no centro do vão, sobre vidro escuro. Moldura: a rosácea-relicário.
 function VitralDeityCard({ deity, tone, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
   const dominio = vtRow(deity, /^dom[ií]nio/i);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + (tone || 'deus')} onClick={onClick}>
-      <VtGothicWindow {...vtFrameFor(deity)} className="vt-card-arch" sizes="240px">
+      <VtRoseWindow className="vt-rose-card" sizes="260px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
@@ -859,7 +891,7 @@ function VitralDeityCard({ deity, tone, onClick }) {
               <DeitySigilImage deity={deity} size="card" />
             </div>
           )}
-      </VtGothicWindow>
+      </VtRoseWindow>
       <div className="vt-card-plaque">{deity.name}</div>
       {deity.epithet && <div className="vt-deity-epithet">{deity.epithet}</div>}
       {dominio && <div className="vt-card-sub">{dominio}</div>}
