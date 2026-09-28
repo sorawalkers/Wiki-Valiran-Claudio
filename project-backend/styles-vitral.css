@@ -490,7 +490,7 @@
 
 .vt-chips { display: none; }
 
-.vt-chapters { display: flex; flex-direction: column; max-width: 880px; min-width: 0; border-bottom: 3px solid var(--vt-lead); }
+.vt-chapters { display: flex; flex-direction: column; gap: 14px; max-width: 880px; min-width: 0; }
 .vt-chapters-tools { display: flex; justify-content: flex-end; padding-bottom: 14px; }
 .vt-link-btn {
   padding: 6px 0;
@@ -504,52 +504,84 @@
 }
 .vt-link-btn:hover { color: var(--vt-ink); }
 
-/* Capítulo em acordeão: a faixa do título é o botão */
-.vt-chapter { scroll-margin-top: 24px; border-top: 3px solid var(--vt-lead); }
-.vt-cracks--chapter { left: auto; width: 46%; opacity: .35; }
-.vt-chapter--corrupt { background: linear-gradient(90deg, rgba(60,20,26,.28), transparent 65%); }
+/* Capítulo = janela narrativa: painel de vidro escuro entre filetes de chumbo,
+   luz quente de um lado e fria do outro, e uma faixa de vitral na base
+   (apagada fechado, acesa aberto). A faixa do título é o botão do acordeão. */
+.vt-chapter {
+  position: relative;
+  scroll-margin-top: 24px;
+  border: 1px solid rgba(201,165,90,.16);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.022) 58px 60px),
+    linear-gradient(100deg, rgba(92,40,38,.22), rgba(9,9,11,.92) 42%, rgba(9,9,11,.92) 62%, rgba(40,60,74,.2));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), 0 10px 26px rgba(0,0,0,.45);
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.vt-chapter:hover { border-color: rgba(201,165,90,.3); }
+.vt-chapter.is-open {
+  border-color: rgba(201,165,90,.34);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.028) 58px 60px),
+    radial-gradient(ellipse 60% 120% at 0 0, rgba(120,52,44,.3), transparent 70%),
+    linear-gradient(100deg, rgba(92,40,38,.26), rgba(12,11,12,.94) 42%, rgba(12,11,12,.94) 62%, rgba(60,50,30,.24));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), 0 14px 34px rgba(0,0,0,.55), 0 0 40px rgba(201,165,90,.06);
+}
+/* faixa de vitral na base do painel */
+.vt-chapter::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background: linear-gradient(90deg,
+    #9a2a24 0 17%, #161517 17% 19%,
+    #3f6a86 19% 44%, #161517 44% 46%,
+    #b8873a 46% 62%, #161517 62% 64%,
+    #56673a 64% 80%, #161517 80% 82%,
+    #9a2a24 82% 100%);
+  opacity: .28;
+  transition: opacity .2s ease, filter .2s ease;
+}
+.vt-chapter:hover::after { opacity: .5; }
+.vt-chapter.is-open::after { opacity: .95; filter: drop-shadow(0 0 6px rgba(201,165,90,.35)); }
+
+/* registro instável (corrupção): vidro tingido de sangue, faixa em cacos vermelhos */
+.vt-chapter--corrupt {
+  border-color: rgba(168,53,43,.42);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.02) 58px 60px),
+    linear-gradient(100deg, rgba(120,30,34,.4), rgba(40,12,16,.85) 55%, rgba(26,10,12,.9));
+}
+.vt-chapter--corrupt.is-open, .vt-chapter--corrupt:hover { border-color: rgba(194,88,74,.6); }
+.vt-chapter--corrupt::after {
+  background: repeating-linear-gradient(90deg, #a8352b 0 34px, #2a1418 34px 38px, #6e1a1a 38px 52px, #2a1418 52px 56px);
+  opacity: .6;
+}
+.vt-cracks--chapter { left: auto; width: 46%; opacity: .3; }
+
 .vt-chapter-h { margin: 0; font: inherit; }
 .vt-chapter-head {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 24px;
   width: 100%;
-  padding: 22px 8px 22px 4px;
+  padding: 24px 26px 26px;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   color: inherit;
 }
-.vt-chapter--corrupt .vt-chapter-head { padding-left: 12px; }
 .vt-chapter-head:focus-visible { outline: 2px solid var(--vt-gold); outline-offset: -2px; }
 
-/* Faixa de vitral sob o título: aparece ao abrir (e de leve no hover) */
-.vt-chapter-head::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -3px;
-  height: 3px;
-  background: repeating-linear-gradient(90deg,
-    var(--vt-gold) 0 34px, var(--vt-lead) 34px 37px,
-    var(--vt-glass-blue) 37px 58px, var(--vt-lead) 58px 61px,
-    var(--vt-blood) 61px 78px, var(--vt-lead) 78px 81px,
-    #b08a45 81px 104px, var(--vt-lead) 104px 107px);
-  opacity: 0;
-  transition: opacity .2s ease;
-}
-.vt-chapter-head:hover::after { opacity: .35; }
-.vt-chapter.is-open .vt-chapter-head::after { opacity: .8; }
-.vt-chapter--corrupt .vt-chapter-head::after {
-  background: repeating-linear-gradient(90deg,
-    var(--vt-corrupt) 0 30px, var(--vt-corrupt-lead) 30px 33px,
-    var(--vt-blood) 33px 60px, var(--vt-corrupt-lead) 60px 63px,
-    #4a1a1c 63px 80px, var(--vt-corrupt-lead) 80px 83px);
-}
-
-/* Janelinha em arco: 4 vidros, apagados quando fechado, acesos quando aberto */
+/* Janela de lanceta estreita: 4 vidros empilhados, apagados fechado, acesos aberto */
 .vt-lancet { flex: none; width: 34px; height: 48px; transition: filter .2s ease; }
+.vt-chapter .vt-lancet { width: 14px; height: 46px; }
+.vt-chapter .vt-lancet-glass {
+  clip-path: path('M0 46 L0 7 Q0 2 7 0 Q14 2 14 7 L14 46 Z') !important;
+  grid-template: repeat(4, 1fr) / 1fr;
+  padding: 2px;
+}
 .vt-lancet-glass {
   display: grid;
   grid-template: 1fr 1fr / 1fr 1fr;
@@ -627,8 +659,12 @@
   color: var(--vt-gold);
 }
 
-.vt-chapter-content { display: flex; flex-direction: column; gap: 20px; padding: 26px 8px 44px 56px; }
-.vt-chapter--corrupt .vt-chapter-content { padding-left: 64px; }
+.vt-chapter-content {
+  display: flex; flex-direction: column; gap: 20px;
+  margin: 0 26px;
+  padding: 26px 30px 40px 38px;
+  border-top: 1px solid rgba(201,165,90,.16);
+}
 
 .vt-chapter-body { display: flex; flex-direction: column; gap: 20px; }
 .vt-chapter-body p {
@@ -658,7 +694,7 @@
 
 .vt-chapter-foot {
   display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
-  border-top: 3px solid var(--vt-lead);
+  border-top: 1px solid rgba(201,165,90,.12);
   padding-top: 14px;
 }
 .vt-tags { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -784,11 +820,11 @@
   .vt-chip.active { border-color: var(--vt-gold); color: var(--vt-gold); }
 
   .vt-chapter { scroll-margin-top: 72px; }
-  .vt-chapter-head { gap: 14px; padding: 18px 0; }
-  .vt-chapter--corrupt .vt-chapter-head { padding-left: 8px; }
+  .vt-chapters { gap: 10px; }
+  .vt-chapter-head { gap: 14px; padding: 16px 16px 18px; }
   .vt-chapter-title, .vt-chapter--pc .vt-chapter-title { font-size: 22px; }
   .vt-eyebrow { font-size: 11px; letter-spacing: .16em; }
-  .vt-chapter-content, .vt-chapter--corrupt .vt-chapter-content { padding: 18px 0 32px; }
+  .vt-chapter-content { margin: 0 14px; padding: 18px 4px 30px; }
   .vt-chapter-body p { font-size: 18px; line-height: 1.65; }
   .vt-inline-quote { font-size: 24px; }
 }
