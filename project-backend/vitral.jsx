@@ -109,12 +109,12 @@ const VT_ASSETS = 'assets/vitral/';
 //   o retrato é enquadrado nele e a máscara recorta o contorno exato.
 // `quebrada`: a moldura já é um vitral estilhaçado (dispensa o efeito extra de morto).
 const VT_FRAMES = [
-  { id: 'viva-fina',            label: 'Viva · fina',                file: 'janela-viva-fina',            box: [27.3, 16.9, 27.3, 7.8] },
-  { id: 'misterio-finas',       label: 'Mistério · rosas finas',     file: 'janela-misterio-finas',       box: [22.7, 17.2, 22.7, 6.7] },
-  { id: 'misterio-murchas',     label: 'Mistério · rosas murchas',   file: 'janela-misterio-murchas',     box: [22.7, 17.4, 22.7, 6.8] },
-  { id: 'quebrada-estilhacada', label: 'Quebrada · estilhaçada',     file: 'janela-quebrada-estilhacada', box: [22.9, 19.2, 20.6, 6.9], quebrada: true },
-  { id: 'quebrada-musgo',       label: 'Quebrada · musgo e heras',   file: 'janela-quebrada-musgo',       box: [23.3, 19.0, 20.4, 7.2], quebrada: true },
-  { id: 'quebrada-morta',       label: 'Quebrada · vegetação morta', file: 'janela-quebrada-morta',       box: [23.3, 19.0, 20.6, 7.1], quebrada: true },
+  { id: 'viva-fina',            label: 'Viva · fina',                file: 'janela-viva-fina',            box: [23.1, 18.1, 23.1, 6.1] },
+  { id: 'misterio-finas',       label: 'Mistério · rosas finas',     file: 'janela-misterio-finas',       box: [22.7, 18.2, 22.9, 6.1] },
+  { id: 'misterio-murchas',     label: 'Mistério · rosas murchas',   file: 'janela-misterio-murchas',     box: [22.7, 18.3, 23.3, 6.7] },
+  { id: 'quebrada-estilhacada', label: 'Quebrada · estilhaçada',     file: 'janela-quebrada-estilhacada', box: [22.3, 20.0, 22.3, 7.2], quebrada: true },
+  { id: 'quebrada-musgo',       label: 'Quebrada · musgo e heras',   file: 'janela-quebrada-musgo',       box: [22.9, 20.0, 22.1, 8.1], quebrada: true },
+  { id: 'quebrada-morta',       label: 'Quebrada · vegetação morta', file: 'janela-quebrada-morta',       box: [23.5, 19.9, 21.9, 7.9], quebrada: true },
 ];
 const VT_FRAME_BY_ID = Object.fromEntries(VT_FRAMES.map(f => [f.id, f]));
 // Molduras antigas (grossas, removidas) → equivalente fina, para escolhas já salvas.
