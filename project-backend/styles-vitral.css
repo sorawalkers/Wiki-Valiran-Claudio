@@ -364,6 +364,7 @@
 }
 /* recuo maior: as rosáceas dos cantos da moldura avançam ~35px sobre os vidros */
 .vt-ficha .vt-cell { padding: 20px 38px 16px; }
+.vt-ficha .vt-cell:last-child { padding-bottom: 26px; }   /* folga da rosácea do canto de baixo */
 /* Cada campo é um vidro: borda superior colorida e leve tinta da cor */
 .vt-cell {
   --pane: var(--vt-gold);

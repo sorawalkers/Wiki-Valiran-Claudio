@@ -84,18 +84,33 @@ function VtSeal({ kind, withLabel = true }) {
 
 // Empacota as células da ficha num grid de 3 colunas sem buracos:
 // perigo ocupa 2, nota ocupa 3, as demais 1; a última célula de cada linha estica.
+// Quando sobra espaço numa linha, ele vai para a célula de texto mais longo daquela
+// linha (não para a última), para não deixar um valor curto numa célula larga ao lado
+// de um valor longo espremido.
 function vtPackCells(cells, cols = 3) {
   const out = cells.map(c => ({ ...c, span: Math.min(c.span || 1, cols) }));
+  const len = c => String(c.note || (c.row && c.row.v) || '').length;
+  let row = [];
   let fill = 0;
-  for (let i = 0; i < out.length; i++) {
-    if (fill + out[i].span > cols) {
-      out[i - 1].span += cols - fill;
-      fill = 0;
-    }
-    fill = (fill + out[i].span) % cols;
+  const closeRow = () => {
+    if (row.length && fill < cols) row.reduce((a, b) => (len(b) > len(a) ? b : a)).span += cols - fill;
+    row = [];
+    fill = 0;
+  };
+  for (const c of out) {
+    if (fill + c.span > cols) closeRow();
+    row.push(c);
+    fill += c.span;
+    if (fill === cols) closeRow();
   }
-  if (fill > 0 && out.length) out[out.length - 1].span += cols - fill;
+  closeRow();
   return out;
+}
+
+// Largura inicial de cada campo pelo tamanho do valor: textos longos já nascem com 2 colunas.
+function vtCellSpan(r) {
+  const n = String(r.v || '').length;
+  return r.danger || n > 26 ? 2 : 1;
 }
 
 // ── Assets de vitral (SVG em assets/vitral/, gerados por script) ──
@@ -354,7 +369,7 @@ function VtFicha({ c, onNav }) {
   let pinned = rows.map(r => r.danger || /filia|fac[cç]/i.test(r.k));
   if (!pinned.some(Boolean)) pinned = rows.map((_, i) => i < 2);
 
-  const cells = rows.map((r, i) => ({ row: r, span: r.danger ? 2 : 1, pinned: pinned[i] }));
+  const cells = rows.map((r, i) => ({ row: r, span: vtCellSpan(r), pinned: pinned[i] }));
   if (c.infobox?.statusNote) cells.push({ note: c.infobox.statusNote, span: 3, pinned: false });
   if (cells.length === 0) return null;
   const packed = vtPackCells(cells);
