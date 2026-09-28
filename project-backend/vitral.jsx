@@ -175,7 +175,7 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
 }
 
 // Seletor de moldura: "Automático" + miniaturas do catálogo com o retrato dentro.
-function VitralFramePicker({ value = '', onChange, portraitUrl, compact = false }) {
+function VitralFramePicker({ value = '', onChange, portraitUrl, framing, compact = false }) {
   const options = [{ id: '', label: 'Automático (pelo status)' }, ...VT_FRAMES];
   return (
     <div className={'vt-picker' + (compact ? ' vt-picker--compact' : '')} role="radiogroup" aria-label="Moldura de vitral">
@@ -191,7 +191,7 @@ function VitralFramePicker({ value = '', onChange, portraitUrl, compact = false 
         >
           {o.id ? (
             <VtGothicWindow frame={o} className="vt-picker-thumb" sizes="120px">
-              {portraitUrl && <img className="vt-picker-portrait" src={portraitUrl} alt="" />}
+              {portraitUrl && <VtFramedImage url={portraitUrl} framing={framing} />}
             </VtGothicWindow>
           ) : (
             <span className="vt-picker-thumb vt-picker-auto">Auto</span>
@@ -203,19 +203,110 @@ function VitralFramePicker({ value = '', onChange, portraitUrl, compact = false 
   );
 }
 
-function VtPortrait({ c, frameOverride, className = '' }) {
+// ── Retrato dentro do vitral, com enquadramento por personagem ─────
+// Guardado em `infobox.retrato` (sem campo novo no Supabase):
+//   x, y: ponto de foco em % da imagem (0–100); z: zoom (1–3);
+//   fit: 'preencher' (cobre o vão, cortando as sobras) | 'inteira' (imagem toda,
+//        com a própria imagem desfocada preenchendo o fundo).
+// Padrão: preencher, foco no terço de cima (onde costumam estar os rostos).
+const VT_FRAMING_DEFAULT = { x: 50, y: 22, z: 1, fit: 'preencher' };
+
+function vtFraming(c, override) {
+  return { ...VT_FRAMING_DEFAULT, ...(c.infobox?.retrato || {}), ...(override || {}) };
+}
+
+// URL do retrato no store de image-slots, atualizando quando o Supabase termina de carregar.
+function useVtSlotUrl(slotId) {
+  const read = () => (window._imageSlotGet && window._imageSlotGet(slotId)?.u) || null;
+  const [url, setUrl] = useVtState(read);
+  useVtEffect(() => {
+    setUrl(read());
+    if (!window._imageSlotSubscribe) return;
+    return window._imageSlotSubscribe(() => setUrl(read()));
+  }, [slotId]);
+  return url;
+}
+
+function VtFramedImage({ url, framing, placeholder, onPan }) {
+  const f = { ...VT_FRAMING_DEFAULT, ...(framing || {}) };
+  const drag = useVtRef(null);
+  if (!url) return <div className="vt-portrait-empty">{placeholder}</div>;
+  const pos = f.x + '% ' + f.y + '%';
+  const imgStyle = {
+    objectFit: f.fit === 'inteira' ? 'contain' : 'cover',
+    objectPosition: pos,
+    transform: 'scale(' + f.z + ')',
+    transformOrigin: pos,
+  };
+
+  // Arrastar move o foco (só quando o ajuste está aberto): arrastar para a direita
+  // mostra mais da esquerda da imagem, como mover uma foto atrás de um vidro.
+  const onPointerDown = onPan ? e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    drag.current = { px: e.clientX, py: e.clientY, x: f.x, y: f.y, w: rect.width, h: rect.height };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  } : undefined;
+  const onPointerMove = onPan ? e => {
+    const d = drag.current;
+    if (!d) return;
+    const k = 100 / Math.max(f.z, 1);
+    const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
+    onPan({ x: clamp(d.x - (e.clientX - d.px) / d.w * k), y: clamp(d.y - (e.clientY - d.py) / d.h * k) });
+  } : undefined;
+  const onPointerUp = onPan ? () => { drag.current = null; } : undefined;
+
+  return (
+    <div
+      className={'vt-framed' + (onPan ? ' vt-framed--pan' : '')}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+    >
+      {f.fit === 'inteira' && <img className="vt-framed-backdrop" src={url} alt="" draggable="false" />}
+      <img className="vt-framed-img" src={url} alt="" draggable="false" style={imgStyle} />
+    </div>
+  );
+}
+
+function VtPortrait({ c, frameOverride, framing, onPan, className = '' }) {
   const { frame, dead } = vtFrameFor(c, frameOverride);
+  const url = useVtSlotUrl('char-portrait-' + c.id);
   return (
     <div className={'vt-portrait-shadow ' + className}>
       <VtGothicWindow frame={frame} dead={dead} className="vt-portrait" sizes="(max-width: 900px) 280px, 400px">
-        <image-slot
-          id={'char-portrait-' + c.id}
-          shape="rect"
-          placeholder={'retrato 3:4 · ' + c.name}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-        ></image-slot>
+        <VtFramedImage url={url} framing={framing || vtFraming(c)} placeholder={'Sem retrato · ' + c.name} onPan={onPan} />
         <div className="vt-portrait-vignette" />
       </VtGothicWindow>
+    </div>
+  );
+}
+
+// Controles de enquadramento (zoom, preencher/inteira, recentralizar).
+function VtFramingControls({ value, onChange }) {
+  const f = { ...VT_FRAMING_DEFAULT, ...value };
+  const set = patch => onChange({ ...f, ...patch });
+  return (
+    <div className="vt-framing">
+      <div className="vt-framing-row">
+        <span className="vt-framing-label">Ajuste</span>
+        <div className="vt-seg">
+          {[['preencher', 'Preencher'], ['inteira', 'Imagem inteira']].map(([id, label]) => (
+            <button key={id} type="button" className={f.fit === id ? 'active' : ''}
+              onClick={() => f.fit !== id && set(id === 'inteira' ? { fit: id, x: 50, y: 50, z: 1 } : { ...VT_FRAMING_DEFAULT })}>{label}</button>
+          ))}
+        </div>
+      </div>
+      <label className="vt-framing-row">
+        <span className="vt-framing-label">Zoom</span>
+        <input type="range" min="1" max="3" step="0.05" value={f.z} onChange={e => set({ z: Number(e.target.value) })} />
+      </label>
+      <div className="vt-framing-row vt-framing-hint">
+        {f.fit === 'preencher' ? 'Arraste o retrato para escolher o foco.' : 'Arraste para mover a imagem dentro do vitral.'}
+        <button type="button" className="vt-link-btn" onClick={() => onChange({ ...VT_FRAMING_DEFAULT })}>Recentralizar</button>
+      </div>
     </div>
   );
 }
@@ -490,19 +581,29 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
   };
   const allOpen = sections.length > 0 && openSet.size === sections.length;
 
-  // Teste de molduras (só editores): pré-visualiza sem salvar; "Salvar" grava infobox.vitral.
+  // Ajuste do vitral (só editores): moldura (infobox.vitral) e enquadramento do retrato
+  // (infobox.retrato). Tudo é pré-visualizado ao vivo e só grava em "Salvar".
   const savedFrame = c.infobox?.vitral || '';
+  const savedFraming = vtFraming(c);
   const [framePreview, setFramePreview] = useVtState(undefined);
+  const [framingPreview, setFramingPreview] = useVtState(undefined);
   const [frameSaving, setFrameSaving] = useVtState(false);
   const [frameTestOpen, setFrameTestOpen] = useVtState(false);
-  const frameDirty = framePreview !== undefined && framePreview !== savedFrame;
+  const framing = framingPreview || savedFraming;
+  const frameDirty = (framePreview !== undefined && framePreview !== savedFrame)
+    || (framingPreview !== undefined && JSON.stringify(framingPreview) !== JSON.stringify(savedFraming));
+  const portraitUrl = useVtSlotUrl('char-portrait-' + c.id);
+  function discardFrame() { setFramePreview(undefined); setFramingPreview(undefined); }
   async function saveFrame() {
     setFrameSaving(true);
     try {
-      await window.DB.saveCharacter({ ...c, infobox: { ...(c.infobox || {}), vitral: framePreview || undefined } });
-      setFramePreview(undefined);
+      const infobox = { ...(c.infobox || {}) };
+      if (framePreview !== undefined) infobox.vitral = framePreview || undefined;
+      if (framingPreview !== undefined) infobox.retrato = framingPreview;
+      await window.DB.saveCharacter({ ...c, infobox });
+      discardFrame();
     } catch (e) {
-      alert('Não foi possível salvar a moldura: ' + (e.message || e));
+      alert('Não foi possível salvar o vitral: ' + (e.message || e));
     } finally {
       setFrameSaving(false);
     }
@@ -528,25 +629,32 @@ function VitralArticle({ c, onNav, backTo, backLabel, isEditor, onEdit }) {
 
   const portrait = (
     <div className="vt-hero-portrait">
-      <VtPortrait c={c} frameOverride={framePreview} />
+      <VtPortrait
+        c={c}
+        frameOverride={framePreview}
+        framing={framing}
+        onPan={frameTestOpen && portraitUrl ? p => setFramingPreview({ ...framing, ...p }) : undefined}
+      />
       {isEditor && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
-            {frameTestOpen ? '− Fechar molduras' : '✠ Testar molduras'}
+            {frameTestOpen ? '− Fechar ajuste' : '✠ Ajustar vitral e retrato'}
           </button>
           {frameTestOpen && (
             <React.Fragment>
+              {portraitUrl && <VtFramingControls value={framing} onChange={setFramingPreview} />}
               <VitralFramePicker
                 compact
                 value={framePreview !== undefined ? framePreview : savedFrame}
                 onChange={setFramePreview}
-                portraitUrl={window._imageSlotGet && window._imageSlotGet('char-portrait-' + c.id)?.u}
+                portraitUrl={portraitUrl}
+                framing={framing}
               />
               {frameDirty && (
                 <div className="vt-frame-test-actions">
-                  <button type="button" className="vt-btn" onClick={() => setFramePreview(undefined)}>Descartar</button>
+                  <button type="button" className="vt-btn" onClick={discardFrame}>Descartar</button>
                   <button type="button" className="vt-btn vt-btn--gold" disabled={frameSaving} onClick={saveFrame}>
-                    {frameSaving ? 'Salvando…' : 'Salvar moldura'}
+                    {frameSaving ? 'Salvando…' : 'Salvar'}
                   </button>
                 </div>
               )}
@@ -661,15 +769,12 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
     ? 'In memoriam' + (morte ? ' · † ' + morte : '')
     : [char.tag, campaignShort].filter(Boolean).join(' · ');
 
+  const url = useVtSlotUrl('char-portrait-' + char.id);
+
   return (
     <article className={'vt-card' + (dead ? ' vt-card--dead' : '')} onClick={onClick}>
       <VtGothicWindow {...vtFrameFor(char)} className="vt-card-arch" sizes="240px">
-        <image-slot
-          id={'char-portrait-' + char.id}
-          shape="rect"
-          placeholder={'retrato 3:4 · ' + char.name}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-        ></image-slot>
+        <VtFramedImage url={url} framing={vtFraming(char)} placeholder="Sem retrato" />
       </VtGothicWindow>
       <div className="vt-card-plaque">{char.name}</div>
       {sub && <div className="vt-card-sub">{sub}</div>}

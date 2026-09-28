@@ -139,6 +139,8 @@
   // Expose so image-upload.js can inject cloud URLs into the slot store
   window._imageSlotSet = setSlot;
   window._imageSlotGet = (id) => getSlot(id);
+  // Avisa quando o store muda (ex.: loadSlots() do Supabase terminou); devolve o "unsubscribe".
+  window._imageSlotSubscribe = (fn) => { subs.add(fn); return () => subs.delete(fn); };
 
   // ── Image downscale ─────────────────────────────────────────────────────
   // Encode through a canvas so the sidecar carries resized bytes, not the
