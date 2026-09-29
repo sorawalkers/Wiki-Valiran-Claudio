@@ -108,6 +108,7 @@ function App() {
       case 'home': return <Portal key={dbVersion} onNav={navigate} />;
       case 'pantheon': return <Pantheon onNav={navigate} />;
       case 'pantheon-teste': return <PantheonLab onNav={navigate} />;
+      case 'pantheon-rosacea': return <PantheonRose onNav={navigate} />;
       case 'article': return <Article onNav={navigate} />;
       case 'campanha3': return <CampaignArticle id="campanha3" onNav={navigate} />;
       case 'campanha2': return <CampaignArticle id="campanha2" onNav={navigate} />;

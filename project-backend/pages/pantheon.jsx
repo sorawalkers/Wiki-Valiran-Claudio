@@ -288,3 +288,148 @@ function PantheonLab({ onNav }) {
   );
 }
 window.PantheonLab = PantheonLab;
+
+// ============================================================
+// Protótipo (#/pantheon-rosacea): o Panteão como uma rosácea.
+// Titãs no anel de dentro, Deuses no do meio, Ascendidos nos lóbulos de fora.
+// Coordenadas no viewBox 1000×1000, centro (500,500).
+// ============================================================
+const PR_RINGS = [
+  { tier: 'tita',      rIn: 100, rOut: 205, rMed: 152, minSlots: 6,  maxD: 92 },
+  { tier: 'deus',      rIn: 205, rOut: 355, rMed: 280, minSlots: 16, maxD: 104 },
+  { tier: 'ascendido', rIn: 355, rOut: 468, rMed: 411, minSlots: 12, maxD: 92 },
+];
+const prPolar = (r, a) => [500 + r * Math.cos(a), 500 + r * Math.sin(a)];
+function prSector(rIn, rOut, a0, a1) {
+  const [x0, y0] = prPolar(rOut, a0), [x1, y1] = prPolar(rOut, a1);
+  const [x2, y2] = prPolar(rIn, a1), [x3, y3] = prPolar(rIn, a0);
+  const big = a1 - a0 > Math.PI ? 1 : 0;
+  return `M${x0} ${y0} A${rOut} ${rOut} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${rIn} ${rIn} 0 ${big} 0 ${x3} ${y3} Z`;
+}
+
+function PantheonRose({ onNav }) {
+  const all = Object.values(Entities.deities).filter(d => d && d.name);
+  const [active, setActive] = React.useState(null);
+
+  // distribui cada nível pelas casas do seu anel; casas sobrando ficam como vidro vazio
+  const rings = PR_RINGS.map(ring => {
+    const gods = all.filter(d => vtDeityTier(d) === ring.tier);
+    const slots = Math.max(ring.minSlots, gods.length);
+    const step = (Math.PI * 2) / slots;
+    const start = -Math.PI / 2;                       // primeira casa no topo
+    const at = new Map(gods.map((d, i) => [Math.round(i * slots / gods.length) % slots, d]));
+    const d = Math.min(ring.maxD, 2 * Math.PI * ring.rMed / slots * 0.8);
+    return { ...ring, gods, slots, step, start, at, d };
+  });
+
+  const cur = active || null;
+  const curTier = cur ? vtDeityTier(cur) : null;
+  const tierName = { tita: 'Titã', deus: 'Deus do Panteão', ascendido: 'Ascendido' };
+
+  return (
+    <div className="vt vt-pantheon">
+      <section className="vt-pantheon-head">
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Protótipo · Cosmologia</div>
+          <h1 className="vt-h1">A Rosácea do Panteão</h1>
+          <p className="vt-pantheon-lede">Protótipo: os Titãs no coração da janela, os Deuses no anel do meio, os Ascendidos nos lóbulos de fora. Passe o cursor sobre um vidro.</p>
+        </div>
+      </section>
+
+      <div className="pr-wrap">
+        <div className="pr-rose">
+          <svg className="pr-glass" viewBox="0 0 1000 1000" aria-hidden="true">
+            <defs>
+              <radialGradient id="pr-hub" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stopColor="#fff3cf" />
+                <stop offset=".35" stopColor="#e2bd6a" />
+                <stop offset="1" stopColor="#5a4217" />
+              </radialGradient>
+            </defs>
+            {/* aro de pedra */}
+            <circle cx="500" cy="500" r="496" className="pr-stone" />
+            {/* vidros de cada anel, alternando o tom */}
+            {rings.map(ring => Array.from({ length: ring.slots }, (_, i) => {
+              const a0 = ring.start + (i - .5) * ring.step, a1 = a0 + ring.step;
+              return <path key={ring.tier + i} d={prSector(ring.rIn, ring.rOut, a0, a1)}
+                className={'pr-pane pr-pane--' + ring.tier + (i % 2 ? ' is-alt' : '') + (curTier === ring.tier ? ' is-lit' : '')} />;
+            }))}
+            {/* lóbulos do anel de fora */}
+            {Array.from({ length: rings[2].slots }, (_, i) => {
+              const [x, y] = prPolar(rings[2].rMed, rings[2].start + i * rings[2].step);
+              const R = rings[2].d / 2 + 9;
+              if (rings[2].at.has(i)) return <circle key={'lobe' + i} cx={x} cy={y} r={R} className="pr-lead" />;
+              // lóbulo vazio: vidro com uma quadrifólia de chumbo
+              return (
+                <g key={'lobe' + i}>
+                  <circle cx={x} cy={y} r={R} className="pr-lobe" />
+                  {[0, 1, 2, 3].map(k => {
+                    const [px, py] = [x + R * .38 * Math.cos(k * Math.PI / 2), y + R * .38 * Math.sin(k * Math.PI / 2)];
+                    return <circle key={k} cx={px} cy={py} r={R * .36} className="pr-lobe-petal" />;
+                  })}
+                  <circle cx={x} cy={y} r={R * .14} className="pr-lobe-bead" />
+                  <circle cx={x} cy={y} r={R} className="pr-lead" />
+                </g>
+              );
+            })}
+            {/* chumbo: raios entre as casas */}
+            {rings.map(ring => Array.from({ length: ring.slots }, (_, i) => {
+              const a = ring.start + (i - .5) * ring.step;
+              const [x0, y0] = prPolar(ring.rIn, a), [x1, y1] = prPolar(ring.rOut, a);
+              return <line key={'s' + ring.tier + i} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead" />;
+            }))}
+            {/* chumbo: anéis, com filete dourado */}
+            {[100, 205, 355, 468].map(r => (
+              <g key={r}>
+                <circle cx="500" cy="500" r={r} className="pr-lead pr-lead--ring" />
+                <circle cx="500" cy="500" r={r} className="pr-gilt" />
+              </g>
+            ))}
+            {/* miolo: a luz */}
+            <circle cx="500" cy="500" r="97" fill="url(#pr-hub)" className="pr-hub" />
+            {Array.from({ length: 16 }, (_, i) => {
+              const a = i * Math.PI / 8;
+              const [x0, y0] = prPolar(30, a), [x1, y1] = prPolar(97, a);
+              return <line key={'h' + i} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead pr-lead--thin" />;
+            })}
+            <circle cx="500" cy="500" r="30" className="pr-lead pr-lead--ring" fill="#f6e3a8" />
+          </svg>
+
+          {/* medalhões (HTML por cima do SVG, para os símbolos e o clique) */}
+          {rings.map(ring => [...ring.at.entries()].map(([slot, d]) => {
+            const [x, y] = prPolar(ring.rMed, ring.start + slot * ring.step);
+            return (
+              <button key={d.id}
+                className={'pr-med pr-med--' + ring.tier + (cur && cur.id === d.id ? ' is-active' : '')}
+                style={{ left: (x - ring.d / 2) / 10 + '%', top: (y - ring.d / 2) / 10 + '%', width: ring.d / 10 + '%' }}
+                onMouseEnter={() => setActive(d)} onFocus={() => setActive(d)}
+                onClick={() => onNav('deity:' + d.id)}
+                aria-label={d.name}>
+                <DeitySigilImage deity={d} size="card" />
+              </button>
+            );
+          }))}
+        </div>
+
+        {/* legenda: a placa votiva mostra o vidro sob o cursor */}
+        <div className={'pr-caption vt-deity-card--' + (curTier || 'deus')}>
+          <div className="vt-votive">
+            <span className="vt-votive-gem" aria-hidden="true" />
+            <div className="vt-votive-name">{cur ? cur.name : 'O Panteão de Valiran'}</div>
+            <div className="vt-votive-title">{cur ? (cur.epithet || '') : 'Passe o cursor sobre um vitral'}</div>
+          </div>
+          <div className="vt-card-sub">{cur ? [tierName[curTier], vtRow(cur, /^dom[ií]nio/i)].filter(Boolean).join(' · ') : ''}</div>
+        </div>
+
+        <div className="pr-legend">
+          {rings.map(r => (
+            <span key={r.tier} className={'pr-legend-item pr-legend-item--' + r.tier}>
+              <i />{{ tita: 'Titãs · anel interno', deus: 'Deuses · anel do meio', ascendido: 'Ascendidos · lóbulos' }[r.tier]} ({r.gods.length})
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+window.PantheonRose = PantheonRose;
