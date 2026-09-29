@@ -269,6 +269,20 @@ function VtSigilAltar({ deity, tier }) {
   );
 }
 
+// Emblema do símbolo sem vitral (teste): 'selo' (medalhão cunhado), 'estandarte'
+// (flâmula bordada pendurada) ou 'relevo' (tábua de pedra entalhada).
+function VtSigilEmblem({ deity, tier, variant = 'selo' }) {
+  return (
+    <div className={'vt-emblem vt-emblem--' + variant + ' vt-altar--' + tier}>
+      {variant === 'estandarte' && <span className="vt-emblem-rod" aria-hidden="true" />}
+      <div className="vt-emblem-body">
+        <div className="vt-emblem-sigil"><DeitySigilImage deity={deity} size="card" /></div>
+      </div>
+      {variant === 'relevo' && <span className="vt-emblem-gem" aria-hidden="true" />}
+    </div>
+  );
+}
+
 function VtRoseWindow({ tier = 'deus', className = '', sizes = '400px', children }) {
   const rose = VT_ROSES[tier] || VT_ROSES.deus;
   const d = rose.r * 2;
@@ -987,4 +1001,4 @@ window.VitralCard    = VitralCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

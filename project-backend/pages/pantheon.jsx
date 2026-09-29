@@ -205,6 +205,8 @@ function PantheonLab({ onNav }) {
   const pair = [withArt[0], noArt[0]].filter(Boolean);
   for (const d of all) { if (pair.length >= 2) break; if (!pair.includes(d)) pair.push(d); }
   const big = pair;
+  // um de cada nível para os emblemas
+  const trio = ['tita', 'deus', 'ascendido'].map(t => all.find(d => vtDeityTier(d) === t)).filter(Boolean);
 
   const Card = ({ d, shape }) => (
     <div className="vt-lab-col">
@@ -229,7 +231,7 @@ function PantheonLab({ onNav }) {
     <div className="vt vt-pantheon">
       <section className="vt-tier vt-tier--deus">
         <header className="vt-tier-head">
-          <span className="vt-tier-num">I <small>/ II</small></span>
+          <span className="vt-tier-num">I <small>/ V</small></span>
           <div>
             <h2 className="vt-tier-name">Teste · Galeria</h2>
             <p className="vt-tier-desc">As mesmas duas divindades no espelho circular e no oval, com placa e domínio.</p>
@@ -240,9 +242,36 @@ function PantheonLab({ onNav }) {
           {pair.map(d => <Card key={'o' + d.id} d={d} shape="oval" />)}
         </div>
       </section>
+      {[
+        ['selo', 'Selo cunhado', 'Medalhão de ouro com borda serrilhada; o esmalte do centro leva a cor do nível.'],
+        ['estandarte', 'Estandarte', 'Flâmula bordada pendurada numa haste, no tecido da cor do nível.'],
+        ['relevo', 'Relevo em pedra', 'Tábua de pedra em arco, com o símbolo entalhado e folheado a ouro.'],
+      ].map(([variant, name, desc], i) => (
+        <section key={variant} className="vt-tier vt-tier--deus">
+          <header className="vt-tier-head">
+            <span className="vt-tier-num">{vtRomanNum(i + 2)} <small>/ V</small></span>
+            <div>
+              <h2 className="vt-tier-name">Símbolo · {name}</h2>
+              <p className="vt-tier-desc">{desc}</p>
+            </div>
+          </header>
+          <div className="vt-lab-row">
+            {trio.map(d => (
+              <div key={d.id} className={'vt-card vt-deity-card vt-lab-col vt-deity-card--' + vtDeityTier(d)} onClick={() => onNav('deity:' + d.id)}>
+                <VtSigilEmblem deity={d} tier={vtDeityTier(d)} variant={variant} />
+                <div className="vt-votive">
+                  <span className="vt-votive-gem" aria-hidden="true" />
+                  <div className="vt-votive-name">{d.name}</div>
+                  {d.epithet && <div className="vt-votive-title">{d.epithet}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
       <section className="vt-tier vt-tier--tita">
         <header className="vt-tier-head">
-          <span className="vt-tier-num">II <small>/ II</small></span>
+          <span className="vt-tier-num">V <small>/ V</small></span>
           <div>
             <h2 className="vt-tier-name">Teste · Tamanho do artigo</h2>
             <p className="vt-tier-desc">A mesma divindade nos dois espelhos, no tamanho do topo da página dela.</p>
