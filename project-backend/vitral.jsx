@@ -221,6 +221,50 @@ function VtDeityFrame({ tier, className = '', sizes, children }) {
   return <VtRoseWindow tier={tier} className={className} sizes={sizes}>{children}</VtRoseWindow>;
 }
 
+// Altar de vidro: fundo para o símbolo quando a divindade não tem arte.
+// Vitral em leque (raios de chumbo saindo do centro) na cor do nível, com o
+// símbolo num medalhão dourado no meio; preenche o espelho oval inteiro.
+// viewBox 200×326 = proporção do vão do espelho.
+const VT_ALTAR_RAYS = 20;
+function VtSigilAltar({ deity, tier }) {
+  const cx = 100, cy = 163, R = 400;
+  const rays = [];
+  for (let i = 0; i < VT_ALTAR_RAYS; i++) {
+    const a0 = (i / VT_ALTAR_RAYS) * Math.PI * 2 - Math.PI / 2;
+    const a1 = ((i + 1) / VT_ALTAR_RAYS) * Math.PI * 2 - Math.PI / 2;
+    rays.push({
+      d: `M${cx} ${cy} L${cx + R * Math.cos(a0)} ${cy + R * Math.sin(a0)} L${cx + R * Math.cos(a1)} ${cy + R * Math.sin(a1)} Z`,
+      x: cx + R * Math.cos(a0), y: cy + R * Math.sin(a0),
+      alt: i % 2,
+    });
+  }
+  return (
+    <div className={'vt-altar vt-altar--' + tier}>
+      <svg className="vt-altar-glass" viewBox="0 0 200 326" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <radialGradient id="vt-altar-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#f3dca0" stopOpacity=".55" />
+            <stop offset=".35" stopColor="#c9a55a" stopOpacity=".18" />
+            <stop offset="1" stopColor="#000" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        {rays.map((r, i) => <path key={i} d={r.d} className={'vt-altar-pane' + (r.alt ? ' is-alt' : '')} />)}
+        {/* anel externo mais escuro: divide cada raio em dois vidros */}
+        <path className="vt-altar-outer" fillRule="evenodd"
+          d={`M-50 -50 H250 V376 H-50 Z M${cx} ${cy - 118} a78 118 0 1 0 0.01 0 Z`} />
+        <circle cx={cx} cy={cy} r="120" fill="url(#vt-altar-glow)" />
+        {/* chumbo */}
+        {rays.map((r, i) => <line key={i} x1={cx} y1={cy} x2={r.x} y2={r.y} className="vt-altar-lead" />)}
+        <ellipse cx={cx} cy={cy} rx="78" ry="118" className="vt-altar-lead" />
+        <circle cx={cx} cy={cy} r="58" className="vt-altar-lead vt-altar-lead--gold" />
+      </svg>
+      <div className="vt-altar-medal">
+        <DeitySigilImage deity={deity} size="card" />
+      </div>
+    </div>
+  );
+}
+
 function VtRoseWindow({ tier = 'deus', className = '', sizes = '400px', children }) {
   const rose = VT_ROSES[tier] || VT_ROSES.deus;
   const d = rose.r * 2;
@@ -747,7 +791,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
         c={c}
         slotId={slotId}
         rose={isDeity}
-        fallback={isDeity ? <div className="vt-deity-sigil-glass"><DeitySigilImage deity={c} size="card" /></div> : null}
+        fallback={isDeity ? <VtSigilAltar deity={c} tier={vtDeityTier(c)} /> : null}
         frameOverride={framePreview}
         framing={framing}
         onPan={frameTestOpen && portraitUrl ? p => setFramingPreview({ ...framing, ...p }) : undefined}
@@ -919,9 +963,7 @@ function VitralDeityCard({ deity, tone, onClick }) {
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
-            <div className="vt-deity-sigil-glass">
-              <DeitySigilImage deity={deity} size="card" />
-            </div>
+            <VtSigilAltar deity={deity} tier={tier} />
           )}
       </VtDeityFrame>
       {/* placa votiva: metal escuro com filete dourado, pontas em flecha e um vidro na cor do nível */}
