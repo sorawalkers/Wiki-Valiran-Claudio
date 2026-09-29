@@ -110,6 +110,7 @@ function DeityModal({ onClose }) {
 function Pantheon({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(false);
+  const [uploader, setUploader] = React.useState(false);
 
   const allDeities = Object.values(Entities.deities).filter(d => d && d.name);
 
@@ -152,9 +153,13 @@ function Pantheon({ onNav }) {
           </p>
         </div>
         {isEditor && (
-          <button className="vt-btn vt-btn--gold vt-pantheon-add" onClick={() => setModal(true)}>+ Nova divindade</button>
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal(true)}>+ Nova divindade</button>
+            <button className="vt-btn" onClick={() => setUploader(u => !u)}>✠ Vitrais da galeria</button>
+          </div>
         )}
       </section>
+      {isEditor && uploader && <VtVitralUploader deities={allDeities} onClose={() => setUploader(false)} />}
 
       {allDeities.length === 0 && (
         <p className="vt-pantheon-empty">Nenhuma divindade registrada ainda.</p>

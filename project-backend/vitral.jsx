@@ -979,17 +979,117 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 // ── Card do panteão ──────────────────────────────────────────────
 // A divindade na rosácea: a arte de destaque enquadrada; sem arte, o sigilo
 // dela aceso no centro do vão, sobre vidro escuro. Moldura: a rosácea-relicário.
+// Slot do vitral da divindade na galeria: 'deity-vitral-<id>' (image_slots / Storage media/slots).
+const VT_DEITY_VITRAL_SLOT = 'deity-vitral-';
+
+// Arquivo "vitral_<nome>_oval.png" → id da divindade. Nomes que não batem com o id vão aqui.
+const VT_VITRAL_ALIASES = { 'raven-queen': 'senhora-da-rapina', 'rainha-dos-corvos': 'senhora-da-rapina' };
+function vtVitralFileToId(fileName, ids) {
+  const base = fileName.replace(/\.[^.]+$/, '').toLowerCase()
+    .replace(/^vitral[_-]/, '').replace(/[_-](oval|catedral|roseta|circular)(?:[_-]\d+)?$/, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const id = VT_VITRAL_ALIASES[base] || base;
+  if (ids.includes(id)) return id;
+  const loose = ids.find(x => x.replace(/-/g, '') === id.replace(/-/g, ''));
+  return loose || null;
+}
+
+// Reduz para WebP (largura máx. 960) antes de enviar; os PNGs originais são pesados.
+async function vtToWebp(file, maxW = 960) {
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(1, maxW / bmp.width);
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(bmp.width * s); cv.height = Math.round(bmp.height * s);
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/webp', 0.88));
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webp', { type: 'image/webp' });
+}
+
+// Envio em lote dos vitrais (editores): escolhe vários arquivos, casa cada um com a divindade
+// pelo nome e grava no slot 'deity-vitral-<id>' — a arte original do artigo não é tocada.
+function VtVitralUploader({ deities, onClose }) {
+  const ids = deities.map(d => d.id);
+  const [rows, setRows] = React.useState([]);
+  const [busy, setBusy] = React.useState(false);
+
+  function pick(e) {
+    const files = [...(e.target.files || [])];
+    e.target.value = '';
+    setRows(files.map(f => ({ file: f, id: vtVitralFileToId(f.name, ids), status: 'pronto' })));
+  }
+  async function send() {
+    if (!window.ImageUpload) return;
+    setBusy(true);
+    const next = rows.slice();
+    for (let i = 0; i < next.length; i++) {
+      const r = next[i];
+      if (!r.id || r.status === 'enviado') continue;
+      next[i] = { ...r, status: 'enviando…' }; setRows(next.slice());
+      try {
+        const webp = await vtToWebp(r.file);
+        const slot = VT_DEITY_VITRAL_SLOT + r.id;
+        const u = await window.ImageUpload.uploadImage(webp, slot);
+        window._imageSlotSet(slot, { u, s: 1, x: 0, y: 0 });
+        next[i] = { ...r, status: 'enviado' };
+      } catch (ex) {
+        next[i] = { ...r, status: 'erro: ' + (ex.message || ex) };
+      }
+      setRows(next.slice());
+    }
+    setBusy(false);
+  }
+  const name = id => (deities.find(d => d.id === id) || {}).name;
+  const matched = rows.filter(r => r.id).length;
+  const missing = deities.filter(d => !rows.some(r => r.id === d.id));
+
+  return (
+    <div className="vt-uploader">
+      <div className="vt-uploader-head">
+        <strong>Vitrais da galeria</strong>
+        <span>Arquivos no formato <code>vitral_nome_oval.png</code>. Ficam num campo próprio; a arte do artigo continua a mesma.</span>
+      </div>
+      <label className="vt-btn vt-btn--gold">
+        Escolher arquivos
+        <input type="file" accept="image/*" multiple hidden onChange={pick} disabled={busy} />
+      </label>
+      {rows.length > 0 && (
+        <React.Fragment>
+          <ul className="vt-uploader-list">
+            {rows.map((r, i) => (
+              <li key={i} className={r.id ? '' : 'is-miss'}>
+                <span>{r.file.name}</span>
+                <span>→ {r.id ? name(r.id) : 'sem divindade com esse nome'}</span>
+                <em>{r.id ? r.status : ''}</em>
+              </li>
+            ))}
+          </ul>
+          {missing.length > 0 && <p className="vt-uploader-note">Sem arquivo: {missing.map(d => d.name).join(', ')}</p>}
+          <div className="vt-uploader-actions">
+            <button className="vt-btn vt-btn--gold" onClick={send} disabled={busy || !matched}>
+              {busy ? 'Enviando…' : 'Enviar ' + matched + ' vitrais'}
+            </button>
+            <button className="vt-btn" onClick={onClose} disabled={busy}>Fechar</button>
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
 function VitralDeityCard({ deity, tone, shape, vitral, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
+  // vitral completo da divindade (slot próprio, separado da arte do artigo):
+  // a moldura já faz parte da imagem, então entra sem espelho por cima.
+  const vitralUrl = useVtSlotUrl(VT_DEITY_VITRAL_SLOT + deity.id);
+  const vitralSrc = vitral ? vtAsset(vitral.file + '-sm.webp') : vitralUrl;
   const dominio = vtRow(deity, /^dom[ií]nio/i);
   const tier = tone || vtDeityTier(deity);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
-      {vitral
+      {vitralSrc
         ? (
-          // vitral completo da divindade (teste): a moldura já faz parte da arte
-          <img className={'vt-deity-vitral vt-deity-vitral--card vt-deity-vitral--' + vitral.shape}
-            src={vtAsset(vitral.file + '-sm.webp')} alt={'Vitral de ' + deity.name} draggable="false" />
+          <img className={'vt-deity-vitral vt-deity-vitral--card vt-deity-vitral--' + (vitral ? vitral.shape : 'catedral')}
+            src={vitralSrc} alt={'Vitral de ' + deity.name} loading="lazy" draggable="false" />
         )
         : (<VtDeityFrame tier={tier} shape={shape} className="vt-rose-card" sizes="280px">
         {url
@@ -1015,4 +1115,4 @@ window.VitralCard    = VitralCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
