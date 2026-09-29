@@ -764,6 +764,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
   const frameDirty = (framePreview !== undefined && framePreview !== savedFrame)
     || (framingPreview !== undefined && JSON.stringify(framingPreview) !== JSON.stringify(savedFraming));
   const portraitUrl = useVtSlotUrl(slotId);
+  const deityVitralUrl = useVtSlotUrl(VT_DEITY_VITRAL_SLOT + c.id);
   function discardFrame() { setFramePreview(undefined); setFramingPreview(undefined); }
   async function saveFrame() {
     setFrameSaving(true);
@@ -803,13 +804,18 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
     </div>
   );
 
-  // heroVitral (teste): vitral completo da divindade no lugar do espelho, {file, shape}
-  const portrait = heroVitral ? (
+  // Divindade com vitral (o mesmo da galeria, slot 'deity-vitral-<id>'): entra inteiro no lugar
+  // do espelho. heroVitral {file, shape} força um vitral local (páginas de teste).
+  const vitralSrc = heroVitral ? vtAsset(heroVitral.file + '.webp') : (isDeity ? deityVitralUrl : null);
+  const portrait = vitralSrc ? (
     <div className="vt-hero-portrait">
-      <img className={'vt-deity-vitral vt-deity-vitral--' + heroVitral.shape}
-        src={vtAsset(heroVitral.file + '.webp')}
-        srcSet={vtAsset(heroVitral.file + '-sm.webp') + ' 480w, ' + vtAsset(heroVitral.file + '.webp') + ' 960w'}
-        sizes="(max-width: 900px) 320px, 480px" alt={'Vitral de ' + c.name} draggable="false" />
+      <img className={'vt-deity-vitral vt-deity-vitral--' + (heroVitral ? heroVitral.shape : 'catedral')}
+        src={vitralSrc}
+        {...(heroVitral ? {
+          srcSet: vtAsset(heroVitral.file + '-sm.webp') + ' 480w, ' + vtAsset(heroVitral.file + '.webp') + ' 960w',
+          sizes: '(max-width: 900px) 320px, 480px',
+        } : {})}
+        alt={'Vitral de ' + c.name} draggable="false" />
     </div>
   ) : (
     <div className="vt-hero-portrait">
@@ -827,7 +833,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 
   // Painel de ajuste (editores) fica numa linha própria sob a janela, fora do bloco
   // alinhado, para não empurrar a janela para cima quando aberto.
-  const tools = isEditor && (
+  const tools = isEditor && !vitralSrc && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
             {frameTestOpen ? '− Fechar ajuste' : (isDeity ? '✠ Ajustar arte na rosácea' : '✠ Ajustar vitral e retrato')}
