@@ -1616,3 +1616,23 @@
 .pr-lobe { fill: color-mix(in srgb, #3f6a86 26%, #0b0b0d); }
 .pr-lobe-petal { fill: color-mix(in srgb, #3f6a86 40%, #0b0b0d); stroke: #050506; stroke-width: 4; }
 .pr-lobe-bead { fill: #a8854a; stroke: #050506; stroke-width: 3; }
+
+/* ── Vitral completo da divindade (teste, #/deity-vitral-teste) ─── */
+.vt-deity-vitral { display: block; height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.8)); }
+.vt-deity-vitral--catedral { width: 400px; }
+.vt-deity-vitral--roseta   { width: 470px; }
+.vt-hero--deity:has(.vt-deity-vitral--catedral) { grid-template-columns: 420px minmax(0, 1fr); }
+.vt-hero--deity:has(.vt-deity-vitral--roseta)   { grid-template-columns: 480px minmax(0, 1fr); }
+.vt-lab-banner { margin: 40px 0 0; padding: 14px 24px; text-align: center;
+  font: 600 12px/1 var(--vt-display); letter-spacing: .3em; text-transform: uppercase; color: var(--vt-gold);
+  border-top: 1px solid rgba(201,165,90,.25); border-bottom: 1px solid rgba(201,165,90,.25);
+  background: linear-gradient(90deg, transparent, rgba(201,165,90,.08), transparent); }
+@container vt (max-width: 1100px) {
+  .vt-hero--deity:has(.vt-deity-vitral) { grid-template-columns: 360px minmax(0, 1fr); }
+  .vt-deity-vitral--catedral { width: 330px; } .vt-deity-vitral--roseta { width: 360px; }
+}
+@container vt (max-width: 760px) {
+  .vt-hero--deity:has(.vt-deity-vitral) { grid-template-columns: minmax(0, 1fr); }
+  .vt-deity-vitral--catedral { width: 260px; } .vt-deity-vitral--roseta { width: 320px; }
+}
+.vt-lab-banner + .vt-article { min-height: 0; }

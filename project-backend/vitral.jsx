@@ -726,7 +726,7 @@ const VT_KINDS = {
   },
 };
 
-function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit }) {
+function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit, heroVitral }) {
   const K = VT_KINDS[kind] || VT_KINDS.character;
   const isDeity = kind === 'deity';
   const isPC = !isDeity && c.tag === 'PC';
@@ -803,7 +803,15 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
     </div>
   );
 
-  const portrait = (
+  // heroVitral (teste): vitral completo da divindade no lugar do espelho, {file, shape}
+  const portrait = heroVitral ? (
+    <div className="vt-hero-portrait">
+      <img className={'vt-deity-vitral vt-deity-vitral--' + heroVitral.shape}
+        src={vtAsset(heroVitral.file + '.webp')}
+        srcSet={vtAsset(heroVitral.file + '-sm.webp') + ' 480w, ' + vtAsset(heroVitral.file + '.webp') + ' 960w'}
+        sizes="(max-width: 900px) 320px, 480px" alt={'Vitral de ' + c.name} draggable="false" />
+    </div>
+  ) : (
     <div className="vt-hero-portrait">
       <VtPortrait
         c={c}

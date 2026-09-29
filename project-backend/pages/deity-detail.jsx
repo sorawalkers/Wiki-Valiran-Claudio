@@ -37,3 +37,21 @@ function DeityDetail({ id, onNav }) {
 }
 
 window.DeityDetail = DeityDetail;
+
+// Teste (#/deity-vitral-teste): artigo do Esmir com os dois vitrais completos
+// (catedral oval e roseta circular) no lugar do espelho.
+function DeityVitralLab({ onNav }) {
+  const d = Entities.deities.esmir;
+  if (!d) return <div className="page"><p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>Carregando…</p></div>;
+  return (
+    <React.Fragment>
+      <div className="vt-lab-banner">Versão I · Vitral de catedral (oval)</div>
+      <VitralArticle c={d} kind="deity" onNav={onNav} backTo="pantheon" backLabel="Panteão"
+        heroVitral={{ file: 'deus-esmir-catedral', shape: 'catedral' }} />
+      <div className="vt-lab-banner">Versão II · Roseta circular</div>
+      <VitralArticle c={d} kind="deity" onNav={onNav} backTo="pantheon" backLabel="Panteão"
+        heroVitral={{ file: 'deus-esmir-roseta', shape: 'roseta' }} />
+    </React.Fragment>
+  );
+}
+window.DeityVitralLab = DeityVitralLab;
