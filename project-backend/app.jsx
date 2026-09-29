@@ -106,6 +106,7 @@ function App() {
     const [page, entity] = active.split(':');
     switch (page) {
       case 'home': return <Portal key={dbVersion} onNav={navigate} />;
+      case 'home-antiga': return <PortalClassic key={dbVersion} onNav={navigate} />;
       case 'pantheon': return <Pantheon onNav={navigate} />;
       case 'pantheon-teste': return <PantheonLab onNav={navigate} />;
       case 'pantheon-rosacea': return <PantheonRose onNav={navigate} />;

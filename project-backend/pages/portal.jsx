@@ -110,7 +110,7 @@ function PortalMapPreview({ onNav }) {
 }
 
 // ── Portal ─────────────────────────────────────────────────────────────────
-function Portal({ onNav }) {
+function PortalClassic({ onNav }) {
   const deityCount   = Object.values(Entities.deities || {}).filter(d => d && d.name).length;
   const charCount    = (Data.charIds || []).length;
   const sessionCount = (Data.sessionIds || []).length;
@@ -263,4 +263,247 @@ function Portal({ onNav }) {
   );
 }
 
+window.PortalClassic = PortalClassic;
+
+
+// ============================================================
+// Home no tema vitral: a nave da catedral, da entrada ao altar.
+// (a home antiga continua em #/home-antiga)
+// ============================================================
+const VH_GATES = [
+  { id: 'pantheon',   label: 'Panteão',  sub: 'Os nomes que recebem oração', icon: 'Sun',     pane: '#7a5aa8' },
+  { id: 'factions',   label: 'Casas',    sub: 'Facções, ordens e coroas',     icon: 'Crown',   pane: '#9a2a24' },
+  { id: 'characters', label: 'Almas',    sub: 'Heróis e pessoas de nota',     icon: 'Hand',    pane: '#b8873a' },
+  { id: 'sessions',   label: 'Crônicas', sub: 'O diário das sessões',         icon: 'Tome',    pane: '#56673a' },
+  { id: 'map',        label: 'Atlas',    sub: 'Reinos e caminhos',            icon: 'Compass', pane: '#3f6a86' },
+];
+
+// número da campanha no texto ("Campanha 3 - ..." → 3)
+const VH_ROMAN = { I: 1, V: 5, X: 10, L: 50 };
+const vhCampaignNum = c => {
+  const m = /campanha\s*(\d+|[ivxl]+)\b/i.exec(c && c.campaign || '');
+  if (!m) return 0;
+  if (/^\d+$/.test(m[1])) return +m[1];
+  const r = m[1].toUpperCase().split('').map(ch => VH_ROMAN[ch] || 0);
+  return r.reduce((t, v, i) => t + (v < (r[i + 1] || 0) ? -v : v), 0);
+};
+
+// personagem citado no elenco de uma sessão ("Diego (PC)", "Kathrine Vans" …)
+function vhFindChar(name) {
+  const n = String(name).replace(/\s*\(.*\)\s*/, '').trim().toLowerCase();
+  if (!n) return null;
+  return Object.values(Entities.characters || {}).find(c => c && c.name &&
+    (c.name.toLowerCase() === n || c.name.toLowerCase().split(/\s+/)[0] === n.split(/\s+/)[0])) || null;
+}
+
+function VhGate({ g, count, onNav }) {
+  const Icon = Sigil[g.icon];
+  const d = ogivePath(100, 250, 0.62, 0.16);
+  const cid = 'vh-gate-' + g.id;
+  return (
+    <button className="vh-gate" style={{ '--pane': g.pane }} onClick={() => onNav(g.id)}>
+      <svg className="vh-gate-glass" viewBox="0 0 100 250" preserveAspectRatio="none" aria-hidden="true">
+        <defs><clipPath id={cid}><path d={d} /></clipPath></defs>
+        <g clipPath={'url(#' + cid + ')'}>
+          <rect width="100" height="250" className="vh-gate-fill" />
+          {/* losangos de chumbo (quarrels) */}
+          {Array.from({ length: 14 }, (_, i) => (
+            <g key={i}>
+              <line x1={-60 + i * 22} y1="250" x2={60 + i * 22} y2="0" className="vh-gate-quarry" />
+              <line x1={160 - i * 22} y1="250" x2={40 - i * 22} y2="0" className="vh-gate-quarry" />
+            </g>
+          ))}
+          <circle cx="50" cy="78" r="30" className="vh-gate-roundel" />
+          <rect x="0" y="170" width="100" height="80" className="vh-gate-base" />
+        </g>
+        <path d={d} className="vh-gate-lead" />
+        <circle cx="50" cy="78" r="30" className="vh-gate-lead vh-gate-lead--gold" />
+        <line x1="0" y1="170" x2="100" y2="170" className="vh-gate-lead" />
+      </svg>
+      <span className="vh-gate-icon">{Icon && <Icon style={{ width: '100%', height: '100%' }} />}</span>
+      <span className="vh-gate-text">
+        <span className="vh-gate-label">{g.label}</span>
+        <span className="vh-gate-count">{count}</span>
+      </span>
+      <span className="vh-gate-sub">{g.sub}</span>
+    </button>
+  );
+}
+
+function VhSoul({ c, onNav }) {
+  const url = useVtSlotUrl('char-portrait-' + c.id);
+  const { frame } = { frame: VT_FRAMES[0] };
+  return (
+    <button className="vh-soul" onClick={() => onNav('character:' + c.id)} title={c.name}>
+      <VtGothicWindow frame={frame} className="vh-soul-window" sizes="80px">
+        <VtFramedImage url={url} framing={vtFraming(c)} placeholder="" />
+      </VtGothicWindow>
+      <span className="vh-soul-name">{c.name.split(' ')[0]}</span>
+    </button>
+  );
+}
+
+function VhHead({ num, title, link, onLink }) {
+  return (
+    <header className="vh-head">
+      <span className="vh-head-num">{num}</span>
+      <h2 className="vh-head-title">{title}</h2>
+      {link && <button className="vh-head-link" onClick={onLink}>{link} →</button>}
+    </header>
+  );
+}
+
+function Portal({ onNav }) {
+  const deities  = Object.values(Entities.deities || {}).filter(d => d && d.name);
+  const chars    = (Data.charIds || []).map(id => Entities.characters[id]).filter(Boolean);
+  const sessions = (Data.sessionIds || []).map(id => Entities.sessions[id]).filter(Boolean);
+  const factions = Object.values(Entities.factions || {}).filter(Boolean);
+  const realms   = (Data.realms || []).filter(r => !r.cursed);
+  const feed     = (Data.feed || []).slice().sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 6);
+  const total    = deities.length + chars.length + sessions.length + (Data.events || []).length + (Data.timeline || []).filter(e => e.title).length;
+
+  // última sessão (a lista vem do banco da mais nova para a mais antiga)
+  const last = sessions.slice().sort((a, b) => (b.num || 0) - (a.num || 0))[0] || null;
+  const cast = last ? (last.cast || []).map(vhFindChar).filter((c, i, a) => c && a.indexOf(c) === i) : [];
+
+  // campanha atual = a dos PCs que jogaram a última sessão (senão, a de maior número); destaques = PCs dela
+  const isPC = c => String(c.tag || '').toUpperCase() === 'PC' || c.tagClass === 'pc';
+  const pcs = chars.filter(isPC);
+  const castCamps = cast.filter(isPC).map(vhCampaignNum).filter(Boolean);
+  const curCamp = castCamps.length ? Math.max(...castCamps) : Math.max(0, ...pcs.map(vhCampaignNum));
+  const featured = (curCamp ? pcs.filter(c => vhCampaignNum(c) === curCamp) : pcs).slice(0, 5);
+  const campName = featured[0] ? (featured[0].campaign || '') : '';
+
+  const counts = {
+    pantheon: deities.length + ' divindades', factions: factions.length + ' casas', characters: chars.length + ' almas',
+    sessions: sessions.length + ' sessões', map: realms.length + ' reinos',
+  };
+  const stats = [
+    ['Entradas', total], ['Divindades', deities.length], ['Almas', chars.length], ['Sessões', sessions.length], ['Era', '3ª · 1281'],
+  ];
+  const statPane = ['#8a8070', '#7a5aa8', '#b8873a', '#56673a', '#3f6a86'];
+
+  return (
+    <div className="vt vt-home" data-screen-label="01 Portal">
+      {/* I · Entrada */}
+      <section className="vh-hero">
+        <div className="vh-hero-text">
+          <div className="vt-label">O Arquivo · Vol. III · Fólio 1281</div>
+          <h1 className="vt-h1 vh-title">Tudo o que se conta<br />sobre Valiran</h1>
+          <p className="vh-lede">
+            Um continente sustentado pela Trama Mágica, dilacerado por reinos em guerra e por uma
+            corrupção que vaza de planos esquecidos. Aqui se guardam os nomes: dos deuses, dos heróis,
+            e daqueles que romperam selos que jamais deveriam ter sido tocados.
+          </p>
+          <VtDivider />
+          <div className="vh-stats">
+            {stats.map(([k, v], i) => (
+              <div key={k} className="vh-stat" style={{ '--pane': statPane[i] }}>
+                <span className="vh-stat-v">{v || '—'}</span>
+                <span className="vh-stat-k">{k}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <button className="vh-hero-rose" onClick={() => onNav('pantheon')} aria-label="Abrir o Panteão">
+          <VtRoseWindow tier="deus" sizes="(max-width: 900px) 300px, 520px">
+            <div className="vh-rose-light" />
+          </VtRoseWindow>
+          <span className="vh-rose-cap">Entrar no Panteão</span>
+        </button>
+      </section>
+
+      {/* II · Onde paramos */}
+      {last && (
+        <section className="vh-section">
+          <VhHead num="I" title="Onde paramos" link="Todas as crônicas" onLink={() => onNav('sessions')} />
+          <article className="vh-last" onClick={() => onNav('session:' + last.num)}>
+            <div className="vh-last-num">
+              <span className="vh-last-n">{String(last.num).padStart(2, '0')}</span>
+              <span className="vh-last-k">Sessão</span>
+            </div>
+            <div className="vh-last-body">
+              <div className="vh-last-meta">{[last.dateShort, last.location].filter(Boolean).join(' · ')}</div>
+              <h3 className="vh-last-title">{last.title}</h3>
+              {last.summary && <p className="vh-last-summary">{last.summary}</p>}
+              <span className="vh-last-go">Continuar a crônica →</span>
+            </div>
+            {cast.length > 0 && (
+              <div className="vh-last-cast" onClick={e => e.stopPropagation()}>
+                <div className="vh-mini-label">Estavam lá</div>
+                <div className="vh-souls">{cast.slice(0, 6).map(c => <VhSoul key={c.id} c={c} onNav={onNav} />)}</div>
+              </div>
+            )}
+          </article>
+        </section>
+      )}
+
+      {/* III · Os Portões */}
+      <section className="vh-section">
+        <VhHead num="II" title="Os Portões do Arquivo" />
+        <nav className="vh-gates">
+          {VH_GATES.map(g => <VhGate key={g.id} g={g} count={counts[g.id]} onNav={onNav} />)}
+        </nav>
+      </section>
+
+      {/* IV · Almas em destaque */}
+      {featured.length > 0 && (
+        <section className="vh-section">
+          <VhHead num="III" title="Almas da campanha atual" link="Todas as almas" onLink={() => onNav('characters')} />
+          {campName && <p className="vh-sub">{campName}</p>}
+          <div className="vt-gallery vh-featured">
+            {featured.map(c => <VitralCard key={c.id} char={c} onClick={() => onNav('character:' + c.id)} />)}
+          </div>
+        </section>
+      )}
+
+      {/* V · Registro do Arquivo */}
+      <section className="vh-section">
+        <VhHead num="IV" title="Registro do Arquivo" link="Ver todas" onLink={() => onNav('recent')} />
+        <div className="vt-ficha vh-ledger">
+          <VtArchiveFrame />
+          {feed.length === 0
+            ? <p className="vh-ledger-empty">“Nenhuma linha nova no livro desde a última vela.” <span>— o Arquivista</span></p>
+            : (
+              <ol className="vh-ledger-list">
+                {feed.map((f, i) => (
+                  <li key={i} className={'vh-ledger-row vh-ledger-row--' + f.entity_type} onClick={() => f.target && onNav(f.target)}>
+                    <span className="vh-ledger-type">{f.type_label}</span>
+                    <span className="vh-ledger-title">{f.title}{f.subtitle && <em> · {f.subtitle}</em>}</span>
+                    <span className="vh-ledger-when">{f.action === 'NOVO' ? 'Novo' : 'Editado'} · {f.date_label}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+        </div>
+      </section>
+
+      {/* VI · O Continente */}
+      <section className="vh-section">
+        <VhHead num="V" title="Pelas veias do continente" link="Abrir o Atlas" onLink={() => onNav('map')} />
+        <div className="vh-map"><PortalMapPreview onNav={onNav} /></div>
+        {realms.length > 0 && (
+          <div className="vh-realms">
+            {realms.map(r => {
+              const Icon = r.sigil && Sigil[r.sigil];
+              return (
+                <button key={r.id} className="vh-realm" style={{ '--pane': r.accent || '#8a8070' }} onClick={() => onNav('map')}>
+                  <span className="vh-realm-icon">{Icon && <Icon style={{ width: '100%', height: '100%' }} />}</span>
+                  <span className="vh-realm-name">{r.name}</span>
+                  {r.eyebrow && <span className="vh-realm-sub">{r.eyebrow}</span>}
+                  {r.desc && <span className="vh-realm-desc">{r.desc}</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <footer className="vt-pantheon-foot">
+        “Tudo o que se esquece continua acontecendo. Por isso escrevemos.”
+        <div className="vt-quote-src">— Arquivista Cael, prefácio do Volume III</div>
+      </footer>
+    </div>
+  );
+}
 window.Portal = Portal;
