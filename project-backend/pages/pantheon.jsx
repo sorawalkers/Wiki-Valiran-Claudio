@@ -201,13 +201,10 @@ function PantheonLab({ onNav }) {
   all.forEach(d => { artUrl[d.id] = useVtSlotUrl('deity-hero-' + d.id); });
   const hasArt = d => !!artUrl[d.id];
   const withArt = all.filter(hasArt), noArt = all.filter(d => !hasArt(d));
-  // cada formato recebe uma divindade com arte e uma só com o símbolo (quando houver)
-  const pick = (i) => [withArt[i], noArt[i]].filter(Boolean);
-  let circ = pick(0), oval = pick(1);
-  const rest = all.filter(d => !circ.includes(d) && !oval.includes(d));
-  while (circ.length < 2 && rest.length) circ.push(rest.shift());
-  while (oval.length < 2 && rest.length) oval.push(rest.shift());
-  const big = [withArt[0] || all[0], noArt[0] || all[1]].filter(Boolean);
+  // as mesmas duas divindades nos dois formatos: uma com arte e uma só com o símbolo (quando houver)
+  const pair = [withArt[0], noArt[0]].filter(Boolean);
+  for (const d of all) { if (pair.length >= 2) break; if (!pair.includes(d)) pair.push(d); }
+  const big = pair;
 
   const Card = ({ d, shape }) => (
     <div className="vt-lab-col">
@@ -235,12 +232,12 @@ function PantheonLab({ onNav }) {
           <span className="vt-tier-num">I <small>/ II</small></span>
           <div>
             <h2 className="vt-tier-name">Teste · Galeria</h2>
-            <p className="vt-tier-desc">Duas divindades no espelho circular e duas no oval, com placa e domínio.</p>
+            <p className="vt-tier-desc">As mesmas duas divindades no espelho circular e no oval, com placa e domínio.</p>
           </div>
         </header>
         <div className="vt-lab-row">
-          {circ.map(d => <Card key={'c' + d.id} d={d} shape="circular" />)}
-          {oval.map(d => <Card key={'o' + d.id} d={d} shape="oval" />)}
+          {pair.map(d => <Card key={'c' + d.id} d={d} shape="circular" />)}
+          {pair.map(d => <Card key={'o' + d.id} d={d} shape="oval" />)}
         </div>
       </section>
       <section className="vt-tier vt-tier--tita">
