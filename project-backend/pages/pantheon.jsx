@@ -300,9 +300,9 @@ window.PantheonLab = PantheonLab;
 // Coordenadas no viewBox 1000×1000, centro (500,500).
 // ============================================================
 const PR_RINGS = [
-  { tier: 'tita',      rIn: 100, rOut: 205, rMed: 152, minSlots: 6,  maxD: 92 },
-  { tier: 'deus',      rIn: 205, rOut: 355, rMed: 280, minSlots: 16, maxD: 104 },
-  { tier: 'ascendido', rIn: 355, rOut: 468, rMed: 411, minSlots: 12, maxD: 92 },
+  { tier: 'tita',      rIn: 97,  rOut: 237, rMed: 167, minSlots: 6,  maxD: 92 },
+  { tier: 'deus',      rIn: 237, rOut: 397, rMed: 317, minSlots: 16, maxD: 104 },
+  { tier: 'ascendido', rIn: 397, rOut: 488, rMed: 443, minSlots: 12, maxD: 78 },
 ];
 const prPolar = (r, a) => [500 + r * Math.cos(a), 500 + r * Math.sin(a)];
 function prSector(rIn, rOut, a0, a1) {
@@ -315,6 +315,9 @@ function prSector(rIn, rOut, a0, a1) {
 function PantheonRose({ onNav }) {
   const all = Object.values(Entities.deities).filter(d => d && d.name);
   const [active, setActive] = React.useState(null);
+  // vitral de cada divindade (o mesmo da galeria); quem não tem fica com o medalhão do símbolo
+  const vitrais = {};
+  all.forEach(d => { vitrais[d.id] = useVtSlotUrl('deity-vitral-' + d.id); });
 
   // distribui cada nível pelas casas do seu anel; casas sobrando ficam como vidro vazio
   const rings = PR_RINGS.map(ring => {
@@ -324,7 +327,12 @@ function PantheonRose({ onNav }) {
     const start = -Math.PI / 2;                       // primeira casa no topo
     const at = new Map(gods.map((d, i) => [Math.round(i * slots / gods.length) % slots, d]));
     const d = Math.min(ring.maxD, 2 * Math.PI * ring.rMed / slots * 0.8);
-    return { ...ring, gods, slots, step, start, at, d };
+    // pétala = vitral oval (2:3) deitado no raio, a ponta de cima virada para fora
+    // (no anel de fora sobra espaço entre os lóbulos, então a pétala pode passar da faixa)
+    const band = (ring.rOut - ring.rIn) * (ring.tier === 'ascendido' ? 1.3 : 0.92);
+    const pw = Math.min(band / 1.5, 2 * Math.PI * ring.rMed / slots * 0.9);
+    const ph = pw * 1.5;
+    return { ...ring, gods, slots, step, start, at, d, pw, ph };
   });
 
   const cur = active || null;
@@ -363,7 +371,7 @@ function PantheonRose({ onNav }) {
             {Array.from({ length: rings[2].slots }, (_, i) => {
               const [x, y] = prPolar(rings[2].rMed, rings[2].start + i * rings[2].step);
               const R = rings[2].d / 2 + 9;
-              if (rings[2].at.has(i)) return <circle key={'lobe' + i} cx={x} cy={y} r={R} className="pr-lead" />;
+              if (rings[2].at.has(i)) return vitrais[rings[2].at.get(i).id] ? null : <circle key={'lobe' + i} cx={x} cy={y} r={R} className="pr-lead" />;
               // lóbulo vazio: vidro com uma quadrifólia de chumbo
               return (
                 <g key={'lobe' + i}>
@@ -384,7 +392,7 @@ function PantheonRose({ onNav }) {
               return <line key={'s' + ring.tier + i} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead" />;
             }))}
             {/* chumbo: anéis, com filete dourado */}
-            {[100, 205, 355, 468].map(r => (
+            {[97, 237, 397, 488].map(r => (
               <g key={r}>
                 <circle cx="500" cy="500" r={r} className="pr-lead pr-lead--ring" />
                 <circle cx="500" cy="500" r={r} className="pr-gilt" />
@@ -402,7 +410,19 @@ function PantheonRose({ onNav }) {
 
           {/* medalhões (HTML por cima do SVG, para os símbolos e o clique) */}
           {rings.map(ring => [...ring.at.entries()].map(([slot, d]) => {
-            const [x, y] = prPolar(ring.rMed, ring.start + slot * ring.step);
+            const a = ring.start + slot * ring.step;
+            const [x, y] = prPolar(ring.rMed, a);
+            if (vitrais[d.id]) return (
+              <button key={d.id}
+                className={'pr-petal pr-med--' + ring.tier + (cur && cur.id === d.id ? ' is-active' : '')}
+                style={{ left: x / 10 + '%', top: y / 10 + '%', width: ring.pw / 10 + '%', height: ring.ph / 10 + '%',
+                  '--rot': (a * 180 / Math.PI + 90) + 'deg' }}
+                onMouseEnter={() => setActive(d)} onFocus={() => setActive(d)}
+                onClick={() => onNav('deity:' + d.id)}
+                aria-label={d.name}>
+                <img src={vitrais[d.id]} alt="" draggable="false" />
+              </button>
+            );
             return (
               <button key={d.id}
                 className={'pr-med pr-med--' + ring.tier + (cur && cur.id === d.id ? ' is-active' : '')}
