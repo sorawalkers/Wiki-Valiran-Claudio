@@ -1636,3 +1636,13 @@
   .vt-deity-vitral--catedral { width: 260px; } .vt-deity-vitral--roseta { width: 320px; }
 }
 .vt-lab-banner + .vt-article { min-height: 0; }
+.vt-deity-vitral--card.vt-deity-vitral--roseta   { width: 270px; }
+.vt-deity-vitral--card.vt-deity-vitral--catedral { width: 210px; }
+.vt-deity-vitral--card { transition: filter .2s ease; filter: drop-shadow(0 18px 24px rgba(0,0,0,.8)); }
+.vt-deity-card:hover .vt-deity-vitral--card { filter: brightness(1.12) drop-shadow(0 0 22px rgba(232,170,70,.45)); }
+.vt-deity-card:has(.vt-deity-vitral--card) .vt-votive { margin-top: -10px; }
+@media (max-width: 900px) {
+  .vt-deity-vitral--card.vt-deity-vitral--roseta   { width: 190px; }
+  .vt-deity-vitral--card.vt-deity-vitral--catedral { width: 150px; }
+}
+.vt-pantheon:has(+ .vt-lab-banner) { min-height: 0; }

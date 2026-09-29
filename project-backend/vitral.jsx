@@ -979,19 +979,25 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 // ── Card do panteão ──────────────────────────────────────────────
 // A divindade na rosácea: a arte de destaque enquadrada; sem arte, o sigilo
 // dela aceso no centro do vão, sobre vidro escuro. Moldura: a rosácea-relicário.
-function VitralDeityCard({ deity, tone, shape, onClick }) {
+function VitralDeityCard({ deity, tone, shape, vitral, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
   const dominio = vtRow(deity, /^dom[ií]nio/i);
   const tier = tone || vtDeityTier(deity);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
-      <VtDeityFrame tier={tier} shape={shape} className="vt-rose-card" sizes="280px">
+      {vitral
+        ? (
+          // vitral completo da divindade (teste): a moldura já faz parte da arte
+          <img className={'vt-deity-vitral vt-deity-vitral--card vt-deity-vitral--' + vitral.shape}
+            src={vtAsset(vitral.file + '-sm.webp')} alt={'Vitral de ' + deity.name} draggable="false" />
+        )
+        : (<VtDeityFrame tier={tier} shape={shape} className="vt-rose-card" sizes="280px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
             <VtSigilAltar deity={deity} tier={tier} />
           )}
-      </VtDeityFrame>
+      </VtDeityFrame>)}
       {/* placa votiva: metal escuro com filete dourado, pontas em flecha e um vidro na cor do nível */}
       <div className="vt-votive">
         <span className="vt-votive-gem" aria-hidden="true" />
