@@ -1817,3 +1817,21 @@
 .vt-uploader-list em { color: var(--vt-gold); font-style: normal; }
 .vt-uploader-note { margin: 0; font-size: 14px; color: var(--vt-ink-muted); }
 .vt-uploader-actions { display: flex; gap: 10px; }
+
+/* Galeria do Panteão mais compacta: vitrais e espelhos menores, mais colunas por linha */
+.vt-deity-gallery { grid-template-columns: repeat(auto-fit, 220px) !important; gap: 40px 20px; }
+.vt-deity-gallery .vt-deity-vitral--card.vt-deity-vitral--catedral { width: 165px; }
+.vt-deity-gallery .vt-mirror--oval.vt-rose-card { width: 150px; height: 225px; }
+.vt-deity-gallery .vt-mirror--circular.vt-rose-card { width: 200px; height: 200px; }
+.vt-deity-gallery .vt-votive { min-width: 0; width: 210px; max-width: 210px; padding: 12px 26px 10px; }
+.vt-deity-gallery .vt-votive-name { font-size: 14px; }
+.vt-deity-gallery .vt-votive-title { font-size: 14px; }
+.vt-deity-gallery .vt-card-sub { font-size: 10px; }
+@media (max-width: 900px) {
+  .vt-deity-gallery { grid-template-columns: repeat(2, minmax(0, 170px)) !important; gap: 28px 10px; }
+  .vt-deity-gallery .vt-deity-vitral--card.vt-deity-vitral--catedral { width: 125px; }
+  .vt-deity-gallery .vt-mirror--oval.vt-rose-card { width: 116px; height: 174px; }
+  .vt-deity-gallery .vt-votive { width: 165px; max-width: 165px; padding: 9px 18px 8px; }
+  .vt-deity-gallery .vt-votive-name { font-size: 12px; }
+  .vt-deity-gallery .vt-votive-title { font-size: 12.5px; }
+}
