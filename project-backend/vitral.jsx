@@ -208,12 +208,16 @@ function vtDeityTier(d) {
 // Espelho oval (teste): moldura alternativa para as divindades, no lugar das rosáceas.
 // VT_DEITY_SHAPE = 'rosa' volta para as rosáceas por nível.
 const VT_DEITY_SHAPE = 'oval';
-const VT_DEITY_MIRROR = { id: 'espelho-oval', file: 'espelho-oval', box: [21.0, 18.2, 20.8, 18.6] };
+const VT_DEITY_MIRRORS = {
+  oval:     { id: 'espelho-oval',     file: 'espelho-oval',     box: [21.0, 18.2, 20.8, 18.6] },
+  circular: { id: 'espelho-circular', file: 'espelho-circular', box: [20.0, 21.0, 20.2, 22.1] },   // teste
+};
 
-function VtDeityFrame({ tier, className = '', sizes, children }) {
-  if (VT_DEITY_SHAPE === 'oval') {
+function VtDeityFrame({ tier, shape = VT_DEITY_SHAPE, className = '', sizes, children }) {
+  const mirror = VT_DEITY_MIRRORS[shape];
+  if (mirror) {
     return (
-      <VtGothicWindow frame={VT_DEITY_MIRROR} className={'vt-mirror vt-mirror--' + tier + ' ' + className} sizes={sizes}>
+      <VtGothicWindow frame={mirror} className={'vt-mirror vt-mirror--' + shape + ' vt-mirror--' + tier + ' ' + className} sizes={sizes}>
         {children}
       </VtGothicWindow>
     );
@@ -953,13 +957,13 @@ function VitralCard({ char, onClick, onEdit, isEditor }) {
 // ── Card do panteão ──────────────────────────────────────────────
 // A divindade na rosácea: a arte de destaque enquadrada; sem arte, o sigilo
 // dela aceso no centro do vão, sobre vidro escuro. Moldura: a rosácea-relicário.
-function VitralDeityCard({ deity, tone, onClick }) {
+function VitralDeityCard({ deity, tone, shape, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
   const dominio = vtRow(deity, /^dom[ií]nio/i);
   const tier = tone || vtDeityTier(deity);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
-      <VtDeityFrame tier={tier} className="vt-rose-card" sizes="280px">
+      <VtDeityFrame tier={tier} shape={shape} className="vt-rose-card" sizes="280px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
@@ -983,3 +987,4 @@ window.VitralCard    = VitralCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
+Object.assign(window, { useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

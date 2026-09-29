@@ -190,3 +190,75 @@ function Pantheon({ onNav }) {
 }
 
 window.Pantheon = Pantheon;
+
+// ============================================================
+// Página de teste (#/pantheon-teste): espelho circular × oval
+// ============================================================
+function PantheonLab({ onNav }) {
+  const all = Object.values(Entities.deities).filter(d => d && d.name);
+  // arte de cada uma (reativo: o estado das imagens chega depois do primeiro render)
+  const artUrl = {};
+  all.forEach(d => { artUrl[d.id] = useVtSlotUrl('deity-hero-' + d.id); });
+  const hasArt = d => !!artUrl[d.id];
+  const withArt = all.filter(hasArt), noArt = all.filter(d => !hasArt(d));
+  // cada formato recebe uma divindade com arte e uma só com o símbolo (quando houver)
+  const pick = (i) => [withArt[i], noArt[i]].filter(Boolean);
+  let circ = pick(0), oval = pick(1);
+  const rest = all.filter(d => !circ.includes(d) && !oval.includes(d));
+  while (circ.length < 2 && rest.length) circ.push(rest.shift());
+  while (oval.length < 2 && rest.length) oval.push(rest.shift());
+  const big = [withArt[0] || all[0], noArt[0] || all[1]].filter(Boolean);
+
+  const Card = ({ d, shape }) => (
+    <div className="vt-lab-col">
+      <span className="vt-lab-tag">{shape === 'circular' ? 'Circular' : 'Oval'}</span>
+      <VitralDeityCard deity={d} shape={shape} onClick={() => onNav('deity:' + d.id)} />
+    </div>
+  );
+  const Big = ({ d, shape }) => (
+    <div className="vt-lab-col">
+      <span className="vt-lab-tag">{shape === 'circular' ? 'Circular' : 'Oval'} · {d.name}</span>
+      <div className="vt-portrait-shadow">
+        <VtDeityFrame tier={vtDeityTier(d)} shape={shape} className="vt-portrait vt-portrait--rose" sizes="460px">
+          {hasArt(d)
+            ? <VtFramedImage url={artUrl[d.id]} framing={vtFraming(d)} />
+            : <VtSigilAltar deity={d} tier={vtDeityTier(d)} />}
+        </VtDeityFrame>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="vt vt-pantheon">
+      <section className="vt-tier vt-tier--deus">
+        <header className="vt-tier-head">
+          <span className="vt-tier-num">I <small>/ II</small></span>
+          <div>
+            <h2 className="vt-tier-name">Teste · Galeria</h2>
+            <p className="vt-tier-desc">Duas divindades no espelho circular e duas no oval, com placa e domínio.</p>
+          </div>
+        </header>
+        <div className="vt-lab-row">
+          {circ.map(d => <Card key={'c' + d.id} d={d} shape="circular" />)}
+          {oval.map(d => <Card key={'o' + d.id} d={d} shape="oval" />)}
+        </div>
+      </section>
+      <section className="vt-tier vt-tier--tita">
+        <header className="vt-tier-head">
+          <span className="vt-tier-num">II <small>/ II</small></span>
+          <div>
+            <h2 className="vt-tier-name">Teste · Tamanho do artigo</h2>
+            <p className="vt-tier-desc">A mesma divindade nos dois espelhos, no tamanho do topo da página dela.</p>
+          </div>
+        </header>
+        {big.map(d => (
+          <div key={d.id} className="vt-lab-row">
+            <Big d={d} shape="circular" />
+            <Big d={d} shape="oval" />
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+window.PantheonLab = PantheonLab;

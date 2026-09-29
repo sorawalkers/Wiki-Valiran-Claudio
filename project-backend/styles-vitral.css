@@ -1484,3 +1484,21 @@
 }
 .vt-altar-medal > .deity-sigil-render { width: 84%; height: 84%; filter: drop-shadow(0 0 8px rgba(201,165,90,.4)); }
 .vt-altar-medal > .deity-sigil-render:has(.deity-sigil-photo) { width: 100%; height: 100%; }
+
+/* ── Espelho circular (teste, #/pantheon-teste) ────────────────── */
+.vt-mirror--circular { aspect-ratio: 1; }
+.vt-mirror--circular.vt-rose-card { width: 270px; height: 270px; }
+.vt-mirror--circular.vt-portrait--rose { width: 440px; height: 440px; }
+.vt-mirror--circular .vt-altar-medal { width: 54%; }
+.vt-lab-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 48px 64px; padding: 40px 24px 48px; }
+.vt-lab-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.vt-lab-tag { font: 600 11px/1 var(--vt-display); letter-spacing: .28em; text-transform: uppercase; color: var(--vt-gold); opacity: .7; }
+@media (max-width: 900px) {
+  .vt-deity-gallery .vt-mirror--circular.vt-rose-card { width: 190px; height: 190px; }
+  .vt-mirror--circular.vt-portrait--rose { width: 300px; height: 300px; }
+  .vt-lab-row { gap: 32px; padding: 24px 8px 32px; }
+}
+@media (max-width: 900px) {
+  .vt-lab-row .vt-mirror--circular.vt-rose-card { width: 190px; height: 190px; }
+  .vt-lab-row .vt-mirror--oval.vt-rose-card { width: 150px; height: 225px; }
+}
