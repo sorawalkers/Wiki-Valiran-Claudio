@@ -1115,10 +1115,173 @@ function VitralDeityCard({ deity, tone, shape, vitral, onClick }) {
   );
 }
 
+
+// ════════════════════════════════════════════════════════════════
+// Artigo de divindade como altar (protótipo, #/deity-altar-teste)
+// Topo: vitral + nome/título/frase + ficha em faixa. Corpo: texto corrido
+// com capitular, Dogmas como tábua de mandamentos, relações divinas por
+// tipo e os fiéis (personagens que citam a divindade).
+// ════════════════════════════════════════════════════════════════
+const VA_TIER_NAME = { tita: 'Titã', deus: 'Divindade', ascendido: 'Ascendido' };
+
+// "Xathyr (inimigo declarado)" → grupo pela palavra entre parênteses
+function vaRelGroup(r) {
+  const note = ((/\(([^)]+)\)\s*$/.exec(r.title || '') || [])[1] || '').toLowerCase();
+  if (/inimig|opost|rival|advers|contr[aá]/.test(note)) return 'Adversários';
+  if (/criador|criadora|pai|m[ãa]e|origem|mestre|senhor/.test(note)) return 'Origem';
+  if (/filh|cria[çc]|ascend|herdeir|servo|serva|seguidor/.test(note)) return 'Descendência';
+  return 'Laços';
+}
+const VA_REL_ORDER = ['Origem', 'Laços', 'Descendência', 'Adversários'];
+
+function VaRelated({ r, onNav }) {
+  const m = /^(.*?)\s*\(([^)]+)\)\s*$/.exec(r.title || '');
+  const name = m ? m[1] : r.title, note = m ? m[2] : '';
+  const deityId = /^deity:(.+)$/.exec(r.target || '')?.[1];
+  const d = deityId && Entities.deities[deityId];
+  const vitral = useVtSlotUrl(VT_DEITY_VITRAL_SLOT + (deityId || '_'));
+  return (
+    <button className={'va-rel' + (d ? ' va-rel--deity' : '')} onClick={() => r.target && onNav(r.target)}>
+      <span className="va-rel-art">
+        {d && vitral ? <img src={vitral} alt="" draggable="false" />
+          : d ? <span className="va-rel-sigil"><DeitySigilImage deity={d} size="card" /></span>
+          : <span className="va-rel-tag">{r.tag}</span>}
+      </span>
+      <span className="va-rel-name">{name}</span>
+      {note && <span className="va-rel-note">{note}</span>}
+    </button>
+  );
+}
+
+function VaFaithful({ c, onNav }) {
+  const url = useVtSlotUrl('char-portrait-' + c.id);
+  return (
+    <button className="vh-soul va-faithful" onClick={() => onNav((c.tag === 'PC' ? 'character:' : 'npc:') + c.id)} title={c.name}>
+      <VtGothicWindow frame={VT_FRAMES[0]} className="vh-soul-window" sizes="80px">
+        <VtFramedImage url={url} framing={vtFraming(c)} placeholder="" />
+      </VtGothicWindow>
+      <span className="vh-soul-name">{c.name.split(' ')[0]}</span>
+      <span className="va-faithful-role">{c.role || c.tag}</span>
+    </button>
+  );
+}
+
+function VitralDeityAltar({ c, onNav, isEditor, onEdit }) {
+  const tier = vtDeityTier(c);
+  const vitral = useVtSlotUrl(VT_DEITY_VITRAL_SLOT + c.id);
+  const rows = (c.infobox?.rows || []).filter(r => r && r.k && (r.v || r.v === 0));
+  const sections = c.placeholder ? [] : (c.sections || []);
+  const dogmas = sections.filter(s => /dogma|mandamento|preceito/i.test(s.title || ''));
+  const prose = sections.filter(s => !dogmas.includes(s));
+
+  const groups = {};
+  (c.related || []).forEach(r => { (groups[vaRelGroup(r)] = groups[vaRelGroup(r)] || []).push(r); });
+
+  // fiéis: personagens que citam a divindade no papel ou na ficha
+  const re = new RegExp('\\b' + (c.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  const faithful = Object.values(Entities.characters || {}).filter(p => p && p.name &&
+    (re.test(p.role || '') || (p.infobox?.rows || []).some(r => re.test(String(r.v || '')))));
+
+  const epigraph = c.hero;
+
+  return (
+    <div className={'vt vt-article va va--' + tier}>
+      <div className="vt-topbar">
+        <nav className="vt-breadcrumb">
+          <a onClick={() => onNav('pantheon')}>Panteão</a>
+          <span className="vt-bc-sep" aria-hidden="true" />
+          <span>{VA_TIER_NAME[tier]}</span>
+          <span className="vt-bc-sep" aria-hidden="true" />
+          <span className="vt-breadcrumb-current">{c.name}</span>
+        </nav>
+        <div className="vt-topbar-actions">
+          {isEditor && <button className="vt-btn" onClick={onEdit}>Editar artigo</button>}
+        </div>
+      </div>
+
+      <section className="va-hero">
+        <div className="va-window">
+          {vitral
+            ? <img className="vt-deity-vitral va-vitral" src={vitral} alt={'Vitral de ' + c.name} draggable="false" />
+            : <VtPortrait c={c} slotId={'deity-hero-' + c.id} rose fallback={<VtSigilAltar deity={c} tier={tier} />} />}
+        </div>
+        <div className="va-head">
+          <div className="vt-label">{VA_TIER_NAME[tier]} · Panteão de Valiran</div>
+          <h1 className="vt-h1">{c.name}</h1>
+          {c.epithet && <div className="vt-epithet">{c.epithet}</div>}
+          <VtDivider />
+          {epigraph && <blockquote className="va-epigraph">“{epigraph}”</blockquote>}
+          {rows.length > 0 && (
+            <dl className="va-attrs">
+              {rows.map((r, i) => (
+                <div key={i} className={'va-attr' + (r.danger ? ' is-danger' : '')}>
+                  <dt>{r.k}</dt>
+                  <dd>{r.v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      </section>
+
+      {prose.length > 0 && (
+        <section className="va-body">
+          {prose.map((s, i) => (
+            <article key={i} className="va-prose">
+              {(prose.length > 1 || !/descri/i.test(s.title || '')) && <h2 className="va-h2">{s.title}</h2>}
+              {(s.paras || []).map((p, j) => <p key={j} className={i === 0 && j === 0 ? 'va-first' : ''}>{p}</p>)}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {dogmas.map((s, i) => (
+        <section key={i} className="va-dogmas">
+          <div className="va-tablet">
+            <div className="vt-label va-tablet-label">{s.title}</div>
+            <ol>
+              {(s.paras || []).map((p, j) => (
+                <li key={j}><span className="va-roman">{vtRoman(j + 1)}</span><span className="va-law">{p}</span></li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      ))}
+
+      {Object.keys(groups).length > 0 && (
+        <section className="va-section">
+          <h2 className="va-h2 va-h2--center">Relações divinas</h2>
+          <div className="va-rel-groups">
+            {VA_REL_ORDER.filter(g => groups[g]).map(g => (
+              <div key={g} className={'va-rel-group va-rel-group--' + g.toLowerCase()}>
+                <div className="vt-label">{g}</div>
+                <div className="va-rel-row">{groups[g].map((r, i) => <VaRelated key={i} r={r} onNav={onNav} />)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {faithful.length > 0 && (
+        <section className="va-section">
+          <h2 className="va-h2 va-h2--center">Fiéis e ecos</h2>
+          <p className="va-sub">Almas do Arquivo que carregam o nome de {c.name}.</p>
+          <div className="va-faithful-row">{faithful.slice(0, 8).map(p => <VaFaithful key={p.id} c={p} onNav={onNav} />)}</div>
+        </section>
+      )}
+
+      <footer className="vt-pantheon-foot va-foot">
+        ✠ {VA_TIER_NAME[tier]} · Panteão de Valiran ✠
+        <div className="vt-quote-src"><a onClick={() => onNav('pantheon')}>Voltar ao Panteão</a></div>
+      </footer>
+    </div>
+  );
+}
+
 window.ogivePath     = ogivePath;
 window.VitralArticle = VitralArticle;
 window.VitralCard    = VitralCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

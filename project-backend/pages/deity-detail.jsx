@@ -82,3 +82,21 @@ function DeityVitralLab({ onNav }) {
   );
 }
 window.DeityVitralLab = DeityVitralLab;
+
+// Teste (#/deity-altar-teste): nova estrutura do artigo de divindade com Lamidriel e a Senhora da Rapina.
+function DeityAltarLab({ onNav }) {
+  const ids = ['lamidriel', 'senhora-da-rapina'];
+  const list = ids.map(id => Entities.deities[id]).filter(Boolean);
+  if (!list.length) return <div className="page"><p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>Carregando…</p></div>;
+  return (
+    <React.Fragment>
+      {list.map((d, i) => (
+        <React.Fragment key={d.id}>
+          <div className="vt-lab-banner">Protótipo {vtRoman(i + 1)} · {d.name}</div>
+          <VitralDeityAltar c={d} onNav={onNav} />
+        </React.Fragment>
+      ))}
+    </React.Fragment>
+  );
+}
+window.DeityAltarLab = DeityAltarLab;
