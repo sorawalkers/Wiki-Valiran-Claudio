@@ -90,7 +90,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 |------|------|-------------|
 | `portal.jsx` | Home / Dashboard | Recent activity feed |
 | `pantheon.jsx` | Pantheon | Deity directory in 3 tiers (Titãs, Deuses, Ascendidos), each a stained-glass panel; deities shown with `VitralDeityCard` (the tier's rose-window reliquary + a votive nameplate `.vt-votive` with name and epithet) |
-| `deity-detail.jsx` | Deity article | Vitral article (`VitralArticle kind="deity"`): hero art in the round rose-window reliquary for its tier (`VT_ROSES` in `vitral.jsx`: `rosacea-titas` / `rosacea-deuses` / `rosacea-ascendidos`, tier from the `Tipo` row via `vtDeityTier`; circular opening sized per file; sigil when no art), sigil medallion, badge from the `Tipo` row, ficha, chapters, related |
+| `deity-detail.jsx` | Deity article | Altar layout (`VitralDeityAltar` in `vitral.jsx`): the deity's full stained glass (image slot `deity-vitral-<id>`, same as the gallery; falls back to the oval mirror with `deity-hero-<id>`), tier label, name, epithet, epigraph, ficha rows as glass plaques, prose sections with a drop cap, `Dogmas` sections as a numbered stone tablet, related links grouped by the note in parentheses (Origem / Laços / Descendência / Adversários) and characters whose role or ficha names the deity (Fiéis e ecos) |
 | `characters.jsx` | Characters | PC + NPC directory, filterable by campaign/tag |
 | `npcs.jsx` | NPCs | NPC-only directory |
 | `character-detail.jsx` | Character article | Full character profile with infobox and sections |

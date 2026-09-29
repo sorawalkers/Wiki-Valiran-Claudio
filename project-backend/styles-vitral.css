@@ -1928,3 +1928,4 @@
 .va-rel-group { padding: 16px 20px 18px; min-width: 170px;
   border: 1px solid rgba(201,165,90,.12); background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
 .va-rel-group--adversários { border-color: rgba(168,53,43,.3); background: linear-gradient(180deg, rgba(168,53,43,.08), transparent); }
+.va-prose { display: flow-root; }   /* a capitular não invade a seção seguinte */

@@ -20,12 +20,9 @@ function DeityDetail({ id, onNav }) {
 
   return (
     <React.Fragment>
-      <VitralArticle
+      <VitralDeityAltar
         c={d}
-        kind="deity"
         onNav={onNav}
-        backTo="pantheon"
-        backLabel="Panteão"
         isEditor={isEditor}
         onEdit={() => setEditModal(true)}
       />
