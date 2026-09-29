@@ -1929,12 +1929,3 @@
   border: 1px solid rgba(201,165,90,.12); background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
 .va-rel-group--adversários { border-color: rgba(168,53,43,.3); background: linear-gradient(180deg, rgba(168,53,43,.08), transparent); }
 .va-prose { display: flow-root; }   /* a capitular não invade a seção seguinte */
-
-/* rosácea do Panteão com os vitrais: cada divindade é uma pétala */
-.pr-petal { position: absolute; padding: 0; border: 0; background: none; cursor: pointer;
-  transform: translate(-50%, -50%) rotate(var(--rot)); transition: transform .25s ease, filter .25s ease;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,.8)); }
-.pr-petal img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.pr-petal:hover, .pr-petal:focus-visible, .pr-petal.is-active { outline: none; z-index: 3;
-  transform: translate(-50%, -50%) rotate(var(--rot)) scale(1.28);
-  filter: brightness(1.15) drop-shadow(0 0 18px rgba(240,200,120,.55)); }
