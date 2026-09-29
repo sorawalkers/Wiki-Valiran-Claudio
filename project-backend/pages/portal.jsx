@@ -405,12 +405,10 @@ function Portal({ onNav }) {
             ))}
           </div>
         </div>
-        <button className="vh-hero-rose" onClick={() => onNav('pantheon')} aria-label="Abrir o Panteão">
-          <VtRoseWindow tier="deus" sizes="(max-width: 900px) 300px, 520px">
-            <div className="vh-rose-light" />
-          </VtRoseWindow>
-          <span className="vh-rose-cap">Entrar no Panteão</span>
-        </button>
+        <div className="vh-hero-wheel">
+          <PantheonRose embed onNav={onNav} />
+          <button className="vh-rose-cap" onClick={() => onNav('pantheon')}>Entrar no Panteão →</button>
+        </div>
       </section>
 
       {/* II · Onde paramos */}

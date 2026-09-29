@@ -312,7 +312,8 @@ function prSector(rIn, rOut, a0, a1) {
   return `M${x0} ${y0} A${rOut} ${rOut} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${rIn} ${rIn} 0 ${big} 0 ${x3} ${y3} Z`;
 }
 
-function PantheonRose({ onNav }) {
+// embed: só a roda + a placa (usada na entrada da home), sem cabeçalho nem legenda
+function PantheonRose({ onNav, embed = false }) {
   const all = Object.values(Entities.deities).filter(d => d && d.name);
   const [active, setActive] = React.useState(null);
 
@@ -331,17 +332,8 @@ function PantheonRose({ onNav }) {
   const curTier = cur ? vtDeityTier(cur) : null;
   const tierName = { tita: 'Titã', deus: 'Deus do Panteão', ascendido: 'Ascendido' };
 
-  return (
-    <div className="vt vt-pantheon">
-      <section className="vt-pantheon-head">
-        <div className="vt-pantheon-head-text">
-          <div className="vt-label">Protótipo · Cosmologia</div>
-          <h1 className="vt-h1">A Rosácea do Panteão</h1>
-          <p className="vt-pantheon-lede">Protótipo: os Titãs no coração da janela, os Deuses no anel do meio, os Ascendidos nos lóbulos de fora. Passe o cursor sobre um vidro.</p>
-        </div>
-      </section>
-
-      <div className="pr-wrap">
+  const wheel = (
+      <div className={'pr-wrap' + (embed ? ' pr-wrap--embed' : '')}>
         <div className="pr-rose">
           <svg className="pr-glass" viewBox="0 0 1000 1000" aria-hidden="true">
             <defs>
@@ -421,19 +413,34 @@ function PantheonRose({ onNav }) {
           <div className="vt-votive">
             <span className="vt-votive-gem" aria-hidden="true" />
             <div className="vt-votive-name">{cur ? cur.name : 'O Panteão de Valiran'}</div>
-            <div className="vt-votive-title">{cur ? (cur.epithet || '') : 'Passe o cursor sobre um vitral'}</div>
+            <div className="vt-votive-title">{cur ? (cur.epithet || '') : 'Passe o cursor sobre um símbolo'}</div>
           </div>
           <div className="vt-card-sub">{cur ? [tierName[curTier], vtRow(cur, /^dom[ií]nio/i)].filter(Boolean).join(' · ') : ''}</div>
         </div>
 
+        {!embed && (
         <div className="pr-legend">
-          {rings.map(r => (
-            <span key={r.tier} className={'pr-legend-item pr-legend-item--' + r.tier}>
-              <i />{{ tita: 'Titãs · anel interno', deus: 'Deuses · anel do meio', ascendido: 'Ascendidos · lóbulos' }[r.tier]} ({r.gods.length})
-            </span>
-          ))}
-        </div>
+            {rings.map(r => (
+              <span key={r.tier} className={'pr-legend-item pr-legend-item--' + r.tier}>
+                <i />{{ tita: 'Titãs · anel interno', deus: 'Deuses · anel do meio', ascendido: 'Ascendidos · lóbulos' }[r.tier]} ({r.gods.length})
+              </span>
+            ))}
+          </div>
+        )}
       </div>
+  );
+  if (embed) return wheel;
+  return (
+    <div className="vt vt-pantheon">
+      <section className="vt-pantheon-head">
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Protótipo · Cosmologia</div>
+          <h1 className="vt-h1">A Rosácea do Panteão</h1>
+          <p className="vt-pantheon-lede">Protótipo: os Titãs no coração da janela, os Deuses no anel do meio, os Ascendidos nos lóbulos de fora. Passe o cursor sobre um vidro.</p>
+        </div>
+      </section>
+
+      {wheel}
     </div>
   );
 }

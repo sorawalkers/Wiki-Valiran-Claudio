@@ -1929,3 +1929,16 @@
   border: 1px solid rgba(201,165,90,.12); background: linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
 .va-rel-group--adversários { border-color: rgba(168,53,43,.3); background: linear-gradient(180deg, rgba(168,53,43,.08), transparent); }
 .va-prose { display: flow-root; }   /* a capitular não invade a seção seguinte */
+
+/* roda do Panteão na entrada da home */
+.vh-hero-wheel { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pr-wrap--embed { padding: 0; gap: 10px; width: 100%; }
+.pr-wrap--embed .pr-rose { width: 100%; }
+.pr-wrap--embed .pr-caption { min-height: 96px; margin-top: 0; }
+.pr-wrap--embed .pr-caption .vt-votive { min-width: 280px; }
+.vh-hero-wheel .vh-rose-cap { background: none; border: 0; cursor: pointer; padding: 4px; }
+.vh-hero-wheel .vh-rose-cap:hover { color: #f0d693; opacity: 1; }
+@media (max-width: 760px) {
+  .vh-hero-wheel { order: -1; width: 100%; max-width: 360px; margin: 0 auto; }
+  .pr-wrap--embed .pr-caption .vt-votive { min-width: 0; }
+}
