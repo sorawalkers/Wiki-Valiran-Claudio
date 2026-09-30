@@ -2066,3 +2066,11 @@
   .vs-pager { padding: 16px; grid-template-columns: 1fr 1fr; }
   .vs-pager-mid { display: none; }
 }
+
+/* artigo de campanha: selo no lugar do retrato */
+.vt-badge--campaign { background: #5a1c18; color: #f3dcd4; border-color: #2c0f0c; }
+.vt-hero-portrait--seal { display: flex; justify-content: center; align-self: center; }
+.vs-seal--campaign { --pane: #9a2a24; width: 320px; }
+.vs-seal--campaign .vs-seal-n { font-size: 120px; }
+@container vt (max-width: 1100px) { .vs-seal--campaign { width: 240px; } .vs-seal--campaign .vs-seal-n { font-size: 90px; } }
+@container vt (max-width: 760px)  { .vs-seal--campaign { width: 170px; } .vs-seal--campaign .vs-seal-n { font-size: 64px; } }

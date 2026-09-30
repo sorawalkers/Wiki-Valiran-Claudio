@@ -724,16 +724,26 @@ const VT_KINDS = {
     indexLabel: () => 'Escrituras',
     empty: 'O arquivista ainda reúne os testemunhos. Origem, dogmas, manifestações e culto serão acrescentados em breve.',
   },
+  // resumo de campanha (Campanha III etc.): sem retrato — no lugar da janela, o selo com o numeral
+  campaign: {
+    slot: c => 'campaign-art-' + c.id,
+    save: e => window.DB.saveCampaignArticle(e),
+    subtitle: c => c.subtitle,
+    context: c => vtRow(c, /^per[ií]odo/i),
+    indexLabel: () => 'Capítulos',
+    empty: 'O escriba ainda transcreve esta campanha.',
+  },
 };
 
 function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit, heroVitral }) {
   const K = VT_KINDS[kind] || VT_KINDS.character;
   const isDeity = kind === 'deity';
-  const isPC = !isDeity && c.tag === 'PC';
+  const isCampaign = kind === 'campaign';
+  const isPC = !isDeity && !isCampaign && c.tag === 'PC';
   const sections = c.placeholder ? [] : (c.sections || []);
   const refs = useVtRef({});
   const [active, setActive] = useVtActiveChapter(sections.length, refs);
-  const campaignShort = isDeity ? '' : vtShortCampaign(c);
+  const campaignShort = isDeity || isCampaign ? '' : vtShortCampaign(c);
   const firstName = (c.name || '').split(' ')[0];
   const slotId = K.slot(c);
   const context = K.context(c);
@@ -790,7 +800,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
           </div>
         )}
         <div className="vt-badge-row">
-          {isDeity ? <VtDeityBadge d={c} /> : <VtBadge c={c} isPC={isPC} />}
+          {isDeity ? <VtDeityBadge d={c} /> : isCampaign ? <span className="vt-badge vt-badge--campaign">Crônica</span> : <VtBadge c={c} isPC={isPC} />}
           {context && <span className="vt-badge-campaign">{context}</span>}
         </div>
         <h1 className="vt-h1">{c.name}</h1>
@@ -807,7 +817,15 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
   // Divindade com vitral (o mesmo da galeria, slot 'deity-vitral-<id>'): entra inteiro no lugar
   // do espelho. heroVitral {file, shape} força um vitral local (páginas de teste).
   const vitralSrc = heroVitral ? vtAsset(heroVitral.file + '.webp') : (isDeity ? deityVitralUrl : null);
-  const portrait = vitralSrc ? (
+  const campaignNum = isCampaign ? ((/\b([IVXL]+)\b\s*$/.exec(c.name || '') || [])[1] || '✠') : null;
+  const portrait = isCampaign ? (
+    <div className="vt-hero-portrait vt-hero-portrait--seal">
+      <div className="vs-seal vs-seal--campaign">
+        <span className="vs-seal-n">{campaignNum}</span>
+        <span className="vs-seal-k">{/^rogue/i.test(c.name || '') ? 'Rogue' : 'Campanha'}</span>
+      </div>
+    </div>
+  ) : vitralSrc ? (
     <div className="vt-hero-portrait">
       <img className={'vt-deity-vitral vt-deity-vitral--' + (heroVitral ? heroVitral.shape : 'catedral')}
         src={vitralSrc}
@@ -833,7 +851,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 
   // Painel de ajuste (editores) fica numa linha própria sob a janela, fora do bloco
   // alinhado, para não empurrar a janela para cima quando aberto.
-  const tools = isEditor && !vitralSrc && (
+  const tools = isEditor && !vitralSrc && !isCampaign && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
             {frameTestOpen ? '− Fechar ajuste' : (isDeity ? '✠ Ajustar arte na rosácea' : '✠ Ajustar vitral e retrato')}
@@ -935,7 +953,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 
       {c.related && c.related.length > 0 && (
         <section className="vt-related">
-          <div className="vt-label">Ligados a {firstName}</div>
+          <div className="vt-label">{isCampaign ? 'Ver também' : 'Ligados a ' + firstName}</div>
           <div className="vt-related-grid">
             {c.related.map((r, i) => (
               <a key={i} className="vt-related-cell" style={{ '--pane': vtRelatedColor(r) }} onClick={() => r.target && onNav(r.target)}>
