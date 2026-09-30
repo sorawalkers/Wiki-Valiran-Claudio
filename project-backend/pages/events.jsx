@@ -123,96 +123,98 @@ function EventModal({ event, onClose }) {
 // ============================================================
 // Events page
 // ============================================================
+// cat do evento → tipo das cores da linha do tempo
+const EV_KIND = { div: 'divine', pol: 'political', cata: 'catastrophe', arc: 'arcane' };
+
 function Events({ onNav }) {
   const { isEditor } = useAuth();
   const [filter, setFilter] = React.useState('todos');
+  const [q, setQ] = React.useState('');
   const [modal, setModal] = React.useState(null);
 
   const events = Data.events || [];
+  const nq = q.trim().toLowerCase();
+  const filtered = events.filter(e => (filter === 'todos' || e.cat === filter) &&
+    (!nq || [e.title, e.desc, e.region, e.year].some(x => String(x || '').toLowerCase().includes(nq))));
+  const counts = {};
+  events.forEach(e => { counts[e.cat] = (counts[e.cat] || 0) + 1; });
 
-  const filters = [
-    { id: 'todos', label: 'Tudo' },
-    ...CAT_OPTIONS,
-  ];
-
-  const filtered = events.filter(e => filter === 'todos' || e.cat === filter);
+  // separa as eras pelo ano: negativo = antes do marco, "AQV" = após a queda de Vranócia
+  const eraOf = e => /aqv/i.test(String(e.year)) ? 'Era Atual · Após a Queda de Vranócia' : 'Era Pré-Vranócia';
+  const groups = [];
+  filtered.forEach(e => {
+    const era = eraOf(e);
+    if (!groups.length || groups[groups.length - 1].era !== era) groups.push({ era, items: [] });
+    groups[groups.length - 1].items.push(e);
+  });
 
   return (
-    <div className="page" data-screen-label="11 Eventos da Era">
-      <header className="page-header">
-        <div className="page-header-row">
-          <div>
-            <div className="page-eyebrow">Crônicas · Volume IV · Eventos catalogados</div>
-            <h1 className="page-title">Eventos da Era</h1>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Novo Evento
-            </button>
-          )}
+    <div className="vt vt-pantheon vev" data-screen-label="11 Eventos da Era">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Crônicas · Eventos catalogados</div>
+          <h1 className="vt-h1">Eventos da Era</h1>
+          <div className="vt-epithet">A linha do tempo é um rio; os eventos são as pedras</div>
+          <p className="vt-pantheon-lede">
+            Os momentos que marcaram cada era, por categoria, data e região.
+            Para a narrativa contínua, <a onClick={() => onNav('timeline')}>veja a Linha do Tempo</a>.
+          </p>
         </div>
-        <p className="page-lede">
-          A linha do tempo é um rio; os eventos são as pedras. Aqui se
-          listam, por categoria e por data, os momentos que marcaram cada
-          uma das três eras. Para narrativa contínua, ver Linha do Tempo.
-        </p>
-      </header>
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Novo evento</button>
+          </div>
+        )}
+      </section>
 
-      <div className="events-controls">
-        <span style={{
-          fontFamily:'JetBrains Mono, monospace', fontSize:10, letterSpacing:'0.22em',
-          textTransform:'uppercase', color:'var(--gold-dim)', marginRight: 8,
-        }}>Filtrar por categoria:</span>
-        {filters.map(f => (
-          <button
-            key={f.id}
-            className={`chip ${filter === f.id ? 'active' : ''}`}
-            onClick={() => setFilter(f.id)}
-          >{f.label}</button>
+      <div className="vtl-filters">
+        <button className={'vtl-filter' + (filter === 'todos' ? ' active' : '')} onClick={() => setFilter('todos')}>Tudo<em>{events.length}</em></button>
+        {CAT_OPTIONS.map(f => (
+          <button key={f.id} className={'vtl-filter' + (filter === f.id ? ' active' : '')}
+            style={{ '--pane': VT_KIND[EV_KIND[f.id]].pane }} onClick={() => setFilter(x => x === f.id ? 'todos' : f.id)}>
+            <i />{f.label}<em>{counts[f.id] || 0}</em>
+          </button>
         ))}
-        <span style={{
-          marginLeft:'auto',
-          fontFamily:'JetBrains Mono, monospace', fontSize:10, letterSpacing:'0.18em',
-          color:'var(--foam-dim)',
-        }}>{filtered.length} de {events.length} eventos</span>
+        <input className="vev-search" type="search" placeholder="Buscar evento, ano ou região…" value={q} onChange={e => setQ(e.target.value)} />
       </div>
 
-      {events.length === 0 && (
-        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
-          Nenhum evento catalogado ainda. Use o botão acima para adicionar.
-        </div>
-      )}
+      {events.length === 0 && <p className="vt-pantheon-empty">Nenhum evento catalogado ainda.</p>}
+      {events.length > 0 && filtered.length === 0 && <p className="vt-pantheon-empty">Nenhum evento corresponde ao filtro.</p>}
 
-      <div className="events-table">
-        <div className="events-row header">
-          <span>Ano</span>
-          <span>Categoria</span>
-          <span>Evento</span>
-          <span style={{textAlign:'right'}}>Região</span>
-        </div>
-        {filtered.map((e, i) => (
-          <div key={e._id || i} className="events-row" onClick={() => e.target && onNav(e.target)}>
-            <span className="events-year">{e.year}</span>
-            <span className={`events-cat ${e.cat}`}>{e.catLabel}</span>
-            <div>
-              <h4 className="events-title">{e.title}</h4>
-              <p className="events-desc">{e.desc}</p>
-            </div>
-            <div style={{ textAlign:'right', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
-              <span className="events-region">{e.region && e.region.toUpperCase()}</span>
-              {isEditor && (
-                <button
-                  className="editor-del-btn"
-                  style={{ opacity:1 }}
-                  onClick={ev => { ev.stopPropagation(); setModal(e); }}
-                >
-                  Editar
-                </button>
-              )}
-            </div>
+      {groups.map(g => (
+        <section key={g.era} className="vh-section vev-group">
+          <header className="vh-head">
+            <span className="vh-head-num">✠</span>
+            <h2 className="vh-head-title">{g.era}</h2>
+            <span className="vev-count">{g.items.length} {g.items.length === 1 ? 'evento' : 'eventos'}</span>
+          </header>
+          <div className="vt-ficha vh-ledger vev-ledger">
+            <VtArchiveFrame />
+            <ol className="vh-ledger-list">
+              {g.items.map((e, i) => (
+                <li key={e._id || i} className={'vev-row' + (e.target ? ' is-link' : '')}
+                  style={{ '--pane': VT_KIND[EV_KIND[e.cat]] ? VT_KIND[EV_KIND[e.cat]].pane : '#8a8070' }}
+                  onClick={() => e.target && onNav(e.target)}>
+                  <span className="vev-year">{e.year}</span>
+                  <span className="vh-ledger-type vev-cat">{e.catLabel || CAT_LABELS[e.cat]}</span>
+                  <div className="vev-body">
+                    <h3 className="vev-title">{e.title}</h3>
+                    {e.desc && <p className="vev-desc">{e.desc}</p>}
+                  </div>
+                  <span className="vev-region">{e.region}</span>
+                  {isEditor && <button className="vt-btn vtl-edit" onClick={ev => { ev.stopPropagation(); setModal(e); }}>Editar</button>}
+                </li>
+              ))}
+            </ol>
           </div>
-        ))}
-      </div>
+        </section>
+      ))}
+
+      <footer className="vt-pantheon-foot">
+        “Cada pedra no rio muda o curso da água um pouco. Algumas mudam tudo.”
+        <div className="vt-quote-src">— Arquivista Cael</div>
+      </footer>
 
       {modal && (
         <EventModal

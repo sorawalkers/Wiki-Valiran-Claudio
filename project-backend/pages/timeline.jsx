@@ -133,103 +133,119 @@ function TimelineEventModal({ event, onClose }) {
 }
 
 // ============================================================
-// Timeline page
+// Linha do tempo no tema vitral: fio de chumbo central, painéis de vidro
+// alternando dos dois lados, cor pelo tipo; divisores de era como faixas.
 // ============================================================
+const VT_KIND = {
+  divine:      { label: 'Divino',     pane: '#b8873a' },
+  political:   { label: 'Política',   pane: '#3f6a86' },
+  catastrophe: { label: 'Catástrofe', pane: '#9a2a24' },
+  arcane:      { label: 'Arcano',     pane: '#7a5aa8' },
+};
+// tipo pelo campo kind, ou pelo rótulo quando o kind está vazio ("Religioso" → divino)
+function vtKindOf(e) {
+  if (VT_KIND[e.kind]) return e.kind;
+  const l = String(e.label || '').toLowerCase();
+  if (/divin|relig/.test(l)) return 'divine';
+  if (/cat[aá]str/.test(l)) return 'catastrophe';
+  if (/arcan/.test(l)) return 'arcane';
+  if (/pol[ií]t/.test(l)) return 'political';
+  return '';
+}
+
 function Timeline({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
-
+  const [filter, setFilter] = React.useState('');
   const events = Data.timeline || [];
 
-  return (
-    <div className="timeline-page" data-screen-label="04 Linha do Tempo">
-      <header className="page-header">
-        <div className="page-header-row">
-          <div>
-            <div className="page-eyebrow">Crônicas · Volume IV · A Marcha dos Anos</div>
-            <h1 className="page-title">Linha do Tempo</h1>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Novo Evento
-            </button>
-          )}
-        </div>
-        <p className="page-lede">
-          De Cerigane tecendo a Trama Mágica antes do tempo, até a noite em que
-          sete heróis improváveis se cruzaram numa estalagem em Tarvane.
-          Vinte e três mil anos de fios atados, rompidos e reatados.
-        </p>
-      </header>
+  // agrupa por era (os divisores abrem um grupo novo)
+  const groups = [];
+  events.forEach(e => {
+    if (e.era) groups.push({ era: e, items: [] });
+    else {
+      if (!groups.length) groups.push({ era: null, items: [] });
+      groups[groups.length - 1].items.push(e);
+    }
+  });
+  const counts = {};
+  events.forEach(e => { if (!e.era) { const k = vtKindOf(e); counts[k] = (counts[k] || 0) + 1; } });
+  let side = 0;
 
-      <div style={{
-        display:'flex', gap: 12, marginBottom: 32, flexWrap:'wrap',
-        fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase'
-      }}>
-        {['Tudo', 'Divino', 'Política', 'Catástrofe', 'Arcano'].map((f, i) => (
-          <button key={f} style={{
-            padding:'6px 14px',
-            background: i === 0 ? 'rgba(184,153,104,0.15)' : 'transparent',
-            color: i === 0 ? 'var(--gold-bright)' : 'var(--foam-dim)',
-            border:'1px solid ' + (i === 0 ? 'var(--gold-dim)' : 'var(--ink-line)'),
-            borderRadius:'2px',
-            cursor:'pointer'
-          }}>{f}</button>
+  return (
+    <div className="vt vt-pantheon vtl" data-screen-label="04 Linha do Tempo">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Crônicas · A marcha dos anos</div>
+          <h1 className="vt-h1">Linha do Tempo</h1>
+          <div className="vt-epithet">Fios atados, rompidos e reatados</div>
+          <p className="vt-pantheon-lede">
+            Da fundação do Império Vranócio ao ano corrente: as eras de Valiran em ordem,
+            cada acontecimento num vidro da cor do que o moveu.
+          </p>
+        </div>
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Novo evento</button>
+          </div>
+        )}
+      </section>
+
+      <div className="vtl-filters" role="tablist">
+        <button className={'vtl-filter' + (!filter ? ' active' : '')} onClick={() => setFilter('')}>Tudo</button>
+        {Object.entries(VT_KIND).map(([k, v]) => (
+          <button key={k} className={'vtl-filter' + (filter === k ? ' active' : '')} style={{ '--pane': v.pane }}
+            onClick={() => setFilter(f => f === k ? '' : k)}>
+            <i />{v.label}<em>{counts[k] || 0}</em>
+          </button>
         ))}
       </div>
 
-      {events.length === 0 && (
-        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
-          Nenhum evento na linha do tempo ainda. Use o botão acima para adicionar.
-        </div>
-      )}
+      {events.length === 0 && <p className="vt-pantheon-empty">Nenhum evento na linha do tempo ainda.</p>}
 
-      <div className="timeline">
-        {events.map((e, i) => {
-          if (e.era) {
-            return (
-              <div key={i} className="era-divider" style={{ display:'flex', alignItems:'center', gap:12 }}>
-                <div className="era-divider-text">{e.era}</div>
-                {isEditor && (
-                  <button
-                    className="editor-del-btn"
-                    style={{ opacity:1, marginLeft:8 }}
-                    onClick={() => setModal(e)}
-                  >
-                    Editar
-                  </button>
-                )}
-              </div>
-            );
-          }
+      <div className="vtl-track">
+        {groups.map((g, gi) => {
+          const items = g.items.filter(e => !filter || vtKindOf(e) === filter);
           return (
-            <div
-              key={i}
-              className={`timeline-event ${e.kind || ''}`}
-              style={{ position:'relative' }}
-            >
-              <div className="timeline-card">
-                <div className="timeline-date">
-                  <span className="year">{e.year}</span>
-                  <span>· {e.label}</span>
-                  <span className="tag">{e.tag}</span>
-                  {isEditor && (
-                    <button
-                      className="editor-del-btn"
-                      style={{ marginLeft:'auto' }}
-                      onClick={ev => { ev.stopPropagation(); setModal(e); }}
-                    >
-                      Editar
-                    </button>
-                  )}
+            <React.Fragment key={gi}>
+              {g.era && (
+                <div className="vtl-era">
+                  <span className="vtl-era-num">{vtRoman(gi + 1)}</span>
+                  <h2 className="vtl-era-name">{g.era.era}</h2>
+                  {isEditor && <button className="vt-btn vtl-edit" onClick={() => setModal(g.era)}>Editar</button>}
                 </div>
-                <h3 className="timeline-title">{e.title}</h3>
-                <p className="timeline-desc">{e.desc}</p>
-              </div>
-            </div>
+              )}
+              {items.map((e, i) => {
+                const k = vtKindOf(e);
+                const pane = (VT_KIND[k] || {}).pane || '#8a8070';
+                const present = /presente|corrente/i.test((e.label || '') + ' ' + (e.title || ''));
+                const cls = 'vtl-event vtl-event--' + ((side++ % 2) ? 'right' : 'left') + (present ? ' vtl-event--now' : '');
+                return (
+                  <div key={e._id || i} className={cls} style={{ '--pane': pane }}>
+                    <span className="vtl-node" aria-hidden="true" />
+                    <article className="vtl-card">
+                      <div className="vtl-meta">
+                        <span className="vtl-year">{e.year}</span>
+                        {e.label && <span className="vtl-label">{e.label}</span>}
+                        {e.tag && <span className="vtl-tag">{e.tag}</span>}
+                        {isEditor && <button className="vt-btn vtl-edit" onClick={() => setModal(e)}>Editar</button>}
+                      </div>
+                      <h3 className="vtl-title">{e.title}</h3>
+                      {e.desc && <p className="vtl-desc">{e.desc}</p>}
+                    </article>
+                  </div>
+                );
+              })}
+            </React.Fragment>
           );
         })}
       </div>
+
+      <footer className="vt-pantheon-foot">
+        “A história não se repete. Ela rima — e quase sempre em Lancaster.”
+        <div className="vt-quote-src">— Arquivista Cael</div>
+      </footer>
 
       {modal && (
         <TimelineEventModal
@@ -240,5 +256,6 @@ function Timeline({ onNav }) {
     </div>
   );
 }
-
 window.Timeline = Timeline;
+window.vtKindOf = vtKindOf;
+window.VT_KIND = VT_KIND;
