@@ -2217,3 +2217,64 @@
   .vt-filter-chips { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
   .vtl-filter { flex: none; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Atlas · Reinos & Potências no tema vitral (o mapa em si fica igual)
+   ════════════════════════════════════════════════════════════════ */
+.hx-page.hx-vt { display: block; height: auto; min-height: 100%; overflow: visible; padding: 0 0 40px; background: var(--vt-surface); }
+.hx-vt .hx-vt-head { margin-bottom: 8px; }
+.vt-btn--danger { color: #f3dcd4; border-color: #9a2a24; background: #5a1c18; }
+.hx-vt .hx-main { max-width: 1320px; margin: 16px auto 0; padding: 0 32px; grid-template-columns: minmax(0, 1fr) 420px; min-height: 640px; }
+.hx-vt .hx-map-wrap { border: 1px solid rgba(201,165,90,.3); border-radius: 0;
+  box-shadow: inset 0 0 0 4px #0b0b0d, inset 0 0 0 5px rgba(201,165,90,.2), 0 24px 40px rgba(0,0,0,.6); }
+.hx-vt .hx-corner { font-family: var(--vt-display); font-weight: 600; letter-spacing: .24em; color: var(--vt-gold);
+  background: rgba(11,11,13,.85); border-color: rgba(201,165,90,.3); }
+
+/* painel do reino: vidro tingido pela cor do reino */
+.hx-vt .hx-panel { position: relative; border: 1px solid rgba(201,165,90,.16); border-radius: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.016) 58px 60px),
+              linear-gradient(170deg, rgba(40,32,24,.6), rgba(10,10,12,.96) 55%); }
+.hx-vt .hx-panel-accent { height: 4px; }
+.hx-vt .hx-panel-head { border-bottom-color: rgba(201,165,90,.16); }
+.hx-vt .hx-panel-crest { border-radius: 50%; border-width: 2px; background: radial-gradient(circle at 50% 35%, #2a2216, #0b0b0d 75%);
+  box-shadow: 0 0 0 3px #050506, 0 0 0 4px rgba(201,165,90,.4); }
+.hx-vt .hx-panel-eyebrow, .hx-vt .hx-section-label, .hx-vt .hx-city-kind, .hx-vt .hx-stat-label, .hx-vt .hx-stat-mini-label, .hx-vt .hx-gcard-eyebrow {
+  font-family: var(--vt-display) !important; font-weight: 600; letter-spacing: .2em; }
+.hx-vt .hx-section-label { color: var(--vt-gold); border-bottom: 1px solid rgba(201,165,90,.14); padding-bottom: 6px; }
+.hx-vt .hx-panel-name { font-family: var(--vt-display); font-weight: 600; font-size: 24px; letter-spacing: .04em; color: var(--vt-ink); }
+.hx-vt .hx-panel-motto { font-family: var(--vt-serif); font-style: italic; font-size: 17px; color: var(--vt-gold); }
+.hx-vt .hx-panel-desc { font-family: var(--vt-text); font-size: 17px; line-height: 1.55; color: var(--vt-ink-body); }
+.hx-vt .hx-stat-note, .hx-vt .hx-resource-detail { font-family: var(--vt-serif); font-style: italic; font-size: 14px; color: var(--vt-ink-muted); }
+.hx-vt .hx-stat-v, .hx-vt .hx-stat-mini-v { font-family: var(--vt-display); font-weight: 700; color: var(--vt-ink); }
+.hx-vt .hx-resource-name, .hx-vt .hx-city-name { font-family: var(--vt-text); font-size: 17px; color: var(--vt-ink); }
+.hx-vt .hx-pip { border-radius: 0; transform: rotate(45deg) scale(.78); }
+.hx-vt .hx-cursed { border-color: rgba(168,53,43,.5); background: linear-gradient(170deg, rgba(90,28,24,.35), rgba(10,10,12,.9)); }
+.hx-vt .hx-cursed-head { font-family: var(--vt-display); letter-spacing: .2em; }
+
+/* galeria de reinos: plaquinhas de vidro na cor de cada coroa */
+.hx-vt-gallery-head { max-width: 1320px; margin: 44px auto 18px; padding: 0 32px 14px; }
+.hx-vt .hx-gallery { max-width: 1320px; margin: 0 auto; padding: 0 32px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.hx-vt .hx-gcard { position: relative; grid-template-columns: 1fr; border: 1px solid rgba(201,165,90,.16); border-radius: 0; min-height: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.016) 58px 60px),
+              linear-gradient(160deg, color-mix(in srgb, var(--card-accent) 26%, transparent), rgba(10,10,12,.95) 62%); }
+.hx-vt .hx-gcard-strip { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; opacity: .8; }
+.hx-vt .hx-gcard-body { padding: 16px 16px 18px; }
+.hx-vt .hx-gcard-crest { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #2a2216, #0b0b0d 75%);
+  box-shadow: 0 0 0 2px #050506, 0 0 0 3px rgba(201,165,90,.35); }
+.hx-vt .hx-gcard-crest svg { width: 28px; height: 28px; }
+.hx-vt .hx-gcard-name { font-family: var(--vt-display); font-weight: 600; font-size: 16px; color: var(--vt-ink); }
+.hx-vt .hx-gcard:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-accent) 50%, transparent), 0 0 22px color-mix(in srgb, var(--card-accent) 18%, transparent); }
+.hx-vt .hx-gcard.active { border-color: var(--card-accent); box-shadow: inset 0 0 0 1px var(--card-accent), 0 0 26px color-mix(in srgb, var(--card-accent) 25%, transparent); }
+
+@media (max-width: 1100px) {
+  .hx-vt .hx-main { grid-template-columns: minmax(0, 1fr); }
+  .hx-vt .hx-map-wrap { min-height: 520px; }
+}
+@media (max-width: 760px) {
+  .hx-vt .hx-main, .hx-vt .hx-gallery, .hx-vt-gallery-head { padding-left: 16px; padding-right: 16px; }
+  .hx-vt .hx-map-wrap { min-height: 380px; }
+}
+.hx-vt .hx-main { align-items: start; }
+.hx-vt .hx-map-wrap { position: sticky; top: 20px; height: min(680px, calc(100vh - 120px)); }
+@media (max-width: 1100px) { .hx-vt .hx-map-wrap { position: relative; top: 0; height: 520px; } }
+@media (max-width: 760px)  { .hx-vt .hx-map-wrap { height: 380px; } }

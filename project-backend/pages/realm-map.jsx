@@ -1207,29 +1207,27 @@ function RealmMapPage({ onNav }) {
 
   return (
     <>
-      <div className="hx-page">
-        {/* Header */}
-        <header className="hx-header">
-          <div className="hx-header-l">
-            <div className="hx-eyebrow">Geopolítica · Reinos &amp; Potências</div>
-            <h1 className="hx-title">Reinos &amp; Potências</h1>
-            <p className="hx-lede">
-              Mapa político do continente de Valiran · Terceira Era, ano 1281
+      <div className="hx-page vt hx-vt">
+        {/* Cabeçalho no tema vitral */}
+        <section className="vt-pantheon-head hx-vt-head">
+          <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+          <div className="vt-pantheon-head-text">
+            <div className="vt-label">Atlas · Geopolítica</div>
+            <h1 className="vt-h1">Reinos &amp; Potências</h1>
+            <div className="vt-epithet">O continente de Valiran</div>
+            <p className="vt-pantheon-lede">
+              O mapa político das coroas, repúblicas e ruínas. Escolha um reino no mapa ou na galeria
+              para ler a força dele, os recursos e as cidades.
             </p>
           </div>
-          <div className="hx-header-r">
-            <span className="hx-volume-tag">Vol. V</span>
-            {canEdit && (
-              <button
-                className={`hx-edit-toggle${editMode ? ' active' : ''}`}
-                onClick={() => setEditMode(m => !m)}>
-                <span className="glyph">{editMode ? '◉' : '✎'}</span>
-                {editMode ? 'Sair da edição' : 'Editar mapa'}
-                <span className="hx-admin-pill">ADMIN</span>
+          {canEdit && (
+            <div className="vt-pantheon-add">
+              <button className={'vt-btn' + (editMode ? ' vt-btn--danger' : ' vt-btn--gold')} onClick={() => setEditMode(m => !m)}>
+                {editMode ? '◉ Sair da edição' : '✎ Editar mapa'}
               </button>
-            )}
-          </div>
-        </header>
+            </div>
+          )}
+        </section>
 
         {/* Main: map + panel */}
         <div className="hx-main">
@@ -1259,6 +1257,10 @@ function RealmMapPage({ onNav }) {
         </div>
 
         {/* Gallery */}
+        <header className="vh-head hx-vt-gallery-head">
+          <span className="vh-head-num">✠</span>
+          <h2 className="vh-head-title">As coroas do continente</h2>
+        </header>
         <div className="hx-gallery">
           {realms.map(k => (
             <RealmGalleryCard
