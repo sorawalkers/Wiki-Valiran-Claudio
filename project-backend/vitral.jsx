@@ -724,6 +724,15 @@ const VT_KINDS = {
     indexLabel: () => 'Escrituras',
     empty: 'O arquivista ainda reúne os testemunhos. Origem, dogmas, manifestações e culto serão acrescentados em breve.',
   },
+  // facção (dossiê): imagem em 'faction-portrait-<id>', carimbo como selo
+  faction: {
+    slot: f => 'faction-portrait-' + f.id,
+    save: null,
+    subtitle: f => f.alias,
+    context: () => null,
+    indexLabel: () => 'Dossiê',
+    empty: 'O arquivista Cael reuniu o esqueleto desta entrada. Inteligência detalhada será acrescentada nas próximas sessões.',
+  },
   // resumo de campanha (Campanha III etc.): sem retrato — no lugar da janela, o selo com o numeral
   campaign: {
     slot: c => 'campaign-art-' + c.id,
@@ -739,11 +748,12 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
   const K = VT_KINDS[kind] || VT_KINDS.character;
   const isDeity = kind === 'deity';
   const isCampaign = kind === 'campaign';
-  const isPC = !isDeity && !isCampaign && c.tag === 'PC';
+  const isFaction = kind === 'faction';
+  const isPC = !isDeity && !isCampaign && !isFaction && c.tag === 'PC';
   const sections = c.placeholder ? [] : (c.sections || []);
   const refs = useVtRef({});
   const [active, setActive] = useVtActiveChapter(sections.length, refs);
-  const campaignShort = isDeity || isCampaign ? '' : vtShortCampaign(c);
+  const campaignShort = isDeity || isCampaign || isFaction ? '' : vtShortCampaign(c);
   const firstName = (c.name || '').split(' ')[0];
   const slotId = K.slot(c);
   const context = K.context(c);
@@ -800,7 +810,9 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
           </div>
         )}
         <div className="vt-badge-row">
-          {isDeity ? <VtDeityBadge d={c} /> : isCampaign ? <span className="vt-badge vt-badge--campaign">Crônica</span> : <VtBadge c={c} isPC={isPC} />}
+          {isDeity ? <VtDeityBadge d={c} /> : isCampaign ? <span className="vt-badge vt-badge--campaign">Crônica</span>
+            : isFaction ? <span className={'vt-badge vt-badge--stamp vt-badge--stamp-' + (c.stampClass || 'red')}>{c.stamp || 'Facção'}</span>
+            : <VtBadge c={c} isPC={isPC} />}
           {context && <span className="vt-badge-campaign">{context}</span>}
         </div>
         <h1 className="vt-h1">{c.name}</h1>
@@ -841,7 +853,8 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
         c={c}
         slotId={slotId}
         rose={isDeity}
-        fallback={isDeity ? <VtSigilAltar deity={c} tier={vtDeityTier(c)} /> : null}
+        fallback={isDeity ? <VtSigilAltar deity={c} tier={vtDeityTier(c)} />
+          : isFaction ? <div className="vf-crest"><span>{(c.name || '?').charAt(0)}</span></div> : null}
         frameOverride={framePreview}
         framing={framing}
         onPan={frameTestOpen && portraitUrl ? p => setFramingPreview({ ...framing, ...p }) : undefined}
@@ -851,7 +864,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 
   // Painel de ajuste (editores) fica numa linha própria sob a janela, fora do bloco
   // alinhado, para não empurrar a janela para cima quando aberto.
-  const tools = isEditor && !vitralSrc && !isCampaign && (
+  const tools = isEditor && !vitralSrc && !isCampaign && !isFaction && (
         <div className="vt-frame-test">
           <button type="button" className="vt-link-btn" onClick={() => setFrameTestOpen(o => !o)}>
             {frameTestOpen ? '− Fechar ajuste' : (isDeity ? '✠ Ajustar arte na rosácea' : '✠ Ajustar vitral e retrato')}
@@ -975,6 +988,31 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 }
 
 // ── Card da galeria (vivo / Morto) ───────────────────────────────
+
+// Brasões de facção: preenchem a janela centralizados (o editor pode reenquadrar pelo infobox.retrato)
+const VT_FACTION_FRAMING = { x: 50, y: 45, z: 1, fit: 'preencher' };
+
+// Card de facção (galeria de Casas): janela com a imagem da facção, carimbo e placa
+function VitralFactionCard({ f, onClick, onEdit, isEditor }) {
+  const url = useVtSlotUrl('faction-portrait-' + f.id);
+  return (
+    <article className="vt-card vf-card" onClick={onClick}>
+      <VtGothicWindow frame={VT_FRAMES[0]} className="vt-card-arch" sizes="240px">
+        {url
+          ? <VtFramedImage url={url} framing={VT_FACTION_FRAMING} />
+          : <div className="vf-crest"><span>{(f.name || '?').trim().charAt(0)}</span></div>}
+      </VtGothicWindow>
+      {f.stamp && <span className={'vt-badge vt-badge--stamp vt-badge--stamp-' + (f.stampClass || 'red') + ' vf-stamp'}>{f.stamp}</span>}
+      <div className="vt-votive vf-votive">
+        <span className="vt-votive-gem" aria-hidden="true" />
+        <div className="vt-votive-name">{(f.name || '').trim()}</div>
+        {f.alias && <div className="vt-votive-title">{f.alias}</div>}
+      </div>
+      {f.summary && <p className="vf-summary">{f.summary}</p>}
+      {isEditor && <button className="vt-btn vt-card-edit" onClick={e => { e.stopPropagation(); onEdit(); }}>Editar</button>}
+    </article>
+  );
+}
 
 function VitralCard({ char, onClick, onEdit, isEditor }) {
   const dead = vtIsDead(char);
@@ -1299,7 +1337,8 @@ function VitralDeityAltar({ c, onNav, isEditor, onEdit }) {
 window.ogivePath     = ogivePath;
 window.VitralArticle = VitralArticle;
 window.VitralCard    = VitralCard;
+window.VitralFactionCard = VitralFactionCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

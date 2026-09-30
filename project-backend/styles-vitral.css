@@ -2074,3 +2074,20 @@
 .vs-seal--campaign .vs-seal-n { font-size: 120px; }
 @container vt (max-width: 1100px) { .vs-seal--campaign { width: 240px; } .vs-seal--campaign .vs-seal-n { font-size: 90px; } }
 @container vt (max-width: 760px)  { .vs-seal--campaign { width: 170px; } .vs-seal--campaign .vs-seal-n { font-size: 64px; } }
+
+/* ── Casas · galeria de facções e carimbos ─────────────────────── */
+.vf { --pane: #9a2a24; }
+.vf-gallery { grid-template-columns: repeat(auto-fit, 280px) !important; justify-content: center; }
+.vf-card { gap: 6px; }
+.vf-crest { position: absolute; inset: 0; display: grid; place-items: center;
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--pane) 45%, #140c0a), #0b0b0d 75%),
+              repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,.03) 18px 20px); }
+.vf-crest span { font: 700 110px/1 var(--vt-display); color: #e9d7a8; opacity: .85; text-shadow: 0 0 30px rgba(233,215,168,.3); }
+.vf-stamp { margin-top: -6px; }
+.vf-votive { margin-top: 4px; }
+.vf-summary { max-width: 270px; margin: 6px 0 0; text-align: center; font: italic 400 16px/1.45 var(--vt-serif); color: var(--vt-ink-muted); }
+.vt-badge--stamp { font: 700 11px/1 var(--vt-display); letter-spacing: .24em; text-transform: uppercase; }
+.vt-badge--stamp-red   { background: #5a1c18; color: #f3dcd4; border-color: #2c0f0c; }
+.vt-badge--stamp-green { background: #2f3d22; color: #dfe8cf; border-color: #182012; }
+.vt-badge--stamp-gold  { background: #5a4217; color: #f6e3a8; border-color: #2a1f0b; }
+.vt-badge--stamp-blue  { background: #1f3a4d; color: #d6e6f2; border-color: #0f1c26; }
