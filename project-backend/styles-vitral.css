@@ -2189,3 +2189,31 @@
 .vf-hero-banner { width: 360px; }
 @container vt (max-width: 1100px) { .vf-hero-banner { width: 300px; } }
 @container vt (max-width: 760px)  { .vf-hero-banner { width: 240px; } }
+
+/* ── Barra de filtros das galerias ──────────────────────────────── */
+.vt-filterbar { max-width: 1240px; margin: 4px auto 8px; padding: 18px 32px 22px; display: flex; flex-direction: column; gap: 12px;
+  border-top: 1px solid rgba(201,165,90,.14); border-bottom: 1px solid rgba(201,165,90,.14);
+  background: linear-gradient(180deg, rgba(255,255,255,.015), transparent); }
+.vt-filter-group { display: flex; align-items: baseline; gap: 16px; }
+.vt-filter-label { flex: none; width: 96px; font: 600 10px/1 var(--vt-display); letter-spacing: .28em; text-transform: uppercase; color: var(--vt-gold); }
+.vt-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.vt-filter-reset { align-self: flex-start; margin-left: 112px; }
+.vt-filter-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; padding-left: 112px; }
+.vt-filter-search { flex: 1 1 320px; padding: 9px 14px; border: 1px solid rgba(201,165,90,.25); background: #0b0b0d;
+  font: 400 17px/1.2 var(--vt-text); color: var(--vt-ink); }
+.vt-filter-search::placeholder { color: var(--vt-ink-faint); font-style: italic; }
+.vt-filter-count { font: italic 400 16px/1 var(--vt-serif); color: var(--vt-ink-muted); }
+.vt-filter-toggle { display: flex; border: 1px solid rgba(201,165,90,.25); }
+.vt-filter-toggle button { padding: 9px 16px; border: 0; background: none; cursor: pointer;
+  font: 600 11px/1 var(--vt-display); letter-spacing: .22em; text-transform: uppercase; color: var(--vt-ink-muted); }
+.vt-filter-toggle button.active { color: var(--vt-ink); background: rgba(201,165,90,.14); }
+.vt-cast .indice { max-width: 1240px; margin: 24px auto 0; padding: 0 32px; }
+@media (max-width: 760px) {
+  .vt-filterbar { padding: 14px 16px 16px; }
+  .vt-filter-group { flex-direction: column; gap: 8px; }
+  .vt-filter-label { width: auto; }
+  .vt-filter-reset { margin-left: 0; }
+  .vt-filter-tools { padding-left: 0; }
+  .vt-filter-chips { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+  .vtl-filter { flex: none; }
+}

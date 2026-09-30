@@ -306,14 +306,14 @@ function Npcs({ onNav }) {
 
   const relOptions = [
     { value: 'todos',   label: 'Todos',    count: relCounts.todos },
-    { value: 'aliado',  label: 'Aliados',  count: relCounts.aliado,  tone: 'necro' },
-    { value: 'inimigo', label: 'Inimigos', count: relCounts.inimigo, tone: 'wine'  },
-    { value: 'neutro',  label: 'Neutros',  count: relCounts.neutro,  tone: 'mute'  },
+    { value: 'aliado',  label: 'Aliados',  count: relCounts.aliado,  pane: '#3f6a86' },
+    { value: 'inimigo', label: 'Inimigos', count: relCounts.inimigo, pane: '#9a2a24'  },
+    { value: 'neutro',  label: 'Neutros',  count: relCounts.neutro,  pane: '#8a8070'  },
   ];
   const campaignOptions = [
     { value: 'todas', label: 'Todas', count: cast.length },
     ...campaignList.map(c => c === '__none__'
-      ? { value: '__none__', label: 'Sem campanha', count: campaignCounts['__none__'] || 0, tone: 'mute' }
+      ? { value: '__none__', label: 'Sem campanha', count: campaignCounts['__none__'] || 0, pane: '#8a8070' }
       : { value: c, label: c, count: campaignCounts[c] || 0 }
     ),
   ];
@@ -321,96 +321,51 @@ function Npcs({ onNav }) {
   const filtersActive = relFilter !== 'todos' || campaignFilter !== 'todas';
 
   return (
-    <div className="page" data-screen-label="13 Pessoas Importantes">
-      <header className="page-header">
-        <div className="page-header-row">
-          <div>
-            <div className="page-eyebrow">Dramatis Personae · Figuras do Mundo</div>
-            <h1 className="page-title">Pessoas Importantes</h1>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Nova Pessoa
-            </button>
-          )}
+    <div className="vt vt-pantheon vt-cast" data-screen-label="13 Pessoas Importantes">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Almas · Figuras do mundo</div>
+          <h1 className="vt-h1">Pessoas Importantes</h1>
+          <div className="vt-epithet">Aliados, antagonistas e os que ficaram no meio</div>
+          <p className="vt-pantheon-lede">
+            Todos os que moldaram os eventos além da mesa de jogo, com o lado em que estão
+            e a campanha em que cruzaram o caminho do grupo.
+          </p>
         </div>
-        <p className="page-lede">
-          Aliados, antagonistas e figuras neutras que moldaram os eventos —
-          todos que importam além da mesa de jogo.
-        </p>
-
-        {cast.length > 0 && (
-          <div className="cast-filters">
-            <NpcFilterChips
-              label="Relação"
-              value={relFilter}
-              options={relOptions}
-              onChange={setRelFilter}
-            />
-            <NpcFilterChips
-              label="Campanha"
-              value={campaignFilter}
-              options={campaignOptions}
-              onChange={setCampaignFilter}
-            />
-            {filtersActive && (
-              <button
-                type="button"
-                className="cast-filter-reset"
-                onClick={() => { setRelFilter('todos'); setCampaignFilter('todas'); }}
-              >LIMPAR FILTROS</button>
-            )}
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Nova pessoa</button>
           </div>
         )}
+      </section>
 
-        <div className="cast-controls">
-          <div className="cast-search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="7"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input
-              type="text"
-              placeholder="Buscar por nome, papel, classe, filiação…"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-            />
-            {query && (
-              <button
-                className="cast-search-clear"
-                onClick={() => setQuery('')}
-                title="Limpar busca"
-              >LIMPAR</button>
-            )}
-            <span className="cast-search-count">
-              {filtered.length}{(q || filtersActive) && cast.length !== filtered.length ? ` / ${cast.length}` : ''}
-            </span>
+      {cast.length > 0 && (
+        <VtFilterBar
+          groups={[
+            { label: 'Campanha', value: campaignFilter, onChange: setCampaignFilter, options: campaignOptions },
+            { label: 'Relação', value: relFilter, onChange: setRelFilter, options: relOptions },
+          ]}
+          active={filtersActive}
+          onReset={() => { setRelFilter('todos'); setCampaignFilter('todas'); }}>
+          <div className="vt-filter-tools">
+            <input className="vt-filter-search" type="search" placeholder="Buscar por nome, papel, classe, filiação…"
+              value={query} onChange={e => setQuery(e.target.value)} />
+            <span className="vt-filter-count">{filtered.length}{(q || filtersActive) && cast.length !== filtered.length ? ' / ' + cast.length : ''}</span>
+            <div className="vt-filter-toggle">
+              <button className={view === 'galeria' ? 'active' : ''} onClick={() => setView('galeria')}>Galeria</button>
+              <button className={view === 'indice' ? 'active' : ''} onClick={() => setView('indice')}>Índice</button>
+            </div>
           </div>
-          <div className="cast-view-toggle">
-            <button
-              className={view === 'galeria' ? 'active' : ''}
-              onClick={() => setView('galeria')}
-            >Galeria</button>
-            <button
-              className={view === 'indice' ? 'active' : ''}
-              onClick={() => setView('indice')}
-            >Índice</button>
-          </div>
-        </div>
-      </header>
+        </VtFilterBar>
+      )}
 
       {cast.length === 0 ? (
-        <div className="cast-empty">
-          Nenhuma pessoa cadastrada ainda. Use o botão acima para adicionar.
-        </div>
+        <p className="vt-pantheon-empty">Nenhuma pessoa cadastrada ainda.</p>
       ) : filtered.length === 0 ? (
-        <div className="cast-empty">
-          {q
-            ? <>Nenhum resultado para “{query}”.</>
-            : <>Nenhum resultado para os filtros atuais.</>}
-        </div>
+        <p className="vt-pantheon-empty">{q ? <>Nenhum resultado para “{query}”.</> : 'Nenhum resultado para os filtros atuais.'}</p>
       ) : view === 'galeria' ? (
-        <div className="vt vt-gallery">
+        <div className="vt-gallery">
           {filtered.map(c => (
             <VitralCard
               key={c.id}

@@ -246,14 +246,14 @@ function Characters({ onNav }) {
 
   const statusOptions = [
     { value: 'todos', label: 'Todos',  count: counts.statusTodos },
-    { value: 'ativo', label: 'Ativos', count: counts.statusAtivo, tone: 'necro' },
-    { value: 'morto', label: 'Mortos', count: counts.statusMorto, tone: 'wine' },
-    { value: 'outro', label: 'Desconhecido', count: counts.statusOutro, tone: 'gold' },
+    { value: 'ativo', label: 'Ativos', count: counts.statusAtivo, pane: '#56673a' },
+    { value: 'morto', label: 'Mortos', count: counts.statusMorto, pane: '#9a2a24' },
+    { value: 'outro', label: 'Desconhecido', count: counts.statusOutro, pane: '#b8873a' },
   ];
   const campaignOptions = [
     { value: 'todas', label: 'Todas', count: cast.length },
     ...campaignList.map(c => c === '__none__'
-      ? { value: '__none__', label: 'Sem campanha', count: campaignCounts['__none__'] || 0, tone: 'mute' }
+      ? { value: '__none__', label: 'Sem campanha', count: campaignCounts['__none__'] || 0, pane: '#8a8070' }
       : { value: c, label: c, count: campaignCounts[c] || 0 }
     ),
   ];
@@ -261,60 +261,41 @@ function Characters({ onNav }) {
   const filtersActive = statusFilter !== 'todos' || campaignFilter !== 'todas';
 
   return (
-    <div className="page" data-screen-label="12 Dramatis Personae">
-      <header className="page-header">
-        <div className="page-header-row">
-          <div>
-            <div className="page-eyebrow">Dramatis Personae · Heróis de Mesa</div>
-            <h1 className="page-title">Personagens (PC)</h1>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Novo Personagem
-            </button>
-          )}
+    <div className="vt vt-pantheon vt-cast" data-screen-label="12 Dramatis Personae">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Almas · Heróis de mesa</div>
+          <h1 className="vt-h1">Personagens</h1>
+          <div className="vt-epithet">Dramatis personae</div>
+          <p className="vt-pantheon-lede">
+            Os heróis em campo, cada um na sua janela: origem, classe e o que restou deles.
+            Abra qualquer vitral para ler a história inteira.
+          </p>
         </div>
-        <p className="page-lede">
-          Galeria dos heróis em campo — cada placa registra origem, classe e
-          status atual. Clique em qualquer retrato para abrir a entrada
-          completa.
-        </p>
-
-        {cast.length > 0 && (
-          <div className="cast-filters">
-            <FilterChips
-              label="Status"
-              value={statusFilter}
-              options={statusOptions}
-              onChange={setStatusFilter}
-            />
-            <FilterChips
-              label="Campanha"
-              value={campaignFilter}
-              options={campaignOptions}
-              onChange={setCampaignFilter}
-            />
-            {filtersActive && (
-              <button
-                type="button"
-                className="cast-filter-reset"
-                onClick={() => { setStatusFilter('todos'); setCampaignFilter('todas'); }}
-              >LIMPAR FILTROS</button>
-            )}
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Novo personagem</button>
           </div>
         )}
-      </header>
+      </section>
+
+      {cast.length > 0 && (
+        <VtFilterBar
+          groups={[
+            { label: 'Campanha', value: campaignFilter, onChange: setCampaignFilter, options: campaignOptions },
+            { label: 'Status', value: statusFilter, onChange: setStatusFilter, options: statusOptions },
+          ]}
+          active={filtersActive}
+          onReset={() => { setStatusFilter('todos'); setCampaignFilter('todas'); }} />
+      )}
 
       {cast.length === 0 ? (
-        <div className="cast-empty">
-          Nenhum personagem cadastrado ainda. Use o botão acima para adicionar.
-        </div>
+        <p className="vt-pantheon-empty">Nenhum personagem cadastrado ainda.</p>
       ) : filtered.length === 0 ? (
-        <div className="cast-empty">
-          Nenhum personagem corresponde aos filtros atuais.
-        </div>
+        <p className="vt-pantheon-empty">Nenhum personagem corresponde aos filtros atuais.</p>
       ) : (
-        <div className="vt vt-gallery">
+        <div className="vt-gallery">
           {filtered.map(c => (
             <VitralCard
               key={c.id}

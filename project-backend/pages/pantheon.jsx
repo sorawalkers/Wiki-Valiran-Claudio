@@ -111,6 +111,8 @@ function Pantheon({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(false);
   const [uploader, setUploader] = React.useState(false);
+  const [tierFilter, setTierFilter] = React.useState(() => { try { return localStorage.getItem('pan-tier') || 'todos'; } catch (e) { return 'todos'; } });
+  React.useEffect(() => { try { localStorage.setItem('pan-tier', tierFilter); } catch (e) {} }, [tierFilter]);
 
   const allDeities = Object.values(Entities.deities).filter(d => d && d.name);
 
@@ -136,6 +138,12 @@ function Pantheon({ onNav }) {
   ].filter(t => t.gods.length > 0);
 
   const total = tiers.length;
+  const shownTiers = tierFilter === 'todos' ? tiers : tiers.filter(t => t.tone === tierFilter);
+  const TIER_PANE = { tita: '#7a5aa8', deus: '#b8873a', ascendido: '#3f6a86' };
+  const tierOptions = [
+    { value: 'todos', label: 'Todos', count: allDeities.length },
+    ...tiers.map(t => ({ value: t.tone, label: t.tier.replace(/^Os /, ''), count: t.gods.length, pane: TIER_PANE[t.tone] })),
+  ];
 
   return (
     <div className="vt vt-pantheon" data-screen-label="02 Panteão">
@@ -165,7 +173,13 @@ function Pantheon({ onNav }) {
         <p className="vt-pantheon-empty">Nenhuma divindade registrada ainda.</p>
       )}
 
-      {tiers.map((tier, ti) => (
+      {allDeities.length > 0 && (
+        <VtFilterBar
+          groups={[{ label: 'Hierarquia', value: tierFilter, onChange: setTierFilter, options: tierOptions }]}
+          active={tierFilter !== 'todos'} onReset={() => setTierFilter('todos')} />
+      )}
+
+      {shownTiers.map(tier => { const ti = tiers.indexOf(tier); return (
         <section key={tier.tier} className={'vt-tier vt-tier--' + tier.tone}>
           <header className="vt-tier-head">
             <span className="vt-tier-num">{vtRomanNum(ti + 1)} <small>/ {vtRomanNum(total)}</small></span>
@@ -181,7 +195,7 @@ function Pantheon({ onNav }) {
             ))}
           </div>
         </section>
-      ))}
+      ); })}
 
       <footer className="vt-pantheon-foot">
         “Conta-se que existem outros. Aqueles cujos nomes foram apagados

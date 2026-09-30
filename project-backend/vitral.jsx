@@ -994,6 +994,33 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 // ── Card da galeria (vivo / Morto) ───────────────────────────────
 
 
+
+// ── Barra de filtros (galerias: Panteão, PCs, Pessoas) ──────────
+// groups: [{ label, value, onChange, options: [{ value, label, count, pane }] }]
+function VtFilterBar({ groups, onReset, active, children }) {
+  return (
+    <div className="vt-filterbar">
+      {groups.map(g => (
+        <div key={g.label} className="vt-filter-group">
+          <span className="vt-filter-label">{g.label}</span>
+          <div className="vt-filter-chips">
+            {g.options.map(o => (
+              <button key={o.value} type="button"
+                className={'vtl-filter' + (g.value === o.value ? ' active' : '')}
+                style={o.pane ? { '--pane': o.pane } : undefined}
+                onClick={() => g.onChange(o.value)}>
+                {o.pane && <i />}{o.label}{o.count != null && <em>{o.count}</em>}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {children}
+      {active && onReset && <button type="button" className="vt-link-btn vt-filter-reset" onClick={onReset}>✕ Limpar filtros</button>}
+    </div>
+  );
+}
+
 // ── Estandartes das facções ─────────────────────────────────────
 // Três modelos de bandeira (assets/vitral/estandarte-<k>): o brasão da facção é pintado no
 // campo liso, recortado pela máscara '<k>-campo.png'. `box` = onde o brasão fica (em % do estandarte).
@@ -1387,4 +1414,4 @@ window.VitralFactionCard = VitralFactionCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { vtFactionRelation, VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VtFilterBar, vtFactionRelation, VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
