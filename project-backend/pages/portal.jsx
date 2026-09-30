@@ -483,30 +483,9 @@ function Portal({ onNav }) {
         </section>
       )}
 
-      {/* V · Registro do Arquivo */}
+      {/* IV · O Continente */}
       <section className="vh-section">
-        <VhHead num="IV" title="Registro do Arquivo" link="Ver todas" onLink={() => onNav('recent')} />
-        <div className="vt-ficha vh-ledger">
-          <VtArchiveFrame />
-          {feed.length === 0
-            ? <p className="vh-ledger-empty">“Nenhuma linha nova no livro desde a última vela.” <span>— o Arquivista</span></p>
-            : (
-              <ol className="vh-ledger-list">
-                {feed.map((f, i) => (
-                  <li key={i} className={'vh-ledger-row vh-ledger-row--' + f.entity_type} onClick={() => f.target && onNav(f.target)}>
-                    <span className="vh-ledger-type">{f.type_label}</span>
-                    <span className="vh-ledger-title">{f.title}{f.subtitle && <em> · {f.subtitle}</em>}</span>
-                    <span className="vh-ledger-when">{f.action === 'NOVO' ? 'Novo' : 'Editado'} · {f.date_label}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-        </div>
-      </section>
-
-      {/* VI · O Continente */}
-      <section className="vh-section">
-        <VhHead num="V" title="Pelas veias do continente" link="Abrir o Atlas" onLink={() => onNav('map')} />
+        <VhHead num="IV" title="Pelas veias do continente" link="Abrir o Atlas" onLink={() => onNav('map')} />
         <div className="vh-map"><PortalMapPreview onNav={onNav} /></div>
         {realms.length > 0 && (
           <div className="vh-realms">
@@ -525,12 +504,33 @@ function Portal({ onNav }) {
         )}
       </section>
 
-      {/* VII · Os Portões (por último) */}
+      {/* V · Os Portões do Arquivo */}
       <section className="vh-section">
-        <VhHead num="VI" title="Os Portões do Arquivo" />
+        <VhHead num="V" title="Os Portões do Arquivo" />
         <nav className="vh-gates">
           {VH_GATES.map(g => <VhGate key={g.id} g={g} count={counts[g.id]} onNav={onNav} />)}
         </nav>
+      </section>
+
+      {/* VI · Registro do Arquivo (por último) */}
+      <section className="vh-section">
+        <VhHead num="VI" title="Registro do Arquivo" link="Ver todas" onLink={() => onNav('recent')} />
+        <div className="vt-ficha vh-ledger">
+          <VtArchiveFrame />
+          {feed.length === 0
+            ? <p className="vh-ledger-empty">“Nenhuma linha nova no livro desde a última vela.” <span>— o Arquivista</span></p>
+            : (
+              <ol className="vh-ledger-list">
+                {feed.map((f, i) => (
+                  <li key={i} className={'vh-ledger-row vh-ledger-row--' + f.entity_type} onClick={() => f.target && onNav(f.target)}>
+                    <span className="vh-ledger-type">{f.type_label}</span>
+                    <span className="vh-ledger-title">{f.title}{f.subtitle && <em> · {f.subtitle}</em>}</span>
+                    <span className="vh-ledger-when">{f.action === 'NOVO' ? 'Novo' : 'Editado'} · {f.date_label}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+        </div>
       </section>
 
       <footer className="vt-pantheon-foot">
