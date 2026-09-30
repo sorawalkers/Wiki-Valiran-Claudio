@@ -374,6 +374,16 @@ function Portal({ onNav }) {
   const featured = (curCamp ? pcs.filter(c => vhCampaignNum(c) === curCamp) : pcs).slice(0, 5);
   const campName = featured[0] ? (featured[0].campaign || '') : '';
 
+  // "O que você precisa saber": por enquanto, o resumo da Campanha III (tabela characters, id 'campanha3',
+  // ou o texto padrão de CAMPAIGN_DEFAULTS enquanto o banco não carrega)
+  const briefId = 'campanha3';
+  const briefRaw = Entities.characters?.[briefId];
+  const brief = briefRaw
+    ? { id: briefId, title: briefRaw.name, subtitle: briefRaw.role, sections: briefRaw.sections || [] }
+    : (window.CAMPAIGN_DEFAULTS || {})[briefId] || null;
+  const briefLede = brief ? ((brief.sections || [])[0]?.paras || []).slice(0, 2).join(' ') : '';
+  const briefChapters = brief ? (brief.sections || []).map(x => x.title).filter(Boolean) : [];
+
   const counts = {
     pantheon: deities.length + ' divindades', factions: factions.length + ' casas', characters: chars.length + ' almas',
     sessions: sessions.length + ' sessões', map: realms.length + ' reinos',
@@ -436,13 +446,31 @@ function Portal({ onNav }) {
         </section>
       )}
 
-      {/* III · Os Portões */}
-      <section className="vh-section">
-        <VhHead num="II" title="Os Portões do Arquivo" />
-        <nav className="vh-gates">
-          {VH_GATES.map(g => <VhGate key={g.id} g={g} count={counts[g.id]} onNav={onNav} />)}
-        </nav>
-      </section>
+      {/* III · O que você precisa saber (resumo da campanha atual) */}
+      {brief && (
+        <section className="vh-section">
+          <VhHead num="II" title="O que você precisa saber" link="Ler o resumo completo" onLink={() => onNav(brief.id)} />
+          <article className="vh-brief" onClick={() => onNav(brief.id)}>
+            <div className="vh-brief-seal">
+              <span className="vh-brief-n">{(/\b([IVX]+)\b/.exec(brief.title || '') || [])[1] || '✠'}</span>
+              <span className="vh-brief-k">Campanha</span>
+            </div>
+            <div className="vh-brief-body">
+              <div className="vh-last-meta">{brief.title}</div>
+              <h3 className="vh-last-title">{(brief.subtitle || '').split(/\s+[—-]\s+/)[0]}</h3>
+              {briefLede && <p className="vh-brief-lede">{briefLede}</p>}
+              {briefChapters.length > 0 && (
+                <ol className="vh-brief-chapters">
+                  {briefChapters.map((t, i) => (
+                    <li key={i}><span className="vh-brief-roman">{vtRoman(i + 1)}</span>{t}</li>
+                  ))}
+                </ol>
+              )}
+              <span className="vh-last-go">Ler o resumo completo →</span>
+            </div>
+          </article>
+        </section>
+      )}
 
       {/* IV · Almas em destaque */}
       {featured.length > 0 && (
@@ -495,6 +523,14 @@ function Portal({ onNav }) {
             })}
           </div>
         )}
+      </section>
+
+      {/* VII · Os Portões (por último) */}
+      <section className="vh-section">
+        <VhHead num="VI" title="Os Portões do Arquivo" />
+        <nav className="vh-gates">
+          {VH_GATES.map(g => <VhGate key={g.id} g={g} count={counts[g.id]} onNav={onNav} />)}
+        </nav>
       </section>
 
       <footer className="vt-pantheon-foot">

@@ -356,3 +356,4 @@ function CampaignArticle({ id, onNav }) {
 }
 
 window.CampaignArticle = CampaignArticle;
+window.CAMPAIGN_DEFAULTS = CAMPAIGN_DEFAULTS;
