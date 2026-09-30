@@ -255,10 +255,147 @@ function SystemEntry({ entry, isEditor, onEdit }) {
 // ============================================================
 // Sistema — main page
 // ============================================================
+// ============================================================
+// Atualizações do sistema no tema vitral: grimório de cartas
+// "New Domain Card - Frost Cone, Level 2 (Arcana)" → { status, kind, name, level, domain }
+// ============================================================
+const SYS_DOMAIN_PANE = {
+  arcana: '#7a5aa8', blade: '#9a2a24', bone: '#8a8070', codex: '#3f6a86', grace: '#b0507a',
+  midnight: '#2c3a66', sage: '#56673a', splendor: '#b8873a', valor: '#c0662a',
+};
+function sysParseTitle(t) {
+  const m = /^(new|updated|nova|nov[oa]|atualizad[ao])\s+(.+?)\s*[-–—]\s*(.+)$/i.exec(t || '');
+  if (!m) return { status: null, kind: 'Entrada', name: t || '', level: null, domain: null };
+  const status = /upd|atual/i.test(m[1]) ? 'Atualizada' : 'Nova';
+  const kindRaw = m[2].trim();
+  const kind = /domain card/i.test(kindRaw) ? 'Carta de domínio' : /subclass/i.test(kindRaw) ? 'Subclasse' : kindRaw;
+  let rest = m[3].trim(), domain = null, level = null;
+  const dm = /\(([^)]+)\)\s*$/.exec(rest);
+  if (dm) { domain = dm[1].trim(); rest = rest.slice(0, dm.index).trim(); }
+  const lm = /,?\s*level\s*(\d+)\s*$/i.exec(rest);
+  if (lm) { level = +lm[1]; rest = rest.slice(0, lm.index).trim(); }
+  return { status, kind, name: rest.replace(/,\s*$/, ''), level, domain };
+}
+const sysPane = d => SYS_DOMAIN_PANE[String(d || '').toLowerCase()] || '#8a8070';
+
+function useSysImage(entryId, idx = 0) {
+  return useVtSlotUrl(`sys-img-${entryId}-${idx}`);
+}
+
+function SysCard({ e, onOpen, isEditor, onEdit }) {
+  const p = sysParseTitle(e.title);
+  const img = useSysImage(e.id);
+  return (
+    <article className="sys-card" style={{ '--pane': sysPane(p.domain) }} onClick={() => onOpen(e)}>
+      <div className="sys-card-art">
+        {img ? <img src={img} alt={e.title} loading="lazy" draggable="false" />
+             : <div className="sys-card-noart"><span>{(p.name || '?').charAt(0)}</span></div>}
+        {p.status && <span className={'sys-card-status' + (p.status === 'Atualizada' ? ' is-upd' : '')}>{p.status}</span>}
+      </div>
+      <div className="sys-card-plate">
+        <div className="sys-card-name">{p.name}</div>
+        <div className="sys-card-meta">
+          {p.domain && <span className="sys-card-domain"><i />{p.domain}</span>}
+          {p.level != null && <span className="sys-card-level">Nível {p.level}</span>}
+        </div>
+      </div>
+      {isEditor && <button className="vt-btn sys-card-edit" onClick={ev => { ev.stopPropagation(); onEdit(e); }}>Editar</button>}
+    </article>
+  );
+}
+
+// Visualizador em tela cheia: zoom (botões, roda do mouse, duplo clique) e arrastar para mover.
+function SysZoomViewer({ src, alt, onClose }) {
+  const [z, setZ] = React.useState(1);
+  const [pos, setPos] = React.useState({ x: 0, y: 0 });
+  const drag = React.useRef(null);
+  const clamp = v => Math.min(5, Math.max(1, v));
+  const zoomTo = v => { const n = clamp(v); setZ(n); if (n === 1) setPos({ x: 0, y: 0 }); };
+  React.useEffect(() => {
+    const k = ev => {
+      if (ev.key === 'Escape') { ev.stopPropagation(); onClose(); }
+      if (ev.key === '+' || ev.key === '=') zoomTo(z + .5);
+      if (ev.key === '-') zoomTo(z - .5);
+      if (ev.key === '0') zoomTo(1);
+    };
+    window.addEventListener('keydown', k, true);
+    return () => window.removeEventListener('keydown', k, true);
+  }, [z]);
+  function onWheel(ev) { ev.preventDefault(); zoomTo(z * (ev.deltaY < 0 ? 1.15 : 1 / 1.15)); }
+  function onDown(ev) { if (z === 1) return; drag.current = { x: ev.clientX - pos.x, y: ev.clientY - pos.y }; ev.currentTarget.setPointerCapture(ev.pointerId); }
+  function onMove(ev) { if (drag.current) setPos({ x: ev.clientX - drag.current.x, y: ev.clientY - drag.current.y }); }
+  function onUp() { drag.current = null; }
+  return (
+    <div className="sys-zoom" onClick={onClose}>
+      <div className="sys-zoom-stage" onClick={ev => ev.stopPropagation()} onWheel={onWheel}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+        onDoubleClick={() => zoomTo(z > 1 ? 1 : 2.5)}>
+        <img src={src} alt={alt} draggable="false"
+          style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${z})`, cursor: z > 1 ? 'grab' : 'zoom-in' }} />
+      </div>
+      <div className="sys-zoom-bar" onClick={ev => ev.stopPropagation()}>
+        <button className="vt-btn" onClick={() => zoomTo(z - .5)} disabled={z <= 1} aria-label="Diminuir">−</button>
+        <span className="sys-zoom-level">{Math.round(z * 100)}%</span>
+        <button className="vt-btn" onClick={() => zoomTo(z + .5)} disabled={z >= 5} aria-label="Aumentar">+</button>
+        <button className="vt-btn" onClick={() => zoomTo(1)}>Ajustar</button>
+        <a className="vt-btn" href={src} target="_blank" rel="noopener noreferrer">Abrir original ↗</a>
+        <button className="vt-btn vt-btn--gold" onClick={onClose}>Fechar</button>
+      </div>
+    </div>
+  );
+}
+
+function SysLightbox({ e, onClose }) {
+  const p = sysParseTitle(e.title);
+  const img = useSysImage(e.id);
+  const blocks = parseSystemBody(e.body);
+  const [zoom, setZoom] = React.useState(null);
+  React.useEffect(() => {
+    const k = ev => { if (ev.key === 'Escape' && !zoom) onClose(); };
+    window.addEventListener('keydown', k);
+    return () => window.removeEventListener('keydown', k);
+  }, [zoom]);
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box sys-lightbox" style={{ '--pane': sysPane(p.domain) }} onClick={ev => ev.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-eyebrow">{[p.status, p.kind, e.date_long || e.date_short].filter(Boolean).join(' · ')}</div>
+          <h2 className="modal-title">{p.name}</h2>
+          <div className="sys-card-meta sys-lightbox-meta">
+            {p.domain && <span className="sys-card-domain"><i />{p.domain}</span>}
+            {p.level != null && <span className="sys-card-level">Nível {p.level}</span>}
+          </div>
+        </div>
+        <div className="modal-body sys-lightbox-body">
+          {img && (
+            <button type="button" className="sys-lightbox-zoomable" onClick={() => setZoom(img)} title="Ampliar">
+              <img className="sys-lightbox-img" src={img} alt={e.title} />
+              <span className="sys-lightbox-hint">⤢ Ampliar</span>
+            </button>
+          )}
+          {blocks.filter(b => b.kind === 'para').map((b, i) => <p key={i}>{b.text}</p>)}
+          {blocks.filter(b => b.kind === 'img' && b.index > 0).map(b => (
+            <SystemFigure key={b.index} entryId={e.id} idx={b.index} caption={b.caption} />
+          ))}
+          {e.compact && e.line && <p>{e.line}</p>}
+        </div>
+        <div className="modal-foot">
+          <button className="btn-cancel" onClick={onClose}>Fechar</button>
+          {img && <button className="btn-save" onClick={() => setZoom(img)}>⤢ Ampliar carta</button>}
+        </div>
+      </div>
+      {zoom && <SysZoomViewer src={zoom} alt={e.title} onClose={() => setZoom(null)} />}
+    </div>
+  );
+}
+
 function Sistema({ onNav }) {
   const { isEditor } = useAuth();
-  const [modal,  setModal]  = React.useState(null);
-  const [active, setActive] = React.useState(null);
+  const [modal, setModal] = React.useState(null);
+  const [open, setOpen] = React.useState(null);
+  const [kind, setKind] = React.useState('todos');
+  const [domain, setDomain] = React.useState('todos');
+  const [q, setQ] = React.useState('');
   const [, setTick] = React.useState(0);
 
   React.useEffect(() => {
@@ -268,98 +405,93 @@ function Sistema({ onNav }) {
   }, []);
 
   const entries = (Data.systemEntries || []).slice()
-    .sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
+    .sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0))
+    .map(e => ({ e, p: sysParseTitle(e.title) }));
 
-  React.useEffect(() => {
-    const scroller = document.querySelector('.main');
-    if (!scroller || entries.length === 0) return;
+  const count = (key, fn) => entries.filter(fn).length;
+  const kinds = Array.from(new Set(entries.map(x => x.p.kind)));
+  const domains = Array.from(new Set(entries.map(x => x.p.domain).filter(Boolean))).sort();
+  const nq = q.trim().toLowerCase();
+  const shown = entries.filter(({ e, p }) =>
+    (kind === 'todos' || p.kind === kind) &&
+    (domain === 'todos' || p.domain === domain) &&
+    (!nq || [e.title, e.body, e.line].some(t => String(t || '').toLowerCase().includes(nq))));
 
-    function onScroll() {
-      const scrollerTop = scroller.getBoundingClientRect().top;
-      let current = entries[0].id;
-      for (const e of entries) {
-        const el = document.getElementById(`sys-${e.id}`);
-        if (!el) continue;
-        const top = el.getBoundingClientRect().top - scrollerTop;
-        if (top <= 80) current = e.id;
-      }
-      setActive(current);
-    }
-    scroller.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => scroller.removeEventListener('scroll', onScroll);
-  }, [entries.length]);
+  // agrupa por data (as entradas já vêm da mais nova para a mais antiga)
+  const groups = [];
+  shown.forEach(x => {
+    const key = x.e.date_long || x.e.date_short || 'Sem data';
+    if (!groups.length || groups[groups.length - 1].key !== key) groups.push({ key, items: [] });
+    groups[groups.length - 1].items.push(x);
+  });
 
-  function scrollTo(id) {
-    const el = document.getElementById(`sys-${id}`);
-    const scroller = document.querySelector('.main');
-    if (!el || !scroller) return;
-    const scrollerTop = scroller.getBoundingClientRect().top;
-    const elTop = el.getBoundingClientRect().top;
-    scroller.scrollTo({
-      top: scroller.scrollTop + (elTop - scrollerTop) - 24,
-      behavior: 'smooth',
-    });
-  }
+  const filtersActive = kind !== 'todos' || domain !== 'todos';
 
   return (
-    <div className="page" data-screen-label="15 Sistema">
-      <header className="page-header">
-        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16 }}>
-          <div>
-            <div className="page-eyebrow">Mesa · Vol. VIII · Sistema</div>
-            <h1 className="page-title">Atualizações de Sistema</h1>
-            <p className="page-lede">
-              Mecânicas novas, ajustes de regra, erratas e novas funcionalidades
-              da Wiki — registradas em ordem cronológica como entradas do
-              caderno do mestre.
-            </p>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" style={{ flexShrink:0, marginTop:4 }}
-              onClick={() => setModal('new')}>
-              + Nova entrada
-            </button>
-          )}
+    <div className="vt vt-pantheon sys-vt" data-screen-label="15 Sistema">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Mesa · Caderno do mestre</div>
+          <h1 className="vt-h1">Atualizações do Sistema</h1>
+          <div className="vt-epithet">O grimório da mesa</div>
+          <p className="vt-pantheon-lede">
+            Cartas de domínio, subclasses, ajustes de regra e erratas, na ordem em que entraram no jogo.
+            Abra uma carta para vê-la inteira.
+          </p>
         </div>
-      </header>
-
-      {entries.length === 0 && (
-        <p style={{ fontFamily:'EB Garamond,serif', fontStyle:'italic', color:'var(--foam-dim)', textAlign:'center', marginTop:60 }}>
-          Nenhuma entrada cadastrada ainda.
-        </p>
-      )}
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Nova entrada</button>
+          </div>
+        )}
+      </section>
 
       {entries.length > 0 && (
-        <div className="sys-shell">
-          <aside className="sys-toc">
-            <h4 className="sys-toc-title">Sumário</h4>
-            <ol>
-              {entries.map(e => (
-                <li
-                  key={e.id}
-                  className={active === e.id ? 'active' : ''}
-                  onClick={() => scrollTo(e.id)}
-                >
-                  <span className="sys-toc-date">{e.date_short || e.date_long || '—'}</span>
-                  <span className="sys-toc-title-text">{e.title}</span>
-                </li>
-              ))}
-            </ol>
-          </aside>
-          <div className="sys-feed">
-            {entries.map(e => (
-              <SystemEntry
-                key={e.id}
-                entry={e}
-                isEditor={isEditor}
-                onEdit={() => setModal(e)}
-              />
-            ))}
+        <VtFilterBar
+          groups={[
+            { label: 'Tipo', value: kind, onChange: setKind, options: [
+              { value: 'todos', label: 'Todos', count: entries.length },
+              ...kinds.map(k => ({ value: k, label: k, count: count(k, x => x.p.kind === k) })),
+            ] },
+            ...(domains.length ? [{ label: 'Domínio · classe', value: domain, onChange: setDomain, options: [
+              { value: 'todos', label: 'Todos', count: entries.length },
+              ...domains.map(d => ({ value: d, label: d, count: count(d, x => x.p.domain === d), pane: sysPane(d) })),
+            ] }] : []),
+          ]}
+          active={filtersActive}
+          onReset={() => { setKind('todos'); setDomain('todos'); }}>
+          <div className="vt-filter-tools">
+            <input className="vt-filter-search" type="search" placeholder="Buscar carta ou regra…" value={q} onChange={e => setQ(e.target.value)} />
+            <span className="vt-filter-count">{shown.length}{shown.length !== entries.length ? ' / ' + entries.length : ''}</span>
           </div>
-        </div>
+        </VtFilterBar>
       )}
 
+      {entries.length === 0 && <p className="vt-pantheon-empty">Nenhuma entrada cadastrada ainda.</p>}
+      {entries.length > 0 && shown.length === 0 && <p className="vt-pantheon-empty">Nenhuma entrada corresponde aos filtros.</p>}
+
+      {groups.map(g => (
+        <section key={g.key} className="vh-section sys-group">
+          <header className="vh-head">
+            <span className="vh-head-num">✠</span>
+            <h2 className="vh-head-title">{g.key}</h2>
+            <span className="vev-count">{g.items.length} {g.items.length === 1 ? 'entrada' : 'entradas'}</span>
+          </header>
+          <div className="sys-grid">
+            {g.items.map(({ e }) => (
+              <SysCard key={e.id} e={e} onOpen={setOpen} isEditor={isEditor} onEdit={setModal} />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <footer className="vt-pantheon-foot">
+        “Toda regra nasce de uma discussão à mesa. As boas sobrevivem à segunda.”
+        <div className="vt-quote-src">— Anotação do mestre</div>
+      </footer>
+
+      {open && <SysLightbox e={open} onClose={() => setOpen(null)} />}
       {modal && (
         <SystemEntryModal
           entry={modal === 'new' ? null : modal}

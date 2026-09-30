@@ -116,7 +116,7 @@ const CAMPAIGN_DEFAULTS = {
       { tag: 'Grupo',     title: 'Personagens (PC)',          target: 'characters' },
       { tag: 'Histórico', title: 'Linha do Tempo',            target: 'timeline' },
       { tag: 'Org.',      title: 'Blackflame · Brotherhood',  target: 'factions' },
-      { tag: 'Divindade', title: 'Ayael — O que Sangra Luz',  target: 'article' },
+      { tag: 'Divindade', title: 'Ayael — O que Sangra Luz',  target: 'deity:ayael' },
     ],
   },
 
@@ -203,7 +203,7 @@ function CampaignEditModal({ data, onClose, onSave }) {
             <div style={{ marginTop: 20, borderTop: '1px solid var(--ink-line-soft)', paddingTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <label className="modal-label" style={{ margin: 0 }}>Infobox — Linhas</label>
-                <button type="button" className="btn-save" style={{ padding: '4px 12px', fontSize: 12 }} onClick={addRow}>+ Linha</button>
+                <button type="button" className="editor-add-btn" onClick={addRow}>Linha</button>
               </div>
               {form.infoRows.map((r, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto auto', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -272,87 +272,24 @@ function CampaignArticle({ id, onNav }) {
     await window.DB.saveCampaignArticle(data);
   }
 
+  // artigo no tema vitral (mesmo layout dos personagens, com o selo da campanha no lugar do retrato)
+  const c = {
+    id: camp.id,
+    name: camp.title,
+    subtitle: camp.subtitle,
+    sections: camp.sections || [],
+    infobox: { rows: camp.infobox?.rows || [], statusNote: camp.infobox?.status || '' },
+    related: camp.related || [],
+  };
+
   return (
-    <div className="article" data-screen-label={camp.title}>
-      <div className="parchment article-body-wrap" style={{ minWidth: 0 }}>
-        <div className="article-body">
-          <nav className="breadcrumb">
-            <a onClick={() => onNav('home')}>Arquivo</a>
-            <span className="sep">▸</span>
-            <a onClick={() => onNav('timeline')}>Crônicas</a>
-            <span className="sep">▸</span>
-            <span>{camp.title}</span>
-          </nav>
-
-          {isEditor && (
-            <button className="editor-del-btn" style={{ opacity: 1, marginBottom: 12 }} onClick={() => setModal(true)}>
-              Editar
-            </button>
-          )}
-
-          <h1 className="article-title">{camp.title}</h1>
-          <p className="article-subtitle">{camp.subtitle}</p>
-          <div className="article-divider"><Sigil.Ornament /></div>
-
-          <div className="prose">
-            {(camp.sections || []).map((sec, i) => (
-              <React.Fragment key={i}>
-                <h2>{sec.title}</h2>
-                {(sec.paras || []).map((p, j) => (
-                  <p key={j} className={i === 0 && j === 0 ? 'dropcap' : ''}>{p}</p>
-                ))}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <aside className="infobox-rail">
-        <div className="infobox">
-          <div className="infobox-head">
-            <div className="infobox-sigil-wrap"><Sigil.Tome /></div>
-            <h3 className="infobox-name">{camp.title}</h3>
-            <p className="infobox-sub">{camp.subtitle?.split('—')[0]?.trim()}</p>
-          </div>
-          <dl className="infobox-rows">
-            {(camp.infobox?.rows || []).map(r => (
-              <div key={r.k} className="infobox-row">
-                <dt>{r.k}</dt>
-                <dd className={r.danger ? 'danger' : r.ok ? 'ok' : ''}>
-                  {r.link
-                    ? <span className="infobox-link" onClick={() => onNav(r.link)}>{r.v}</span>
-                    : r.v}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          {camp.infobox?.status && (
-            <div className="infobox-status">
-              <strong>SITUAÇÃO ATUAL</strong><br />
-              {camp.infobox.status}
-            </div>
-          )}
-        </div>
-
-        <div className="toc">
-          <h4 className="toc-title">Sumário</h4>
-          <ol>{(camp.sections || []).map(s => <li key={s.title}>{s.title}</li>)}</ol>
-        </div>
-
-        <div className="related">
-          <h4 className="related-title">Cf. Relacionados</h4>
-          {(camp.related || []).map(r => (
-            <a key={r.title} className="related-link" onClick={() => r.target && onNav(r.target)}>
-              <span className="related-link-tag">{r.tag}</span>
-              <span className="related-link-title">{r.title}</span>
-            </a>
-          ))}
-        </div>
-      </aside>
-
+    <React.Fragment>
+      <VitralArticle c={c} kind="campaign" onNav={onNav} backTo="sessions" backLabel="Crônicas"
+        isEditor={isEditor} onEdit={() => setModal(true)} />
       {modal && <CampaignEditModal data={camp} onClose={() => setModal(false)} onSave={handleSave} />}
-    </div>
+    </React.Fragment>
   );
 }
 
 window.CampaignArticle = CampaignArticle;
+window.CAMPAIGN_DEFAULTS = CAMPAIGN_DEFAULTS;

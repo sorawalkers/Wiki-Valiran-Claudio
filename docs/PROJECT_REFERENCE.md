@@ -47,7 +47,7 @@ Wiki-Valiran-Claudio/
 | Image Storage | Supabase Storage | `media` bucket, drag-drop upload via `image-upload.js` |
 | Routing | Manual | No React Router; page IDs dispatched in `app.jsx` |
 | State | Window namespace | `window.Data`, `window.Entities`, `window.DB` |
-| Styling | CSS | Custom design system in `styles.css` + `styles-extra.css` |
+| Styling | CSS | `styles-vitral.css` (new theme + shell) on top of the legacy `styles.css` + `styles-extra.css` |
 
 **There is no build step.** Editing a `.jsx` file takes effect on the next browser reload. There is no `npm install`, no `package.json`, no compilation pipeline.
 
@@ -73,13 +73,14 @@ Wiki-Valiran-Claudio/
 |------|------|
 | `app.jsx` | Root component. Manual router (dispatches page by ID). Palette/density theme management. Listens for `db-refresh`. |
 | `auth.jsx` | `AuthContext` + `useAuth()` hook. Login modal, session check, role fetch from `profiles` table. |
-| `chrome.jsx` | Header, sidebar, breadcrumbs, search bar — the persistent UI shell. |
+| `chrome.jsx` | Persistent UI shell: header with 5 sections (Panteão · Casas · Almas · Crônicas · Atlas) + "Mais", archive search (Ctrl K), and the mobile bottom nav. Nav structure lives in `Data.topnav` / `Data.moreNav` (`data.jsx`). |
 | `data.jsx` | Global `Data` object (static nav structure) and shared state. |
 | `data-entities.jsx` | Entity type definitions and field schemas used across the app. |
 | `article-editor.jsx` | In-app WYSIWYG editor for campaign articles, deity/character detail pages. |
 | `tweaks-panel.jsx` | Settings panel: palette selector (wine/planar/necro), density (compact/normal/spacious), ornaments toggle. |
 | `deity-sigil.jsx` | Renders a deity sigil SVG by ID. |
 | `sigils.jsx` / `sigils-deities.jsx` | Heraldic sigil definitions and rendering for kingdoms, factions, deities. |
+| `vitral.jsx` + `styles-vitral.css` | **"Vitral sob Holofote" theme** (the redesign being rolled out page by page). `styles-vitral.css` holds the global `--vt-*` tokens, the header / mobile bottom-nav shell, and the `.vt` components. `vitral.jsx` has `VitralArticle` (PC/NPC article), `VitralCard` (gallery card, alive/dead) and `ogivePath(w,h)`. Stained-glass assets live in `assets/vitral/`. Portrait window frames are a catalog (`VT_FRAMES` in `vitral.jsx`): each is `<file>.webp` (960px) + `<file>-sm.webp` (480px) + `<file>-vao.png` (alpha mask of the opening, so irregular/broken frames work), produced from a 2:3 transparent PNG with `python3 assets/vitral/processar_moldura.py origem.png janela-nome [--fechar N]`, which also prints the `box` to register. Each character can pick a frame via `infobox.vitral` (editor modal, or "Ajustar vitral e retrato" under the portrait for editors, which previews live and saves); the same panel sets the portrait framing in `infobox.retrato` (`x`/`y` focus %, `z` zoom, `fit` `preencher`|`inteira`); without it the frame follows the Status (alive → `viva-fina`, missing/captive/unknown → `misterio-finas`, dead → `viva-fina` greyed with broken glass). The first two thick frames (`viva`, `misterio`) were removed; saved ids are aliased to the thin versions. The character ficha sits inside an ornamental archive frame built from slices in `assets/vitral/ficha/` (fixed corners and center ornaments, repeating plain rails, so it fits any number of fields), produced by `python3 assets/vitral/processar_ficha.py origem.png`, which also removes stray alpha specks left by the cut-out. The rose window, vine divider and broken glass are SVGs regenerated with `python3 assets/vitral/gerar_vitral.py`. |
 
 ### Pages (`pages/`)
 
@@ -88,21 +89,16 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | File | Page | Description |
 |------|------|-------------|
 | `portal.jsx` | Home / Dashboard | Recent activity feed |
-| `pantheon.jsx` | Pantheon | Deity directory (3-tier hierarchy) |
-| `deity-detail.jsx` | Deity article | Full deity profile with infobox and sections |
+| `pantheon.jsx` | Pantheon | Deity directory in 3 tiers (Titãs, Deuses, Ascendidos), each a stained-glass panel; deities shown with `VitralDeityCard` (the tier's rose-window reliquary + a votive nameplate `.vt-votive` with name and epithet) |
+| `deity-detail.jsx` | Deity article | Altar layout (`VitralDeityAltar` in `vitral.jsx`): the deity's full stained glass (image slot `deity-vitral-<id>`, same as the gallery; falls back to the oval mirror with `deity-hero-<id>`), tier label, name, epithet, epigraph, ficha rows as glass plaques, prose sections with a drop cap, `Dogmas` sections as a numbered stone tablet, related links grouped by the note in parentheses (Origem / Laços / Descendência / Adversários) and characters whose role or ficha names the deity (Fiéis e ecos) |
 | `characters.jsx` | Characters | PC + NPC directory, filterable by campaign/tag |
 | `npcs.jsx` | NPCs | NPC-only directory |
 | `character-detail.jsx` | Character article | Full character profile with infobox and sections |
 | `sessions.jsx` | Session Diary | Campaign session list + individual session view |
 | `timeline.jsx` | Timeline | Chronological event line with era markers |
-| `events.jsx` | Recent Events | Categorical event feed (divine / political / catastrophe / arcane) |
 | `factions.jsx` | Factions | Secret organization dossiers with redacted fields |
 | `realm-map.jsx` | Map (`#/map`) | Interactive hex-grid map of kingdoms — reads `realms` / `realm_hexes` / `realm_cities` / `realm_rivers` |
-| `houserules.jsx` | House Rules | Mechanical house rule compendium |
-| `planes.jsx` | Planes | Cosmological planes (Feywild, Underdark, Abyss, etc.) |
-| `weave.jsx` | The Weave | Magical system primer |
-| `article.jsx` | Ayael | Static lore article |
-| `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles |
+| `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles, rendered through `VitralArticle kind="campaign"` (roman-numeral seal instead of a portrait) |
 
 **Removed dead code (2026):** `kingdoms.jsx` and `map.jsx` predated the hex-map rewrite and were removed — `app.jsx`'s router already redirected `kingdoms` → `map` and rendered `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component was ever reached. Their `<script>` tags in `index.html` and the orphaned `.kingdom-*` CSS block in `styles-extra.css` were removed along with them. See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
 
@@ -172,7 +168,8 @@ Example: "Annabella Whiteflame" → "annabella-whiteflame"
 
 ## 7. Design System
 
-- **Color scheme**: Dark theme — `ardósia` (#16161b) background, `pergamino` (#e8dcc4) text, `dourado` (#b89968) accents, `vinho` (#6b1a26) highlights.
+- **Redesign in progress — "Vitral sob Holofote"** (gothic stained glass + museum spotlight): near-black `#060606` background, `#e4dccb` ink, `#c9a55a` gold, 3px `#161517` "lead" rules, zero border radius, ogive arches for portraits. Fonts: Cinzel (display), Cormorant Garamond (body), Karla (utility UI). Tokens are the `--vt-*` custom properties in `styles-vitral.css`; the legacy tokens in `styles.css` are remapped toward this palette until each page is migrated. Done so far: shell (header + mobile bottom nav, responsive viewport) and the Almas section (PC/NPC articles and galleries).
+- **Legacy color scheme** (pages not yet migrated): `ardósia` background, `pergamino` text, `dourado` accents, `vinho` highlights.
 - **Palettes**: Three switchable palettes — `wine` (default), `planar`, `necro`. Controlled by `tweaks-panel.jsx` and persisted in `localStorage`.
 - **Typography**: Cinzel (display headings), EB Garamond (body), JetBrains Mono (metadata/code labels).
 - **Density modes**: `compact`, `normal`, `spacious` — toggle from the tweaks panel.
@@ -226,4 +223,21 @@ These files provide deeper guidance for specific tasks:
 - **JSONB field shapes are load-bearing.** `db.js` and the page components expect exact key names (`rows`, `k`, `v`, `sections`, `title`, `body`, etc.). Changing the shape of a JSONB field breaks both read and write paths.
 - **Do not refactor the global state pattern** (`window.DB`, `window.Data`, `window.Entities`) without updating every file that references it — there is no module system, so namespace changes break silently.
 - **Script load order matters.** `index.html` loads files in a specific order. If you add a new file, verify it is inserted after its dependencies and before its consumers.
-- **Routing is manual.** To add a new page: add a component to `pages/`, import it in `app.jsx`, add it to the page registry in `app.jsx`, and add a nav link in `chrome.jsx` and/or `data.jsx`.
+- **Routing is manual.** To add a new page: add a component to `pages/`, import it in `app.jsx`, add it to the page registry in `app.jsx`, add a nav entry in `Data.topnav`/`Data.moreNav` (`data.jsx`), and map its route to a header section in `NAV_SECTION_OF` (`chrome.jsx`).
+
+
+## Stained-glass redesign (vitral) — page map
+
+All pages use `styles-vitral.css` and components from `vitral.jsx`:
+
+- Home (`portal.jsx`): entrance with the Pantheon rose wheel (`PantheonRose`), Onde paramos, O que você precisa saber (Campaign III summary), Almas, Continente, Portões, Registro.
+- Pantheon: hierarchy filter (`VtFilterBar`), deity cards show the gallery stained glass (`deity-vitral-<id>`), falling back to the oval mirror (`deity-hero-<id>`) or the sigil altar. Editors bulk-upload windows with `VtVitralUploader`.
+- Deity page: `VitralDeityAltar`.
+- PCs / NPCs: gothic header + `VtFilterBar`; articles via `VitralArticle`.
+- Casas: faction banners by relation (`VtBanner`, `vtFactionRelation`; 'Relação' ficha row: Aliada/Neutra/Inimiga), dossier via `VitralArticle kind="faction"`.
+- Crônicas: sessions diary and folio (`sessions.jsx`), timeline with kind filters (`timeline.jsx`) — era events are merged in by title (descriptions and regions), `#/events` redirects to the timeline.
+- Atlas: `realm-map.jsx` with the `.hx-vt` theme layer; the hex map itself is unchanged.
+- Modals: every `.modal-*` dialog is themed in `styles-vitral.css`.
+- Atualizações do sistema (`sistema.jsx`, admin): card grimoire grouped by date, filters by type and domain/class parsed from the title ("New Domain Card - Name, Level N (Domain)"), card opens in a lightbox.
+- Regras da casa was removed; `#/house-rules` redirects home (the `houserules` table is untouched).
+- `#/article` (old static Ayael page) redirects to `deity:ayael`.

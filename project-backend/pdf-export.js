@@ -301,35 +301,6 @@
     save(ctx, 'sessao-' + String(s.num).padStart(2, '0') + '.pdf');
   }
 
-  function houseRulesTemplate() {
-    const ctx = newCtx();
-    eyebrow(ctx, 'Compêndio');
-    title(ctx, 'Regras da Casa');
-    divider(ctx);
-    (window.Data && window.Data.houserules || []).forEach(r => {
-      sectionTitle(ctx, r.title);
-      (r.paragraphs || []).forEach(p => paragraph(ctx, p));
-      if (r.callout_text) {
-        ensureSpace(ctx, 10);
-        if (r.callout_label) {
-          ctx.doc.setFont('helvetica', 'bold');
-          ctx.doc.setFontSize(8);
-          ctx.doc.setTextColor(...COLORS.wine);
-          ctx.doc.text(r.callout_label.toUpperCase(), PAGE.margin, ctx.y);
-          ctx.y += 5;
-        }
-        paragraph(ctx, r.callout_text, { italic: true, color: COLORS.inkSoft });
-      }
-      ctx.y += 3;
-    });
-    save(ctx, 'regras-da-casa.pdf');
-  }
-
-  // Fallback for pages with no dedicated template above (portal, timeline,
-  // map, list pages, ...): there's no single structured record behind
-  // those, so this reads the headings/paragraphs currently rendered on
-  // screen instead. Extend the switch in exportCurrentPage() with a real
-  // template for any page that deserves a purpose-built layout.
   function genericTemplate(routeKey) {
     const root = document.querySelector('[data-screen-label]') || document.querySelector('.main');
     if (!root) return alertNoContent();
@@ -393,8 +364,6 @@
           if (!s) return alertNoContent();
           return sessionTemplate(s);
         }
-        case 'house-rules':
-          return houseRulesTemplate();
         default:
           return genericTemplate(routeKey);
       }

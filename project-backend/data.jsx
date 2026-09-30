@@ -1,75 +1,36 @@
 // Wiki data — articles, deities, timeline events, regions
 
 const Data = {
-  // ===== Nav structure =====
-  nav: [
-    { section: "Portal", items: [
-      { id: "home", label: "Início", icon: "navHome" },
-      { id: "recent", label: "Adições recentes", icon: "navScroll" },
+  // ===== Nav structure (header em 5 seções + "Mais") =====
+  // `home` é para onde o rótulo da seção leva; `items` aparecem no menu suspenso.
+  topnav: [
+    { id: 'panteao', label: 'Panteão', home: 'pantheon', items: [
+      { id: 'pantheon', label: 'Panteão' },
     ]},
-    { section: "Cosmologia", items: [
-      { id: "pantheon", label: "Panteão", icon: "navDeity" },
+    { id: 'casas', label: 'Casas', home: 'factions', items: [
+      { id: 'factions', label: 'Facções' },
     ]},
-    { section: "Geopolítica", items: [
-      { id: "map", label: "Reinos & Potências", icon: "navSword" },
-      { id: "factions", label: "Facções", icon: "navBook" },
+    { id: 'almas', label: 'Almas', home: 'characters', items: [
+      { id: 'characters', label: 'Personagens (PC)' },
+      { id: 'npcs', label: 'Pessoas importantes' },
     ]},
-    { section: "Crônicas", items: [
-      { id: "timeline", label: "Linha do Tempo", icon: "navTime" },
-      { id: "events", label: "Eventos da Era", icon: "navBook" },
-      { id: "campanha3", label: "Campanha III", icon: "navScroll" },
+    { id: 'cronicas', label: 'Crônicas', home: 'sessions', items: [
+      { id: 'sessions', label: 'Diário de sessões' },
+      { id: 'timeline', label: 'Linha do tempo' },
+      { id: 'campanha3', label: 'Campanha III' },
+      { id: 'recent', label: 'Adições recentes' },
     ]},
-    { section: "Dramatis Personae", items: [
-      { id: "characters", label: "Personagens (PC)", icon: "navScroll" },
-      { id: "npcs", label: "Pessoas Importantes (NPC)", icon: "navScroll" },
-    ]},
-    { section: "Mesa", items: [
-      { id: "sessions", label: "Diário de sessões", icon: "navScroll" },
-      { id: "house-rules", label: "Regras da casa", icon: "navBook" },
-      { id: "sistema", label: "Atualizações do Sistema", icon: "navBook" },
+    { id: 'atlas', label: 'Atlas', home: 'map', items: [
+      { id: 'map', label: 'Reinos & Potências' },
     ]},
   ],
+  moreNav: { id: 'mais', label: 'Mais', home: 'home', items: [
+    { id: 'home', label: 'Início' },
+    { id: 'sistema', label: 'Atualizações do sistema', adminOnly: true },
+  ]},
 
   // ===== Latest entries (portal + feed — populated from DB) =====
   latest: [],
-
-  // ===== Article: Ayael =====
-  article: {
-    breadcrumb: ["Panteão", "Ascendidos", "Ayael"],
-    title: "Ayael",
-    subtitle: "O que Sangra Luz · O Anjo Aprisionado · Filho de Lamidriel",
-    infobox: {
-      name: "Ayael",
-      sub: "O que Sangra Luz",
-      sigil: "Chain",
-      rows: [
-        { k: "Tipo", v: "Anjo Ascendido" },
-        { k: "Pai", v: "Lamidriel, o Titã" },
-        { k: "Domínio", v: "Sofrimento, Necromância", danger: true },
-        { k: "Alinhamento", v: "Aprisionado" },
-        { k: "Plano", v: "Energia Negativa", danger: true },
-        { k: "Símbolo", v: "Corrente quebrada sobre asa" },
-        { k: "Adoradores", v: "Necromantes, cultos do dilúvio" },
-        { k: "Antagonista de", v: "Esmir, Bahamut" },
-      ],
-      status: "Atualmente prisioneiro. A corrupção que vaza de seu cárcere é a principal ameaça da era — toda necromância em Valiran tem nele sua fonte última.",
-    },
-    toc: [
-      "Origem",
-      "O Aprisionamento",
-      "A Corrupção como Vazamento",
-      "Cultos e Hereges",
-      "Implicações para os Vivos",
-      "Notas do Arquivista",
-    ],
-    related: [
-      { tag: "Plano", title: "Plano de Energia Negativa" },
-      { tag: "Titã", title: "Lamidriel, a Mão que Cria" },
-      { tag: "Evento", title: "A Queda de Lancaster" },
-      { tag: "Organização", title: "Blackflame" },
-      { tag: "Local", title: "Tumba dos Hereges" },
-    ],
-  },
 
   // ===== Timeline (populated from DB) =====
   timeline: [],

@@ -13,6 +13,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
   const [sigil, setSigil] = React.useState(entity.sigil || '');
   const [sections, setSections] = React.useState(
     (entity.sections || []).map(s => ({
+      _orig:    s,  // preserva campos que o editor não mostra (fase, confiabilidade, quote…)
       title:    s.title    || '',
       paras:    (s.paras || []).join('\n\n'),
       eyebrow:  s.eyebrow  || '',
@@ -27,6 +28,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
     (entity.infobox?.rows || []).map(r => ({ ...r }))
   );
   const [statusNote, setStatusNote] = React.useState(entity.infobox?.statusNote || '');
+  const [vitral, setVitral] = React.useState(entity.infobox?.vitral || '');
   const [related, setRelated] = React.useState(
     (entity.related || []).map(r => ({ ...r }))
   );
@@ -111,7 +113,8 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
         hero,
         epithet: type === 'deity' ? epithet : entity.epithet,
         sigil: type === 'deity' ? sigil : entity.sigil,
-        sections: sections.map(s => ({
+        sections: sections.map(({ _orig, ...s }) => ({
+          ...(_orig || {}),
           title:    s.title,
           paras:    s.paras.split('\n\n').map(p => p.trim()).filter(Boolean),
           eyebrow:  s.eyebrow  || undefined,
@@ -125,6 +128,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
           ...(entity.infobox || {}),
           rows: rows.filter(r => r.k || r.v),
           statusNote: statusNote || undefined,
+          vitral: type === 'character' ? (vitral || undefined) : entity.infobox?.vitral,
         },
         related: related.filter(r => r.title),
         placeholder,
@@ -148,13 +152,13 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
 
   const btnRemove = {
     background: 'transparent',
-    border: '1px solid var(--wine)',
-    color: 'var(--wine-bright)',
+    border: '1px solid rgba(168,53,43,.6)',
+    color: '#e59a8c',
     borderRadius: 2,
     padding: '5px 9px',
     cursor: 'pointer',
     fontSize: 11,
-    fontFamily: 'JetBrains Mono, monospace',
+    fontFamily: "'Cinzel', serif",
     letterSpacing: '0.1em',
     flexShrink: 0,
   };
@@ -170,9 +174,9 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
     flexShrink: 0,
   };
   const sectionBox = {
-    background: 'var(--ink-deep)',
-    border: '1px solid var(--ink-line)',
-    borderRadius: 2,
+    background: 'rgba(5,5,6,.55)',
+    border: '1px solid rgba(201,165,90,.16)',
+    borderRadius: 0,
     padding: '14px 16px',
     marginBottom: 10,
   };
@@ -246,7 +250,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                 {imgPreview && (
                   <button
                     type="button"
-                    style={{ marginLeft:8, padding:'7px 12px', fontSize:10, background:'transparent', border:'1px solid var(--wine)', color:'var(--wine-bright)', borderRadius:2, cursor:'pointer', fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.1em' }}
+                    style={{ marginLeft:8, padding:'7px 12px', fontSize:10, background:'transparent', border:'1px solid rgba(168,53,43,.6)', color:'#e59a8c', borderRadius:0, cursor:'pointer', fontFamily:"'Cinzel', serif", letterSpacing:'0.1em' }}
                     onClick={() => { setImgFile(null); setImgPreview(null); window._imageSlotSet(slotId, null); }}
                   >
                     Remover
@@ -260,6 +264,14 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
             </div>
           </div>
 
+          {/* Moldura de vitral do retrato (personagens) */}
+          {type === 'character' && window.VitralFramePicker && (
+            <div className="modal-field">
+              <label className="modal-label">Moldura de vitral</label>
+              <VitralFramePicker value={vitral} onChange={setVitral} portraitUrl={imgPreview} />
+            </div>
+          )}
+
           {/* Hero quote */}
           <div className="modal-field">
             <label className="modal-label">Citação de abertura</label>
@@ -271,7 +283,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
             <div style={subHead}>
               <span className="modal-label">Seções do Artigo</span>
               <button type="button" className="editor-add-btn" style={{ padding:'5px 14px', fontSize:10 }} onClick={addSection}>
-                + Seção
+                Seção
               </button>
             </div>
             {sections.length === 0 && (
@@ -384,7 +396,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
                 <div style={subHead}>
                   <span className="modal-label">Infobox — Linhas de dados</span>
                   <button type="button" className="editor-add-btn" style={{ padding:'5px 14px', fontSize:10 }} onClick={addRow}>
-                    + Linha
+                    Linha
                   </button>
                 </div>
                 {rows.map((row, i) => (
@@ -423,7 +435,7 @@ function ArticleEditor({ type, entity, onClose, onDelete }) {
             <div style={subHead}>
               <span className="modal-label">Cf. Relacionados</span>
               <button type="button" className="editor-add-btn" style={{ padding:'5px 14px', fontSize:10 }} onClick={addRelated}>
-                + Link
+                Link
               </button>
             </div>
             {related.map((rel, i) => (

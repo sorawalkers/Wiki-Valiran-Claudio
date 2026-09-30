@@ -107,7 +107,7 @@ function App() {
     switch (page) {
       case 'home': return <Portal key={dbVersion} onNav={navigate} />;
       case 'pantheon': return <Pantheon onNav={navigate} />;
-      case 'article': return <Article onNav={navigate} />;
+      case 'article': navigate('deity:ayael'); return null;   // antigo artigo fixo da Ayael
       case 'campanha3': return <CampaignArticle id="campanha3" onNav={navigate} />;
       case 'campanha2': return <CampaignArticle id="campanha2" onNav={navigate} />;
       case 'campanha1': return <CampaignArticle id="campanha1" onNav={navigate} />;
@@ -118,7 +118,7 @@ function App() {
       case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
       case 'faction': return <FactionDetail id={entity} onNav={navigate} />;
-      case 'events': return <Events key={dbVersion} onNav={navigate} />;
+      case 'events': navigate('timeline'); return null;   // Eventos da era foi incorporado à Linha do Tempo
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
       case 'npcs': return <Npcs key={dbVersion} onNav={navigate} />;
       case 'character': return <CharacterDetail key={entity + ':' + dbVersion} id={entity} onNav={navigate} />;
@@ -126,7 +126,7 @@ function App() {
       case 'deity': return <DeityDetail id={entity} onNav={navigate} />;
       case 'sessions': return <Sessions key={dbVersion} onNav={navigate} />;
       case 'session': return <SessionDetail id={entity} onNav={navigate} />;
-      case 'house-rules': return <HouseRules onNav={navigate} />;
+      case 'house-rules': navigate('home'); return null;   // Regras da casa foi removida
       case 'sistema': return <Sistema key={dbVersion} onNav={navigate} />;
       default:
         return <ComingSoon page={active} onNav={navigate} />;
@@ -138,8 +138,8 @@ function App() {
     <React.Fragment>
       <div className="app">
         <Topbar onNav={navigate} active={active} />
-        <Sidebar active={active} onNav={navigate} />
         <main className="main">{renderPage()}</main>
+        <BottomNav onNav={navigate} active={active} />
       </div>
 
       <TweaksPanel title="Tweaks · Arquivo">
@@ -178,15 +178,12 @@ function App() {
               {id:'home', label:'Portal'},
               {id:'recent', label:'Recentes'},
               {id:'pantheon', label:'Panteão'},
-              {id:'article', label:'Artigo'},
               {id:'factions', label:'Facções'},
               {id:'timeline', label:'Timeline'},
-              {id:'events', label:'Eventos'},
               {id:'map', label:'Mapa'},
               {id:'characters', label:'Personae (PC)'},
               {id:'npcs', label:'Personae (NPC)'},
               {id:'sessions', label:'Sessões'},
-              {id:'house-rules', label:'Regras'},
               {id:'sistema', label:'Atualizações do Sistema'},
             ].map(p => (
               <button key={p.id} onClick={() => navigate(p.id)} style={{
@@ -227,7 +224,6 @@ function ComingSoon({ page, onNav }) {
         {[
           {id:'home', label:'Portal'},
           {id:'pantheon', label:'Panteão'},
-          {id:'article', label:'Ayael'},
           {id:'timeline', label:'Linha do Tempo'},
           {id:'map', label:'Mapa'},
         ].map(p => (

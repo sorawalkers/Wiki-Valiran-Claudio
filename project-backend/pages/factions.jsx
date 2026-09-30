@@ -20,9 +20,11 @@ function FactionModal({ faction, onClose }) {
     stampClass: faction?.stampClass ?? '',
     summary:    faction?.summary    ?? '',
     sort_order: faction?.sort_order ?? 0,
+    relation:   faction ? vtFactionRelation(faction) : 'neutra',
   });
+  // a relação é guardada como a linha "Relação" da ficha (editada pelo seletor acima, não na lista)
   const [rows, setRows] = React.useState(
-    (faction?.rows || []).map(r => ({ ...r }))
+    (faction?.rows || []).filter(r => !/^rela[cç][aã]o$/i.test(r.k || '')).map(r => ({ ...r }))
   );
   const [busy, setBusy] = React.useState(false);
   const [err, setErr]   = React.useState('');
@@ -42,10 +44,14 @@ function FactionModal({ faction, onClose }) {
     setBusy(true);
     try {
       const id = form.id || slugify(form.name);
+      const { relation, ...fields } = form;
+      const REL_LABEL = { aliada: 'Aliada', neutra: 'Neutra', inimiga: 'Inimiga' };
       await window.DB.saveFaction({
-        ...form,
+        // mantém o que este formulário não edita (texto, seções, ligações) — antes era apagado ao salvar
+        ...(faction || {}),
+        ...fields,
         id,
-        rows: rows.filter(r => r.k || r.v),
+        rows: [{ k: 'Relação', v: REL_LABEL[relation] || 'Neutra' }, ...rows.filter(r => r.k || r.v)],
       });
       onClose();
     } catch (e) {
@@ -68,9 +74,9 @@ function FactionModal({ faction, onClose }) {
   }
 
   const btnRemove = {
-    background: 'transparent', border: '1px solid var(--wine)',
-    color: 'var(--wine-bright)', borderRadius: 2, padding: '5px 9px',
-    cursor: 'pointer', fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+    background: 'transparent', border: '1px solid rgba(168,53,43,.6)',
+    color: '#e59a8c', borderRadius: 2, padding: '5px 9px',
+    cursor: 'pointer', fontSize: 11, fontFamily: "'Cinzel', serif",
     letterSpacing: '0.1em', flexShrink: 0,
   };
 
@@ -121,6 +127,14 @@ function FactionModal({ faction, onClose }) {
                   onChange={e => set('stamp', e.target.value)} />
               </div>
               <div className="modal-field">
+                <label className="modal-label">Relação com o grupo</label>
+                <select className="modal-select" value={form.relation} onChange={e => set('relation', e.target.value)}>
+                  <option value="aliada">Aliada (estandarte azul)</option>
+                  <option value="neutra">Neutra (estandarte cinza)</option>
+                  <option value="inimiga">Inimiga (estandarte preto)</option>
+                </select>
+              </div>
+              <div className="modal-field">
                 <label className="modal-label">Estilo do carimbo</label>
                 <select className="modal-select" value={form.stampClass} onChange={e => set('stampClass', e.target.value)}>
                   <option value="">Padrão (vermelho)</option>
@@ -132,7 +146,7 @@ function FactionModal({ faction, onClose }) {
             <div style={{ borderTop: '1px solid var(--ink-line)', paddingTop: 16, marginTop: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span className="modal-label">Linhas do dossiê</span>
-                <button type="button" className="editor-add-btn" style={{ padding: '5px 14px', fontSize: 10 }} onClick={addRow}>+ Linha</button>
+                <button type="button" className="editor-add-btn" style={{ padding: '5px 14px', fontSize: 10 }} onClick={addRow}>Linha</button>
               </div>
               {rows.map((row, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
@@ -183,66 +197,38 @@ function Factions({ onNav }) {
     .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
 
   return (
-    <div className="page" data-screen-label="10 Facções Secretas">
-      <header className="page-header">
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-          <div>
-            <div className="page-eyebrow">Anexo do Conselho · Vol. VII · Acesso restrito</div>
-            <h1 className="page-title">Facções</h1>
-            <p className="page-lede">
-              Nem todo poder se anuncia em bandeiras. Aqui se mantêm dossiês das
-              organizações que operam nas brechas — algumas oficiais, outras
-              heréticas, uma delas literalmente apagada do registro. A consulta
-              é permitida; a transcrição, não.
-            </p>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" style={{ flexShrink: 0, marginTop: 4 }} onClick={() => setModal('new')}>
-              + Nova Facção
-            </button>
-          )}
+    <div className="vt vt-pantheon vf" data-screen-label="10 Facções">
+      <section className="vt-pantheon-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Casas · Anexo do Conselho</div>
+          <h1 className="vt-h1">Casas e Facções</h1>
+          <div className="vt-epithet">Nem todo poder se anuncia em bandeiras</div>
+          <p className="vt-pantheon-lede">
+            Dossiês das organizações que operam nas brechas: algumas oficiais, outras heréticas,
+            uma delas literalmente apagada do registro. A consulta é permitida; a transcrição, não.
+          </p>
         </div>
-      </header>
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Nova facção</button>
+          </div>
+        )}
+      </section>
 
-      {list.length === 0 && (
-        <p style={{ fontFamily: 'EB Garamond,serif', fontStyle: 'italic', color: 'var(--foam-dim)', textAlign: 'center', marginTop: 60 }}>
-          Nenhum dossiê registrado ainda.
-        </p>
-      )}
+      {list.length === 0 && <p className="vt-pantheon-empty">Nenhum dossiê registrado ainda.</p>}
 
-      <div className="dossier-grid">
+      <div className="vt-gallery vf-gallery">
         {list.map(d => (
-          <article key={d.id} className="dossier" style={{ position: 'relative' }}
-            onClick={e => { if (e.target.closest('.editor-add-btn')) return; onNav('faction:' + d.id); }}>
-            {isEditor && (
-              <button
-                className="editor-add-btn"
-                style={{ position: 'absolute', top: 12, right: 12, padding: '4px 10px', fontSize: 9 }}
-                onClick={e => { e.stopPropagation(); setModal(d); }}
-              >
-                Editar
-              </button>
-            )}
-            {d.stamp && <div className={`dossier-stamp ${d.stampClass || ''}`}>{d.stamp}</div>}
-            <div className="dossier-id">DOSSIÊ · {d.id.toUpperCase()}</div>
-            <h3 className="dossier-name">{d.name}</h3>
-            {d.alias && <p className="dossier-alias">{d.alias}</p>}
-
-            {d.rows && d.rows.length > 0 && (
-              <dl className="dossier-rows">
-                {d.rows.map((r, i) => (
-                  <div key={i} className="dossier-row">
-                    <dt>{r.k}</dt>
-                    <dd className={r.redacted ? 'redacted' : ''}>{r.v}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-
-            {d.summary && <p className="dossier-summary">{d.summary}</p>}
-          </article>
+          <VitralFactionCard key={d.id} f={d} isEditor={isEditor}
+            onClick={() => onNav('faction:' + d.id)} onEdit={() => setModal(d)} />
         ))}
       </div>
+
+      <footer className="vt-pantheon-foot">
+        “Quem não tem estandarte ainda assim tem senhor.”
+        <div className="vt-quote-src">— Anotação à margem do dossiê Blackflame</div>
+      </footer>
 
       {modal && (
         <FactionModal
@@ -255,236 +241,37 @@ function Factions({ onNav }) {
 }
 
 // ============================================================
-// FactionDetail — dossier layout (igual a Personagens / NPCs)
-// Depende de: npNorm, npSectionMatches, NpReport, NpGrid, e ícones
-// definidos em npc-detail.jsx (carregado antes na index.html)
+// FactionDetail — artigo de vitral (VitralArticle kind="faction")
 // ============================================================
 function FactionDetail({ id, onNav }) {
   const { isEditor } = useAuth();
-  const [editModal,  setEditModal]  = React.useState(false);
-  const [openSet,    setOpenSet]    = React.useState(() => new Set([0]));
-  const [query,      setQuery]      = React.useState('');
-  const [tagFilter,  setTagFilter]  = React.useState(null);
-  const [viewMode,   setViewMode]   = React.useState('list');
-  const reportRefs = React.useRef({});
-
-  const faction  = (Entities.factions || {})[id];
-  const sections = faction ? (faction.sections || []) : [];
-  const nq       = npNorm(query);
-
-  const allTags = React.useMemo(
-    () => Array.from(new Set(sections.flatMap(s => s.tags || []))),
-    [sections]
-  );
-  const filtered = React.useMemo(
-    () => sections.map((sec, i) => ({ sec, i, matches: npSectionMatches(sec, nq, tagFilter) })),
-    [sections, nq, tagFilter]
-  );
-  const visibleFiltered = filtered.filter(f => f.matches);
-
-  React.useEffect(() => {
-    if (!nq) return;
-    const matching = filtered.filter(f => f.matches).map(f => f.i);
-    setOpenSet(prev => new Set([...prev, ...matching]));
-  }, [nq]);
+  const [editModal, setEditModal] = React.useState(false);
+  const faction = (Entities.factions || {})[id];
 
   if (!faction) {
     return (
-      <div className="page">
-        <button className="back-btn" onClick={() => onNav('factions')}>Voltar às Facções</button>
-        <p className="page-lede" style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic' }}>
-          Dossiê não encontrado.
-        </p>
-      </div>
+      <div className="vt vs"><p className="vt-pantheon-empty">Dossiê não encontrado. <a onClick={() => onNav('factions')}>Voltar às Casas</a></p></div>
     );
   }
 
-  function toggleReport(idx) {
-    setOpenSet(prev => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
-      return next;
-    });
-  }
-  function expandAll()   { setOpenSet(new Set(sections.map((_, i) => i))); }
-  function collapseAll() { setOpenSet(new Set()); }
-  function handleGridSelect(idx) {
-    setViewMode('list');
-    setOpenSet(prev => new Set([...prev, idx]));
-    requestAnimationFrame(() => {
-      const el = reportRefs.current[idx];
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        el.classList.add('pulse');
-        setTimeout(() => el.classList.remove('pulse'), 700);
-      }
-    });
-  }
+  // artigo no tema vitral (mesmo layout dos personagens; carimbo no lugar do selo de papel)
+  const c = {
+    ...faction,
+    name: (faction.name || '').trim(),
+    infobox: { rows: faction.rows || [], retrato: faction.infobox?.retrato || VT_FACTION_FRAMING },
+  };
 
   return (
-    <div className="article np-dossier" data-screen-label={'Facção · ' + faction.name}>
-
-      {/* ── Esquerda: corpo do dossiê ─────────────────────────── */}
-      <div className="parchment" style={{ minWidth: 0 }}>
-        <div className="article-body np-body">
-
-          <div className="np-topbar">
-            <button className="back-btn" style={{ marginBottom: 0 }} onClick={() => onNav('factions')}>
-              Voltar às Facções
-            </button>
-            {isEditor && (
-              <button className="editor-add-btn" onClick={() => setEditModal(true)}>
-                Editar Artigo
-              </button>
-            )}
-          </div>
-
-          <nav className="breadcrumb">
-            <a onClick={() => onNav('home')}>Arquivo</a>
-            <span className="sep">▸</span>
-            <a onClick={() => onNav('factions')}>Facções</a>
-            <span className="sep">▸</span>
-            <span>{faction.name}</span>
-          </nav>
-
-          <div className="np-header">
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: 6 }}>
-              DOSSIÊ · {faction.id.toUpperCase()}
-            </div>
-            <h1 className="np-title">{faction.name}</h1>
-            {faction.alias && <p className="np-subtitle">{faction.alias}</p>}
-          </div>
-
-          <div className="article-divider"><Sigil.Ornament /></div>
-
-          {faction.hero && <p className="detail-hero">{faction.hero}</p>}
-
-          {faction.placeholder && (
-            <div className="placeholder-banner" style={{
-              background: 'rgba(120,90,50,0.04)',
-              border: '1px dashed var(--parchment-rule)',
-              color: 'var(--parchment-text)',
-            }}>
-              <div className="placeholder-banner-eyebrow" style={{ color: 'var(--wine)' }}>Em compilação</div>
-              <h3 style={{ color: 'var(--parchment-text)' }}>Esta entrada ainda está sendo transcrita</h3>
-              <p style={{ color: 'var(--parchment-text-soft)' }}>
-                O arquivista Cael reuniu o esqueleto desta entrada. Inteligência detalhada será acrescentada nas próximas sessões.
-              </p>
-            </div>
-          )}
-
-          {!faction.placeholder && sections.length > 0 && (
-            <React.Fragment>
-              <div className="np-toolbar">
-                <div className="np-toolbar-search">
-                  <NpSearchIcon />
-                  <input
-                    type="text"
-                    placeholder="Buscar por texto ou tag…"
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                  />
-                  {query && (
-                    <button className="np-toolbar-search-clear" onClick={() => setQuery('')}>Limpar</button>
-                  )}
-                </div>
-                <button className="np-toolbar-btn" title="Expandir tudo" onClick={expandAll}><NpExpandIcon /></button>
-                <button className="np-toolbar-btn" title="Recolher tudo" onClick={collapseAll}><NpCollapseIcon /></button>
-                <div className="np-toolbar-divider" />
-                <button className={'np-toolbar-btn' + (viewMode === 'list' ? ' active' : '')} title="Vista lista" onClick={() => setViewMode('list')}><NpListIcon /></button>
-                <button className={'np-toolbar-btn' + (viewMode === 'grid' ? ' active' : '')} title="Vista grade" onClick={() => setViewMode('grid')}><NpGridIcon /></button>
-              </div>
-
-              {allTags.length > 0 && (
-                <div className="np-tag-filter">
-                  <span className="np-tag-filter-label">Filtrar:</span>
-                  <button className={'np-tag-pill' + (!tagFilter ? ' active' : '')} onClick={() => setTagFilter(null)}>Tudo</button>
-                  {allTags.map(t => (
-                    <button key={t} className={'np-tag-pill' + (tagFilter === t ? ' active' : '')} onClick={() => setTagFilter(prev => prev === t ? null : t)}>{t}</button>
-                  ))}
-                </div>
-              )}
-
-              {visibleFiltered.length === 0 ? (
-                <div className="np-empty"><strong>Nada encontrado</strong>Nenhuma seção corresponde à busca ou ao filtro ativo.</div>
-              ) : viewMode === 'list' ? (
-                <div className="np-reports">
-                  {visibleFiltered.map(({ sec, i }) => (
-                    <NpReport key={i} sec={sec} idx={i} isOpen={openSet.has(i)} query={query} onToggle={() => toggleReport(i)} reportRef={el => { reportRefs.current[i] = el; }} />
-                  ))}
-                </div>
-              ) : (
-                <NpGrid sections={visibleFiltered.map(f => f.sec)} onSelect={localIdx => handleGridSelect(visibleFiltered[localIdx].i)} />
-              )}
-            </React.Fragment>
-          )}
-
-          {!faction.placeholder && sections.length === 0 && (
-            <p style={{ fontFamily: 'EB Garamond, serif', fontStyle: 'italic', color: 'var(--foam-dim)', textAlign: 'center', marginTop: 40 }}>
-              {isEditor ? 'Nenhuma seção ainda — clique em "Editar Artigo" para adicionar.' : 'Nenhuma informação adicional registrada.'}
-            </p>
-          )}
-
-        </div>
-      </div>
-
-      {/* ── Direita: infobox do dossiê ───────────────────────── */}
-      <aside className="infobox-rail">
-        <div className="infobox">
-          <div className="infobox-head">
-            <div className="infobox-portrait-wrap" style={{ position: 'relative' }}>
-              <image-slot
-                id={`faction-portrait-${faction.id}`}
-                shape="rect"
-                placeholder={`Imagem · ${faction.name}`}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-              ></image-slot>
-              {faction.stamp && (
-                <div className={`dossier-stamp ${faction.stampClass || ''}`}
-                  style={{ position: 'absolute', top: 10, right: 8, fontSize: 10, padding: '2px 8px', letterSpacing: '0.2em' }}>
-                  {faction.stamp}
-                </div>
-              )}
-            </div>
-            <h3 className="infobox-name">{faction.name}</h3>
-            {faction.alias && <p className="infobox-sub">{faction.alias}</p>}
-          </div>
-
-          {faction.rows && faction.rows.length > 0 && (
-            <dl className="infobox-rows">
-              {faction.rows.map((r, i) => (
-                <div key={i} className="infobox-row">
-                  <dt>{r.k}</dt>
-                  <dd className={r.redacted ? 'redacted' : ''}>
-                    {r.link
-                      ? <span className="infobox-link" onClick={() => onNav(r.link)}>{r.v}</span>
-                      : r.v}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </div>
-
-        {faction.related && faction.related.length > 0 && (
-          <div className="related">
-            <h4 className="related-title">Cf. Relacionados</h4>
-            {faction.related.map(r => (
-              <a key={r.title} className="related-link" onClick={() => onNav(r.target)}>
-                <span className="related-link-tag">{r.tag}</span>
-                <span className="related-link-title">{r.title}</span>
-              </a>
-            ))}
-          </div>
-        )}
-      </aside>
-
+    <React.Fragment>
+      <VitralArticle c={c} kind="faction" onNav={onNav} backTo="factions" backLabel="Casas"
+        isEditor={isEditor} onEdit={() => setEditModal(true)} />
       {editModal && (
         <ArticleEditor type="faction" entity={faction} onClose={() => setEditModal(false)} onDelete={() => onNav('factions')} />
       )}
-    </div>
+    </React.Fragment>
   );
 }
 
 window.Factions = Factions;
+
 window.FactionDetail = FactionDetail;

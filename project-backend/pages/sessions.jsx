@@ -141,116 +141,148 @@ function SessionModal({ session, onClose }) {
 }
 
 // ============================================================
-// Sessions list
+// Crônicas no tema vitral: diário (lista) e fólio da sessão
 // ============================================================
-function Sessions({ onNav }) {
-  const { isEditor } = useAuth();
-  const [modal, setModal] = React.useState(null);
 
-  const sessionIds = Data.sessionIds || [];
+// "Diego (PC)", "Mark (NPC)", "Lawrence Cainhurst" → { name, npc, char }
+function vsCastEntry(raw) {
+  const npc = /\(\s*npc/i.test(raw);
+  const name = String(raw).replace(/\s*\(.*\)\s*$/, '').trim();
+  const n = name.toLowerCase();
+  const char = Object.values(Entities.characters || {}).find(c => c && c.name && c.tag !== 'ARTICLE' &&
+    (c.name.toLowerCase() === n || c.name.toLowerCase().split(/\s+/)[0] === n.split(/\s+/)[0])) || null;
+  return { raw, name, npc, char };
+}
 
+const vsPad = n => String(n).padStart(2, '0');
+
+function VsSoul({ c, onNav }) {
+  const url = useVtSlotUrl('char-portrait-' + c.id);
+  const target = (String(c.tag || '').toUpperCase() === 'PC' ? 'character:' : 'npc:') + c.id;
   return (
-    <div className="page" data-screen-label="13 Diário de Sessões">
-      <header className="page-header">
-        <div className="page-header-row">
-          <div>
-            <div className="page-eyebrow">Mesa · Vol. VIII · Diário ativo</div>
-            <h1 className="page-title">Diário de Sessões</h1>
-          </div>
-          {isEditor && (
-            <button className="editor-add-btn" onClick={() => setModal('new')}>
-              Nova Sessão
-            </button>
-          )}
+    <button className="vh-soul" onClick={e => { e.stopPropagation(); onNav(target); }} title={c.name}>
+      <VtGothicWindow frame={VT_FRAMES[0]} className="vh-soul-window" sizes="80px">
+        <VtFramedImage url={url} framing={vtFraming(c)} placeholder="" />
+      </VtGothicWindow>
+      <span className="vh-soul-name">{c.name.split(' ')[0]}</span>
+    </button>
+  );
+}
+
+// Elenco: quem tem página vira mini-janela; o resto vira plaquinha de vidro
+function VsCast({ cast, onNav, max = 99 }) {
+  const entries = (cast || []).map(vsCastEntry);
+  const souls = entries.filter(e => e.char).slice(0, max);
+  const others = entries.filter(e => !e.char);
+  return (
+    <div className="vs-cast">
+      {souls.length > 0 && <div className="vh-souls">{souls.map(e => <VsSoul key={e.char.id} c={e.char} onNav={onNav} />)}</div>}
+      {others.length > 0 && (
+        <div className="vs-chips">
+          {others.map(e => <span key={e.raw} className={'vs-chip' + (e.npc ? ' vs-chip--npc' : '')}>{e.npc && <em>NPC</em>}{e.name}</span>)}
         </div>
-        <p className="page-lede">
-          Cada sessão se torna um fólio. Os cards abaixo mostram o resumo
-          rápido — pessoas, lugares, o que aconteceu em uma respiração. Clique
-          em qualquer um para abrir o diário completo da sessão, transcrito
-          pelo escriba da mesa logo após o jogo.
-        </p>
-      </header>
-
-      {sessionIds.length === 0 && (
-        <div style={{ padding:'60px 0', textAlign:'center', color:'var(--foam-dim)', fontFamily:'EB Garamond, serif', fontStyle:'italic', fontSize:16 }}>
-          Nenhuma sessão registrada ainda. Use o botão acima para adicionar.
-        </div>
-      )}
-
-      <div className="session-card-grid">
-        {sessionIds.map((id, i) => {
-          const s = Entities.sessions[id];
-          if (!s) return null;
-          const peopleChips = s.cast.slice(0, 5);
-          const placeChips = s.places.slice(0, 4);
-          return (
-            <article
-              key={id}
-              className={`session-card ${i === 0 ? 'latest' : ''}`}
-              onClick={() => onNav('session:' + id)}
-            >
-              <div className="session-card-head">
-                <div>
-                  <div className="session-card-num">{String(s.num).padStart(2,'0')}</div>
-                  <div className="session-card-num-label">Sessão</div>
-                </div>
-                <div>
-                  <div className="session-card-date">{s.dateShort}</div>
-                  {i === 0 && <div className="session-card-tag">Mais recente</div>}
-                </div>
-              </div>
-
-              <h3 className="session-card-title">{s.title}</h3>
-              <p className="session-card-location">↳ {s.location}</p>
-              <p className="session-card-summary">{s.summary}</p>
-
-              <div className="session-card-meta">
-                <div className="session-card-meta-row">
-                  <span className="session-card-meta-label">Pessoas</span>
-                  <span className="session-card-meta-value">
-                    {peopleChips.map(p => (
-                      <span key={p} className={`chip-mini ${p.includes('(NPC') ? 'npc' : ''}`}>{p.replace(/ \(NPC.*\)/, '')}</span>
-                    ))}
-                  </span>
-                </div>
-                <div className="session-card-meta-row">
-                  <span className="session-card-meta-label">Lugares</span>
-                  <span className="session-card-meta-value">
-                    {placeChips.map(p => (
-                      <span key={p} className="chip-mini place">{p}</span>
-                    ))}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:16 }}>
-                <div className="session-card-cta">Abrir diário completo →</div>
-                {isEditor && (
-                  <button
-                    className="editor-del-btn"
-                    onClick={e => { e.stopPropagation(); setModal(s); }}
-                  >
-                    Editar
-                  </button>
-                )}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {modal && (
-        <SessionModal
-          session={modal === 'new' ? null : modal}
-          onClose={() => setModal(null)}
-        />
       )}
     </div>
   );
 }
 
 // ============================================================
-// Session detail (full journal page)
+// Diário de sessões
+// ============================================================
+function Sessions({ onNav }) {
+  const { isEditor } = useAuth();
+  const [modal, setModal] = React.useState(null);
+
+  const list = (Data.sessionIds || []).map(id => Entities.sessions[id]).filter(Boolean)
+    .sort((a, b) => (b.num || 0) - (a.num || 0));
+  const [latest, ...older] = list;
+
+  return (
+    <div className="vt vs vs-list" data-screen-label="13 Diário de Sessões">
+      <section className="vt-pantheon-head vs-head">
+        <img className="vt-hero-rose" src={vtAsset('rosacea.svg')} alt="" aria-hidden="true" draggable="false" />
+        <div className="vt-pantheon-head-text">
+          <div className="vt-label">Crônicas · O diário da mesa</div>
+          <h1 className="vt-h1">Diário de Sessões</h1>
+          <div className="vt-epithet">Cada sessão, um fólio</div>
+          <p className="vt-pantheon-lede">
+            O que aconteceu à mesa, transcrito pelo escriba logo após o jogo: quem estava lá,
+            por onde passaram e o que ficou em aberto. Abra um fólio para ler a crônica inteira.
+          </p>
+        </div>
+        {isEditor && (
+          <div className="vt-pantheon-add">
+            <button className="vt-btn vt-btn--gold" onClick={() => setModal('new')}>+ Nova sessão</button>
+          </div>
+        )}
+      </section>
+
+      {list.length === 0 && <p className="vt-pantheon-empty">Nenhuma sessão registrada ainda.</p>}
+
+      {latest && (
+        <section className="vh-section vs-latest-wrap">
+          <div className="vt-label vs-kicker">A mais recente</div>
+          <article className="vh-last vs-latest" onClick={() => onNav('session:' + latest.num)}>
+            <div className="vh-last-num">
+              <span className="vh-last-n">{vsPad(latest.num)}</span>
+              <span className="vh-last-k">Sessão</span>
+            </div>
+            <div className="vh-last-body">
+              <div className="vh-last-meta">{[latest.dateShort, latest.location].filter(Boolean).join(' · ')}</div>
+              <h3 className="vh-last-title">{latest.title}</h3>
+              {latest.summary && <p className="vh-last-summary">{latest.summary}</p>}
+              <span className="vh-last-go">Abrir o fólio →</span>
+            </div>
+            <div className="vh-last-cast" onClick={e => e.stopPropagation()}>
+              <div className="vh-mini-label">Estavam lá</div>
+              <VsCast cast={latest.cast} onNav={onNav} max={6} />
+            </div>
+            {isEditor && <button className="vt-btn vs-edit" onClick={e => { e.stopPropagation(); setModal(latest); }}>Editar</button>}
+          </article>
+        </section>
+      )}
+
+      {older.length > 0 && (
+        <section className="vh-section">
+          <header className="vh-head">
+            <span className="vh-head-num">✠</span>
+            <h2 className="vh-head-title">Fólios anteriores</h2>
+          </header>
+          <ol className="vs-folios">
+            {older.map(s => (
+              <li key={s.num} className="vs-folio" onClick={() => onNav('session:' + s.num)}>
+                <span className="vs-folio-num">{vsPad(s.num)}</span>
+                <div className="vs-folio-body">
+                  <div className="vh-last-meta">{[s.dateShort, s.location].filter(Boolean).join(' · ')}</div>
+                  <h3 className="vs-folio-title">{s.title}</h3>
+                  {s.summary && <p className="vs-folio-summary">{s.summary}</p>}
+                  {(s.places || []).length > 0 && (
+                    <div className="vs-folio-places">{s.places.slice(0, 4).map(p => <span key={p}>{p.replace(/\s*\(.*\)$/, '')}</span>)}</div>
+                  )}
+                </div>
+                <div className="vs-folio-side">
+                  <span className="vs-folio-count">{(s.cast || []).length} presentes</span>
+                  <span className="vh-last-go">Abrir →</span>
+                  {isEditor && <button className="vt-btn vs-edit" onClick={e => { e.stopPropagation(); setModal(s); }}>Editar</button>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      <footer className="vt-pantheon-foot">
+        “O que não se escreve, a mesa esquece. O que se escreve, o mundo lembra.”
+        <div className="vt-quote-src">— O escriba da mesa</div>
+      </footer>
+
+      {modal && <SessionModal session={modal === 'new' ? null : modal} onClose={() => setModal(null)} />}
+    </div>
+  );
+}
+
+// ============================================================
+// Fólio da sessão
 // ============================================================
 function SessionDetail({ id, onNav }) {
   const { isEditor } = useAuth();
@@ -259,81 +291,123 @@ function SessionDetail({ id, onNav }) {
   const s = Entities.sessions[id];
   if (!s) {
     return (
-      <div className="page" data-screen-label={"Sessão " + id}>
-        <button className="back-btn" onClick={() => onNav('sessions')}>Voltar ao diário</button>
-        <h1 className="page-title">Sessão não encontrada</h1>
+      <div className="vt vs">
+        <p className="vt-pantheon-empty">Sessão não encontrada. <a onClick={() => onNav('sessions')}>Voltar ao diário</a></p>
       </div>
     );
   }
 
+  const nums = (Data.sessionIds || []).map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
+  const idx = nums.indexOf(Number(s.num));
+  const prev = idx > 0 ? Entities.sessions[String(nums[idx - 1])] : null;
+  const next = idx >= 0 && idx < nums.length - 1 ? Entities.sessions[String(nums[idx + 1])] : null;
+
+  const attrs = [
+    ['Data', s.date && /^\d{4}-\d{2}-\d{2}$/.test(s.date) ? (s.dateShort || s.date) : (s.date || s.dateShort)],
+    ['Local', s.location],
+    ['Duração', s.duration],
+    ['Experiência', s.session_xp],
+  ].filter(([, v]) => v || v === 0);
+  const keypoints = (s.keypoints || []).filter(k => k && k.text);
+  const loot = (s.loot || []).filter(Boolean);
+
   return (
-    <div className="session-detail" data-screen-label={"Sessão " + s.num}>
-      <div style={{ display:'flex', alignItems:'center', marginBottom:20 }}>
-        <button className="back-btn" onClick={() => onNav('sessions')} style={{ marginBottom:0 }}>
-          Voltar ao diário
-        </button>
-        {isEditor && (
-          <button className="editor-add-btn" onClick={() => setModal(true)}>
-            Editar Sessão
-          </button>
-        )}
+    <div className="vt vt-article vs vs-detail" data-screen-label={'Sessão ' + s.num}>
+      <div className="vt-topbar">
+        <nav className="vt-breadcrumb">
+          <a onClick={() => onNav('sessions')}>Diário de Sessões</a>
+          <span className="vt-bc-sep" aria-hidden="true" />
+          <span className="vt-breadcrumb-current">Sessão {vsPad(s.num)}</span>
+        </nav>
+        <div className="vt-topbar-actions">
+          {isEditor && <button className="vt-btn" onClick={() => setModal(true)}>Editar sessão</button>}
+        </div>
       </div>
 
-      <header className="session-detail-head">
-        <div className="session-detail-num">{String(s.num).padStart(2,'0')}</div>
-        <div className="session-detail-num-label">Sessão · {s.dateShort}</div>
-        <h1 className="session-detail-title">{s.title}</h1>
-        <p className="session-detail-location">↳ {s.location}</p>
-        <p className="session-detail-location-sub">{s.locationDetail}</p>
-
-        <div className="session-meta-strip">
-          <div><span className="label">Data</span><span className="value">{s.date}</span></div>
+      <section className="vs-hero">
+        <div className="vs-seal">
+          <span className="vs-seal-n">{vsPad(s.num)}</span>
+          <span className="vs-seal-k">Sessão</span>
         </div>
-      </header>
-
-      <section className="session-detail-block">
-        <h2>Resumo</h2>
-        <p style={{fontStyle:'italic', color:'var(--foam)', fontSize:18}}>{s.summary}</p>
-      </section>
-
-      <section className="session-detail-block">
-        <h2>Elenco da Sessão</h2>
-        <div className="session-detail-chips">
-          {s.cast.map(c => {
-            const isNpc = c.includes('NPC');
-            const name = c.replace(/ \((NPC[^)]*)\)/, '');
-            return (
-              <span key={c} className={`chip-mini ${isNpc ? 'npc' : ''}`} style={{fontSize:11, padding:'5px 10px'}}>
-                {isNpc && <span style={{opacity:0.6, marginRight:4}}>NPC ·</span>}
-                {name}
-              </span>
-            );
-          })}
+        <div className="va-head">
+          <div className="vt-label">Crônicas · {s.dateShort || 'Fólio da mesa'}</div>
+          <h1 className="vt-h1">{s.title}</h1>
+          {s.location && <div className="vt-epithet">{s.location}</div>}
+          {s.locationDetail && <p className="vs-where">{s.locationDetail}</p>}
+          <VtDivider />
+          {s.summary && <blockquote className="va-epigraph">“{s.summary}”</blockquote>}
+          {attrs.length > 0 && (
+            <dl className="va-attrs">
+              {attrs.map(([k, v]) => <div key={k} className="va-attr"><dt>{k}</dt><dd>{v}</dd></div>)}
+            </dl>
+          )}
         </div>
       </section>
 
-      <section className="session-detail-block">
-        <h2>Lugares Visitados</h2>
-        <div className="session-detail-chips">
-          {s.places.map(p => (
-            <span key={p} className="chip-mini place" style={{fontSize:11, padding:'5px 10px'}}>{p}</span>
-          ))}
-        </div>
-      </section>
+      {((s.cast || []).length > 0 || (s.places || []).length > 0) && (
+        <section className="va-section vs-who">
+          {(s.cast || []).length > 0 && (
+            <div className="vs-who-col">
+              <h2 className="va-h2">Estavam lá</h2>
+              <VsCast cast={s.cast} onNav={onNav} />
+            </div>
+          )}
+          {(s.places || []).length > 0 && (
+            <div className="vs-who-col">
+              <h2 className="va-h2">Por onde passaram</h2>
+              <ul className="vs-places">{s.places.map(p => <li key={p}>{p}</li>)}</ul>
+            </div>
+          )}
+        </section>
+      )}
 
-      <section className="session-detail-block">
-        <h2>Narrativa</h2>
-        {s.narrative.map((p, i) => <p key={i}>{p}</p>)}
-      </section>
+      {(s.narrative || []).length > 0 && (
+        <section className="va-body">
+          <article className="va-prose">
+            <h2 className="va-h2">A crônica</h2>
+            {s.narrative.map((p, i) => <p key={i} className={i === 0 ? 'va-first' : ''}>{p}</p>)}
+          </article>
+        </section>
+      )}
 
-      <section className="session-detail-block">
-        <h2>Pontos-Chave</h2>
-        <ul className="session-keylist">
-          {s.keypoints.map((k, i) => (
-            <li key={i} className={k.danger ? 'danger' : ''}>{k.text}</li>
-          ))}
-        </ul>
-      </section>
+      {keypoints.length > 0 && (
+        <section className="va-dogmas">
+          <div className="va-tablet vs-tablet">
+            <div className="vt-label va-tablet-label">Pontos-chave</div>
+            <ol>
+              {keypoints.map((k, i) => (
+                <li key={i} className={k.danger ? 'is-danger' : ''}>
+                  <span className="va-roman">{vtRoman(i + 1)}</span>
+                  <span className="vs-point">{k.text}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
+
+      {(loot.length > 0 || s.next || s.gmnote) && (
+        <section className="va-section vs-extra">
+          {loot.length > 0 && (
+            <div className="vs-extra-box">
+              <div className="vt-label">Espólio</div>
+              <ul>{loot.map((l, i) => <li key={i}>{typeof l === 'string' ? l : (l.text || l.name || JSON.stringify(l))}</li>)}</ul>
+            </div>
+          )}
+          {s.next && <div className="vs-extra-box"><div className="vt-label">Próxima sessão</div><p>{s.next}</p></div>}
+          {s.gmnote && isEditor && <div className="vs-extra-box vs-extra-box--gm"><div className="vt-label">Nota do mestre</div><p>{s.gmnote}</p></div>}
+        </section>
+      )}
+
+      <nav className="vs-pager">
+        {prev
+          ? <a className="vs-pager-link" onClick={() => onNav('session:' + prev.num)}><span>← Sessão {vsPad(prev.num)}</span><em>{prev.title}</em></a>
+          : <span />}
+        <a className="vs-pager-mid" onClick={() => onNav('sessions')}>✠ Diário</a>
+        {next
+          ? <a className="vs-pager-link vs-pager-link--next" onClick={() => onNav('session:' + next.num)}><span>Sessão {vsPad(next.num)} →</span><em>{next.title}</em></a>
+          : <span />}
+      </nav>
 
       {modal && <SessionModal session={s} onClose={() => setModal(false)} />}
     </div>
