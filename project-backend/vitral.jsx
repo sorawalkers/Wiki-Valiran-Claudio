@@ -989,6 +989,37 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
 
 // ── Card da galeria (vivo / Morto) ───────────────────────────────
 
+
+// ── Estandartes das facções ─────────────────────────────────────
+// Três modelos de bandeira (assets/vitral/estandarte-<k>): o brasão da facção é pintado no
+// campo liso, recortado pela máscara '<k>-campo.png'. `box` = onde o brasão fica (em % do estandarte).
+// Nos campos claros o brasão entra em "multiplicar", como tinta sobre o tecido.
+const VT_BANNERS = {
+  a: { label: 'Estandarte de guerra', box: [34, 27, 34, 40], paint: 'normal' },
+  b: { label: 'Estandarte de vitral', box: [34, 24, 34, 49], paint: 'multiply' },
+  c: { label: 'Flâmula',              box: [37, 20, 37, 42], paint: 'multiply' },
+};
+
+function VtBanner({ variant = 'a', url, name, className = '', sizes = '280px' }) {
+  const b = VT_BANNERS[variant] || VT_BANNERS.a;
+  const mask = `url('${vtAsset('estandarte-' + variant + '-campo.png')}')`;
+  const [l, t, r, bt] = b.box;
+  return (
+    <div className={'vb vb--' + variant + ' ' + className}>
+      <img className="vb-cloth" src={vtAsset('estandarte-' + variant + '.webp')}
+        srcSet={vtAsset('estandarte-' + variant + '-sm.webp') + ' 480w, ' + vtAsset('estandarte-' + variant + '.webp') + ' 960w'}
+        sizes={sizes} alt="" aria-hidden="true" draggable="false" />
+      <div className="vb-field" style={{ WebkitMaskImage: mask, maskImage: mask, mixBlendMode: b.paint }}>
+        <div className="vb-emblem" style={{ left: l + '%', top: t + '%', right: r + '%', bottom: bt + '%' }}>
+          {url
+            ? <img src={url} alt={name ? 'Brasão de ' + name : ''} draggable="false" />
+            : <span className="vb-initial">{(name || '?').trim().charAt(0)}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Brasões de facção: preenchem a janela centralizados (o editor pode reenquadrar pelo infobox.retrato)
 const VT_FACTION_FRAMING = { x: 50, y: 45, z: 1, fit: 'preencher' };
 
@@ -1341,4 +1372,4 @@ window.VitralFactionCard = VitralFactionCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

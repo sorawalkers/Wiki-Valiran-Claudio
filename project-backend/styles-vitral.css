@@ -2156,3 +2156,25 @@
   .vtl-era { padding: 12px 28px; margin-left: 0; }
   .vtl-era-name { font-size: 15px; }
 }
+
+/* estandartes das facções */
+.vb { position: relative; aspect-ratio: 2 / 3; }
+.vb-cloth { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 18px 24px rgba(0,0,0,.75)); }
+.vb-field { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; pointer-events: none; }
+.vb-emblem { position: absolute; display: grid; place-items: center; }
+.vb-emblem img { width: 100%; height: 100%; object-fit: contain; }
+.vb--a .vb-emblem img { filter: sepia(.2) saturate(.9) brightness(.92); }
+.vb-initial { font: 700 clamp(40px, 9vw, 120px)/1 var(--vt-display); }
+.vb--a .vb-initial { color: #d9b770; text-shadow: 0 2px 0 #1a120a, 0 0 18px rgba(217,183,112,.35); }
+.vb--b .vb-initial, .vb--c .vb-initial { color: #6a1a14; opacity: .85; }
+.vf-card--banner .vf-banner { width: 240px; }
+.vf-card--banner:hover .vb-cloth { filter: brightness(1.12) drop-shadow(0 0 20px rgba(201,165,90,.35)); }
+.vf-card--banner .vf-stamp { margin-top: -4px; }
+.vb-emblem { overflow: visible; }
+.vb-emblem img { transform: scale(1.5); }   /* brasões costumam vir com margem de pergaminho em volta */
+.vf-card--banner { width: 280px; }
+.vf-card--banner .vf-banner { flex: none; width: 240px; }
+.vb-initial { font-size: 88px; }
+.vb--c .vb-initial { font-size: 64px; }
+.vb--c .vb-emblem img { transform: scale(1.25); }
+.vf .vt-lab-row { align-items: flex-start; }

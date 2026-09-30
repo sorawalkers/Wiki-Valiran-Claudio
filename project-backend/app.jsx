@@ -122,6 +122,7 @@ function App() {
       case 'recent': return <Recent onNav={navigate} />;
       case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
+      case 'casas-teste': return <FactionBannerLab onNav={navigate} />;
       case 'faction': return <FactionDetail id={entity} onNav={navigate} />;
       case 'events': navigate('timeline'); return null;   // Eventos da era foi incorporado à Linha do Tempo
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
