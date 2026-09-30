@@ -2256,3 +2256,42 @@
 .modal-box .editor-add-btn::before { content: "+ "; }
 .modal-box .editor-add-btn { padding: 8px 14px; font-size: 10px; }
 .modal-footer { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+/* ════════════════════════════════════════════════════════════════
+   Atualizações do sistema · grimório de cartas
+   ════════════════════════════════════════════════════════════════ */
+.vev-count { margin-left: auto; font: italic 400 15px/1 var(--vt-serif); color: var(--vt-ink-faint); }
+.sys-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 26px 20px; }
+.sys-card { position: relative; display: flex; flex-direction: column; cursor: pointer;
+  border: 1px solid rgba(201,165,90,.18);
+  background: linear-gradient(170deg, color-mix(in srgb, var(--pane) 22%, transparent), rgba(10,10,12,.95) 55%);
+  box-shadow: inset 0 0 0 3px #0b0b0d, inset 0 0 0 4px color-mix(in srgb, var(--pane) 35%, transparent), 0 16px 26px rgba(0,0,0,.6);
+  transition: transform .2s ease, box-shadow .2s ease; }
+.sys-card:hover { transform: translateY(-3px);
+  box-shadow: inset 0 0 0 3px #0b0b0d, inset 0 0 0 4px color-mix(in srgb, var(--pane) 70%, transparent), 0 0 26px color-mix(in srgb, var(--pane) 30%, transparent); }
+.sys-card-art { position: relative; aspect-ratio: 2 / 3; margin: 8px 8px 0; overflow: hidden; background: #050506; display: grid; place-items: center; }
+.sys-card-art img { width: 100%; height: 100%; object-fit: contain; }
+.sys-card-noart { width: 100%; height: 100%; display: grid; place-items: center;
+  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--pane) 40%, #140c0a), #0b0b0d 75%); }
+.sys-card-noart span { font: 700 72px/1 var(--vt-display); color: #e9d7a8; opacity: .8; }
+.sys-card-status { position: absolute; top: 8px; left: 8px; padding: 5px 9px; background: #2f3d22; color: #dfe8cf;
+  border: 1px solid #182012; font: 700 9px/1 var(--vt-display); letter-spacing: .22em; text-transform: uppercase; }
+.sys-card-status.is-upd { background: #5a4217; color: #f6e3a8; border-color: #2a1f0b; }
+.sys-card-plate { padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.sys-card-plate::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--pane); opacity: .8; }
+.sys-card-name { font: 600 16px/1.2 var(--vt-display); letter-spacing: .03em; color: var(--vt-ink); }
+.sys-card-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.sys-card-domain { display: inline-flex; align-items: center; gap: 7px; font: 600 10px/1 var(--vt-display); letter-spacing: .22em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--pane) 45%, #e9d7a8); }
+.sys-card-domain i { width: 8px; height: 8px; transform: rotate(45deg); background: var(--pane); box-shadow: 0 0 6px var(--pane); }
+.sys-card-level { font: italic 400 15px/1 var(--vt-serif); color: var(--vt-gold); }
+.sys-card-edit { position: absolute; top: 14px; right: 14px; padding: 5px 10px; font-size: 9px; background: rgba(11,11,13,.85); }
+.sys-lightbox { max-width: 620px; }
+.sys-lightbox-meta { margin-top: 12px; }
+.sys-lightbox-body { align-items: center; }
+.sys-lightbox-img { max-width: 100%; max-height: 62vh; object-fit: contain; box-shadow: 0 18px 40px rgba(0,0,0,.7); }
+.sys-lightbox-body p { align-self: stretch; margin: 0; font-size: 17px; line-height: 1.6; color: var(--vt-ink-body); }
+@media (max-width: 760px) {
+  .sys-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 10px; }
+  .sys-card-name { font-size: 14px; }
+}

@@ -24,9 +24,8 @@ const Data = {
       { id: 'map', label: 'Reinos & Potências' },
     ]},
   ],
-  moreNav: { id: 'mais', label: 'Mais', home: 'house-rules', items: [
+  moreNav: { id: 'mais', label: 'Mais', home: 'home', items: [
     { id: 'home', label: 'Início' },
-    { id: 'house-rules', label: 'Regras da casa' },
     { id: 'sistema', label: 'Atualizações do sistema', adminOnly: true },
   ]},
 

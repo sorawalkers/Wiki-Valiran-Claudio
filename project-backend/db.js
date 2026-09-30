@@ -47,9 +47,6 @@
     (Data.kingdoms || []).forEach(k => {
       push('kingdom', 'Reino', k.name, k.eyebrow, 'kingdoms', k.created_at, k.updated_at);
     });
-    (Data.houserules || []).forEach(r => {
-      push('houserule', 'Regra da Casa', r.title, null, 'house-rules', r.created_at, r.updated_at);
-    });
     (Data.systemEntries || []).forEach(e => {
       push('system', 'Sistema', e.title, e.date_short || e.date_long || null, 'sistema', e.created_at, e.updated_at);
     });

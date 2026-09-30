@@ -10,7 +10,7 @@ const NAV_SECTION_OF = {
   sessions: 'cronicas', session: 'cronicas', timeline: 'cronicas', events: 'cronicas',
   recent: 'cronicas', campanha1: 'cronicas', campanha2: 'cronicas', campanha3: 'cronicas', rogue1: 'cronicas',
   map: 'atlas', kingdoms: 'atlas',
-  'house-rules': 'mais', sistema: 'mais',
+  sistema: 'mais',
 };
 
 function navSectionOf(active) {

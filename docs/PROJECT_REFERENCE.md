@@ -98,7 +98,6 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `timeline.jsx` | Timeline | Chronological event line with era markers |
 | `factions.jsx` | Factions | Secret organization dossiers with redacted fields |
 | `realm-map.jsx` | Map (`#/map`) | Interactive hex-grid map of kingdoms — reads `realms` / `realm_hexes` / `realm_cities` / `realm_rivers` |
-| `houserules.jsx` | House Rules | Mechanical house rule compendium |
 | `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles, rendered through `VitralArticle kind="campaign"` (roman-numeral seal instead of a portrait) |
 
 **Removed dead code (2026):** `kingdoms.jsx` and `map.jsx` predated the hex-map rewrite and were removed — `app.jsx`'s router already redirected `kingdoms` → `map` and rendered `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component was ever reached. Their `<script>` tags in `index.html` and the orphaned `.kingdom-*` CSS block in `styles-extra.css` were removed along with them. See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
@@ -239,4 +238,6 @@ All pages use `styles-vitral.css` and components from `vitral.jsx`:
 - Crônicas: sessions diary and folio (`sessions.jsx`), timeline with kind filters (`timeline.jsx`) — era events are merged in by title (descriptions and regions), `#/events` redirects to the timeline.
 - Atlas: `realm-map.jsx` with the `.hx-vt` theme layer; the hex map itself is unchanged.
 - Modals: every `.modal-*` dialog is themed in `styles-vitral.css`.
+- Atualizações do sistema (`sistema.jsx`, admin): card grimoire grouped by date, filters by type and domain/class parsed from the title ("New Domain Card - Name, Level N (Domain)"), card opens in a lightbox.
+- Regras da casa was removed; `#/house-rules` redirects home (the `houserules` table is untouched).
 - `#/article` (old static Ayael page) redirects to `deity:ayael`.

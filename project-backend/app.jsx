@@ -126,7 +126,7 @@ function App() {
       case 'deity': return <DeityDetail id={entity} onNav={navigate} />;
       case 'sessions': return <Sessions key={dbVersion} onNav={navigate} />;
       case 'session': return <SessionDetail id={entity} onNav={navigate} />;
-      case 'house-rules': return <HouseRules onNav={navigate} />;
+      case 'house-rules': navigate('home'); return null;   // Regras da casa foi removida
       case 'sistema': return <Sistema key={dbVersion} onNav={navigate} />;
       default:
         return <ComingSoon page={active} onNav={navigate} />;
@@ -184,7 +184,6 @@ function App() {
               {id:'characters', label:'Personae (PC)'},
               {id:'npcs', label:'Personae (NPC)'},
               {id:'sessions', label:'Sessões'},
-              {id:'house-rules', label:'Regras'},
               {id:'sistema', label:'Atualizações do Sistema'},
             ].map(p => (
               <button key={p.id} onClick={() => navigate(p.id)} style={{
