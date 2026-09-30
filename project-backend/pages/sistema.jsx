@@ -304,15 +304,57 @@ function SysCard({ e, onOpen, isEditor, onEdit }) {
   );
 }
 
+// Visualizador em tela cheia: zoom (botões, roda do mouse, duplo clique) e arrastar para mover.
+function SysZoomViewer({ src, alt, onClose }) {
+  const [z, setZ] = React.useState(1);
+  const [pos, setPos] = React.useState({ x: 0, y: 0 });
+  const drag = React.useRef(null);
+  const clamp = v => Math.min(5, Math.max(1, v));
+  const zoomTo = v => { const n = clamp(v); setZ(n); if (n === 1) setPos({ x: 0, y: 0 }); };
+  React.useEffect(() => {
+    const k = ev => {
+      if (ev.key === 'Escape') { ev.stopPropagation(); onClose(); }
+      if (ev.key === '+' || ev.key === '=') zoomTo(z + .5);
+      if (ev.key === '-') zoomTo(z - .5);
+      if (ev.key === '0') zoomTo(1);
+    };
+    window.addEventListener('keydown', k, true);
+    return () => window.removeEventListener('keydown', k, true);
+  }, [z]);
+  function onWheel(ev) { ev.preventDefault(); zoomTo(z * (ev.deltaY < 0 ? 1.15 : 1 / 1.15)); }
+  function onDown(ev) { if (z === 1) return; drag.current = { x: ev.clientX - pos.x, y: ev.clientY - pos.y }; ev.currentTarget.setPointerCapture(ev.pointerId); }
+  function onMove(ev) { if (drag.current) setPos({ x: ev.clientX - drag.current.x, y: ev.clientY - drag.current.y }); }
+  function onUp() { drag.current = null; }
+  return (
+    <div className="sys-zoom" onClick={onClose}>
+      <div className="sys-zoom-stage" onClick={ev => ev.stopPropagation()} onWheel={onWheel}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+        onDoubleClick={() => zoomTo(z > 1 ? 1 : 2.5)}>
+        <img src={src} alt={alt} draggable="false"
+          style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${z})`, cursor: z > 1 ? 'grab' : 'zoom-in' }} />
+      </div>
+      <div className="sys-zoom-bar" onClick={ev => ev.stopPropagation()}>
+        <button className="vt-btn" onClick={() => zoomTo(z - .5)} disabled={z <= 1} aria-label="Diminuir">−</button>
+        <span className="sys-zoom-level">{Math.round(z * 100)}%</span>
+        <button className="vt-btn" onClick={() => zoomTo(z + .5)} disabled={z >= 5} aria-label="Aumentar">+</button>
+        <button className="vt-btn" onClick={() => zoomTo(1)}>Ajustar</button>
+        <a className="vt-btn" href={src} target="_blank" rel="noopener noreferrer">Abrir original ↗</a>
+        <button className="vt-btn vt-btn--gold" onClick={onClose}>Fechar</button>
+      </div>
+    </div>
+  );
+}
+
 function SysLightbox({ e, onClose }) {
   const p = sysParseTitle(e.title);
   const img = useSysImage(e.id);
   const blocks = parseSystemBody(e.body);
+  const [zoom, setZoom] = React.useState(null);
   React.useEffect(() => {
-    const k = ev => { if (ev.key === 'Escape') onClose(); };
+    const k = ev => { if (ev.key === 'Escape' && !zoom) onClose(); };
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-  }, []);
+  }, [zoom]);
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box sys-lightbox" style={{ '--pane': sysPane(p.domain) }} onClick={ev => ev.stopPropagation()}>
@@ -325,15 +367,24 @@ function SysLightbox({ e, onClose }) {
           </div>
         </div>
         <div className="modal-body sys-lightbox-body">
-          {img && <img className="sys-lightbox-img" src={img} alt={e.title} />}
+          {img && (
+            <button type="button" className="sys-lightbox-zoomable" onClick={() => setZoom(img)} title="Ampliar">
+              <img className="sys-lightbox-img" src={img} alt={e.title} />
+              <span className="sys-lightbox-hint">⤢ Ampliar</span>
+            </button>
+          )}
           {blocks.filter(b => b.kind === 'para').map((b, i) => <p key={i}>{b.text}</p>)}
           {blocks.filter(b => b.kind === 'img' && b.index > 0).map(b => (
             <SystemFigure key={b.index} entryId={e.id} idx={b.index} caption={b.caption} />
           ))}
           {e.compact && e.line && <p>{e.line}</p>}
         </div>
-        <div className="modal-foot"><button className="btn-cancel" onClick={onClose}>Fechar</button></div>
+        <div className="modal-foot">
+          <button className="btn-cancel" onClick={onClose}>Fechar</button>
+          {img && <button className="btn-save" onClick={() => setZoom(img)}>⤢ Ampliar carta</button>}
+        </div>
       </div>
+      {zoom && <SysZoomViewer src={zoom} alt={e.title} onClose={() => setZoom(null)} />}
     </div>
   );
 }

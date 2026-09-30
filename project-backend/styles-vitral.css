@@ -2295,3 +2295,16 @@
   .sys-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 10px; }
   .sys-card-name { font-size: 14px; }
 }
+.sys-lightbox-zoomable { position: relative; padding: 0; border: 0; background: none; cursor: zoom-in; display: block; }
+.sys-lightbox-hint { position: absolute; right: 10px; bottom: 10px; padding: 6px 10px; background: rgba(11,11,13,.85); border: 1px solid rgba(201,165,90,.4);
+  font: 600 10px/1 var(--vt-display); letter-spacing: .2em; text-transform: uppercase; color: var(--vt-gold); opacity: .85; transition: opacity .2s; }
+.sys-lightbox-zoomable:hover .sys-lightbox-hint { opacity: 1; }
+.sys-zoom { position: fixed; inset: 0; z-index: 9500; background: rgba(5,5,6,.96); display: flex; flex-direction: column; }
+.sys-zoom-stage { flex: 1; min-height: 0; overflow: hidden; display: grid; place-items: center; touch-action: none; user-select: none; }
+.sys-zoom-stage img { max-width: 94vw; max-height: calc(100vh - 110px); object-fit: contain; transition: transform .12s ease-out; will-change: transform; }
+.sys-zoom-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; padding: 14px 16px 18px;
+  border-top: 1px solid rgba(201,165,90,.2); background: linear-gradient(180deg, rgba(20,17,12,.9), rgba(8,8,9,.98)); }
+.sys-zoom-bar .vt-btn { min-width: 44px; justify-content: center; text-decoration: none; }
+.sys-zoom-level { min-width: 56px; text-align: center; font: 600 13px/1 var(--vt-display); letter-spacing: .1em; color: var(--vt-ink); }
+.sys-zoom { background: #050506; }
+.sys-zoom-bar .vt-btn[aria-label] { font-size: 18px; padding: 6px 14px; }
