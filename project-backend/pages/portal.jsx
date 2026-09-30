@@ -110,165 +110,11 @@ function PortalMapPreview({ onNav }) {
 }
 
 // ── Portal ─────────────────────────────────────────────────────────────────
-function PortalClassic({ onNav }) {
-  const deityCount   = Object.values(Entities.deities || {}).filter(d => d && d.name).length;
-  const charCount    = (Data.charIds || []).length;
-  const sessionCount = (Data.sessionIds || []).length;
-  const eventCount   = (Data.events || []).length;
-  const tlCount      = (Data.timeline || []).filter(e => e.title).length;
-  const totalCount   = deityCount + charCount + sessionCount + eventCount + tlCount;
 
-  const activeRealms = (Data.realms || []).filter(r => !r.cursed);
-
-  return (
-    <div className="portal" data-screen-label="01 Portal">
-      <section className="hero" style={{'--sigil-watermark': `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%23b89968' stroke-width='0.8'><circle cx='100' cy='100' r='96'/><circle cx='100' cy='100' r='56'/><path d='M100 8 L108 100 L100 192 L92 100 Z' fill='%23b89968' fill-opacity='0.4'/><path d='M34 34 L100 96 L166 34 L104 100 L166 166 L100 104 L34 166 L96 100 Z' stroke-width='0.5'/></svg>")`}}>
-        <div className="hero-eyebrow">O Arquivo · Vol. III · Fólio 1281</div>
-        <h1 className="hero-title">
-          Tudo o que <span className="accent">se conta</span><br />
-          sobre Valiran
-        </h1>
-        <p className="hero-lede">
-          Um continente sustentado pela Trama Mágica, dilacerado por reinos em
-          guerra e por uma corrupção que vaza de planos esquecidos. Aqui se
-          guardam os nomes — dos deuses, dos heróis, e daqueles que romperam
-          selos que jamais deveriam ter sido tocados.
-        </p>
-
-        <div className="hero-meta">
-          <div className="hero-meta-item">
-            <span>Entradas</span>
-            <span className="v">{totalCount || '—'}</span>
-          </div>
-          <div className="hero-meta-item">
-            <span>Divindades</span>
-            <span className="v">{deityCount || '—'}</span>
-          </div>
-          <div className="hero-meta-item">
-            <span>Personagens</span>
-            <span className="v">{charCount || '—'}</span>
-          </div>
-          <div className="hero-meta-item">
-            <span>Sessões</span>
-            <span className="v">{sessionCount || '—'}</span>
-          </div>
-          <div className="hero-meta-item">
-            <span>Era</span>
-            <span className="v">3ª · 1281</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Adições recentes */}
-      <section className="portal-grid">
-        <div className="section-header">
-          <h2 className="section-title">Adições Recentes</h2>
-          <a className="section-link" onClick={() => onNav('recent')}>Ver todas →</a>
-        </div>
-
-        {(Data.feed || []).length > 0 && (() => {
-          const f = Data.feed[0];
-          return (
-            <div className="card card-featured" onClick={() => f.target && onNav(f.target)} style={f.target ? {cursor:'pointer'} : undefined}>
-              <div className="card-featured-body">
-                <div className="card-tag">{f.type_label}</div>
-                <h3 className="card-title">{f.title}</h3>
-                <p className="card-excerpt">{f.subtitle || '—'}</p>
-                <div className="card-footer">
-                  <span>{f.action}</span>
-                  <span>{f.date_label}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
-        {(Data.feed || []).slice(1, 4).map((c, i) => (
-          <div key={i} className="card"
-            onClick={() => c.target && onNav(c.target)}
-            style={c.target ? {cursor:'pointer'} : undefined}>
-            <div className="card-tag">{c.type_label}</div>
-            <h3 className="card-title">{c.title}</h3>
-            <p className="card-excerpt">{c.subtitle || '—'}</p>
-            <div className="card-footer">
-              <span>{c.action}</span>
-              <span>{c.date_label}</span>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* Mapa real */}
-      <section className="portal-grid" style={{borderBottom:'none'}}>
-        <div className="section-header">
-          <h2 className="section-title">Pelas Veias do Continente</h2>
-          <a className="section-link" onClick={() => onNav('map')}>Abrir mapa →</a>
-        </div>
-
-        <div className="card" style={{gridColumn:'span 3', padding:0, overflow:'hidden'}}>
-          <PortalMapPreview onNav={onNav} />
-        </div>
-      </section>
-
-      {/* Reinos principais do Supabase */}
-      <section className="portal-grid">
-        <div className="section-header">
-          <h2 className="section-title">Reinos</h2>
-          <a className="section-link" onClick={() => onNav('map')}>Reinos completos →</a>
-        </div>
-
-        {activeRealms.length > 0
-          ? activeRealms.map(realm => {
-              const Icon = Sigil && Sigil[realm.sigil];
-              return (
-                <div key={realm.id} className="card" onClick={() => onNav('map')} style={{cursor:'pointer'}}>
-                  <div style={{display:'flex', alignItems:'center', gap:14, marginBottom:18}}>
-                    <div style={{width:48, height:48, color: realm.accent, flexShrink:0}}>
-                      {Icon && <Icon style={{width:'100%', height:'100%'}} />}
-                    </div>
-                    <div>
-                      <div className="card-title" style={{margin:0, fontSize:19}}>{realm.name}</div>
-                      <div style={{fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--parchment-text-soft)', marginTop:4}}>{realm.eyebrow}</div>
-                    </div>
-                  </div>
-                  <p className="card-excerpt" style={{margin:0}}>{realm.desc}</p>
-                </div>
-              );
-            })
-          : /* fallback enquanto DB carrega */
-            [
-              { name: 'Oshain', sub: 'Monarquia · Annabella Whiteflame', desc: 'Expansionismo sob pretexto de proteção.', sigil: 'Crown', color: 'var(--wine)' },
-              { name: 'República Prateada', sub: 'República dracônica · Conselho dos Dez', desc: 'Bastião de justiça fundado por dragões.', sigil: 'Dragon', color: '#6a8aaa' },
-              { name: 'Lorean Treaz', sub: 'Magocracia · Concílio Magisterial', desc: 'Domínio absoluto da Trama e dos Warforged.', sigil: 'Tome', color: '#8a6aba' },
-            ].map(p => {
-              const Icon = Sigil[p.sigil];
-              return (
-                <div key={p.name} className="card" style={{cursor:'pointer'}}>
-                  <div style={{display:'flex', alignItems:'center', gap:14, marginBottom:18}}>
-                    <div style={{width:48, height:48, color: p.color, flexShrink:0}}>
-                      {Icon && <Icon style={{width:'100%', height:'100%'}} />}
-                    </div>
-                    <div>
-                      <div className="card-title" style={{margin:0, fontSize:19}}>{p.name}</div>
-                      <div style={{fontFamily:'JetBrains Mono', fontSize:10, letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--parchment-text-soft)', marginTop:4}}>{p.sub}</div>
-                    </div>
-                  </div>
-                  <p className="card-excerpt" style={{margin:0}}>{p.desc}</p>
-                </div>
-              );
-            })
-        }
-      </section>
-    </div>
-  );
-}
-
-window.PortalClassic = PortalClassic;
 
 
 // ============================================================
 // Home no tema vitral: a nave da catedral, da entrada ao altar.
-// (a home antiga continua em #/home-antiga)
 // ============================================================
 const VH_GATES = [
   { id: 'pantheon',   label: 'Panteão',  sub: 'Os nomes que recebem oração', icon: 'Sun',     pane: '#7a5aa8' },
@@ -416,7 +262,7 @@ function Portal({ onNav }) {
           </div>
         </div>
         <div className="vh-hero-wheel">
-          <PantheonRose embed onNav={onNav} />
+          <PantheonRose onNav={onNav} />
           <button className="vh-rose-cap" onClick={() => onNav('pantheon')}>Entrar no Panteão →</button>
         </div>
       </section>

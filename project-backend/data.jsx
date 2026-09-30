@@ -6,7 +6,6 @@ const Data = {
   topnav: [
     { id: 'panteao', label: 'Panteão', home: 'pantheon', items: [
       { id: 'pantheon', label: 'Panteão' },
-      { id: 'article', label: 'Ayael' },
     ]},
     { id: 'casas', label: 'Casas', home: 'factions', items: [
       { id: 'factions', label: 'Facções' },
@@ -33,44 +32,6 @@ const Data = {
 
   // ===== Latest entries (portal + feed — populated from DB) =====
   latest: [],
-
-  // ===== Article: Ayael =====
-  article: {
-    breadcrumb: ["Panteão", "Ascendidos", "Ayael"],
-    title: "Ayael",
-    subtitle: "O que Sangra Luz · O Anjo Aprisionado · Filho de Lamidriel",
-    infobox: {
-      name: "Ayael",
-      sub: "O que Sangra Luz",
-      sigil: "Chain",
-      rows: [
-        { k: "Tipo", v: "Anjo Ascendido" },
-        { k: "Pai", v: "Lamidriel, o Titã" },
-        { k: "Domínio", v: "Sofrimento, Necromância", danger: true },
-        { k: "Alinhamento", v: "Aprisionado" },
-        { k: "Plano", v: "Energia Negativa", danger: true },
-        { k: "Símbolo", v: "Corrente quebrada sobre asa" },
-        { k: "Adoradores", v: "Necromantes, cultos do dilúvio" },
-        { k: "Antagonista de", v: "Esmir, Bahamut" },
-      ],
-      status: "Atualmente prisioneiro. A corrupção que vaza de seu cárcere é a principal ameaça da era — toda necromância em Valiran tem nele sua fonte última.",
-    },
-    toc: [
-      "Origem",
-      "O Aprisionamento",
-      "A Corrupção como Vazamento",
-      "Cultos e Hereges",
-      "Implicações para os Vivos",
-      "Notas do Arquivista",
-    ],
-    related: [
-      { tag: "Plano", title: "Plano de Energia Negativa" },
-      { tag: "Titã", title: "Lamidriel, a Mão que Cria" },
-      { tag: "Evento", title: "A Queda de Lancaster" },
-      { tag: "Organização", title: "Blackflame" },
-      { tag: "Local", title: "Tumba dos Hereges" },
-    ],
-  },
 
   // ===== Timeline (populated from DB) =====
   timeline: [],

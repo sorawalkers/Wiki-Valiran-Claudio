@@ -106,13 +106,8 @@ function App() {
     const [page, entity] = active.split(':');
     switch (page) {
       case 'home': return <Portal key={dbVersion} onNav={navigate} />;
-      case 'home-antiga': return <PortalClassic key={dbVersion} onNav={navigate} />;
       case 'pantheon': return <Pantheon onNav={navigate} />;
-      case 'pantheon-teste': return <PantheonLab onNav={navigate} />;
-      case 'pantheon-rosacea': return <PantheonRose onNav={navigate} />;
-      case 'deity-vitral-teste': return <DeityVitralLab onNav={navigate} />;
-      case 'deity-altar-teste': return <DeityAltarLab onNav={navigate} />;
-      case 'article': return <Article onNav={navigate} />;
+      case 'article': navigate('deity:ayael'); return null;   // antigo artigo fixo da Ayael
       case 'campanha3': return <CampaignArticle id="campanha3" onNav={navigate} />;
       case 'campanha2': return <CampaignArticle id="campanha2" onNav={navigate} />;
       case 'campanha1': return <CampaignArticle id="campanha1" onNav={navigate} />;
@@ -122,7 +117,6 @@ function App() {
       case 'recent': return <Recent onNav={navigate} />;
       case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
-      case 'casas-teste': return <FactionBannerLab onNav={navigate} />;
       case 'faction': return <FactionDetail id={entity} onNav={navigate} />;
       case 'events': navigate('timeline'); return null;   // Eventos da era foi incorporado à Linha do Tempo
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
@@ -184,7 +178,6 @@ function App() {
               {id:'home', label:'Portal'},
               {id:'recent', label:'Recentes'},
               {id:'pantheon', label:'Panteão'},
-              {id:'article', label:'Artigo'},
               {id:'factions', label:'Facções'},
               {id:'timeline', label:'Timeline'},
               {id:'map', label:'Mapa'},
@@ -232,7 +225,6 @@ function ComingSoon({ page, onNav }) {
         {[
           {id:'home', label:'Portal'},
           {id:'pantheon', label:'Panteão'},
-          {id:'article', label:'Ayael'},
           {id:'timeline', label:'Linha do Tempo'},
           {id:'map', label:'Mapa'},
         ].map(p => (

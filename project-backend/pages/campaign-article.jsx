@@ -116,7 +116,7 @@ const CAMPAIGN_DEFAULTS = {
       { tag: 'Grupo',     title: 'Personagens (PC)',          target: 'characters' },
       { tag: 'Histórico', title: 'Linha do Tempo',            target: 'timeline' },
       { tag: 'Org.',      title: 'Blackflame · Brotherhood',  target: 'factions' },
-      { tag: 'Divindade', title: 'Ayael — O que Sangra Luz',  target: 'article' },
+      { tag: 'Divindade', title: 'Ayael — O que Sangra Luz',  target: 'deity:ayael' },
     ],
   },
 

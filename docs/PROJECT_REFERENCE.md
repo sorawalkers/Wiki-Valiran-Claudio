@@ -96,14 +96,10 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `character-detail.jsx` | Character article | Full character profile with infobox and sections |
 | `sessions.jsx` | Session Diary | Campaign session list + individual session view |
 | `timeline.jsx` | Timeline | Chronological event line with era markers |
-| `events.jsx` | Recent Events | Categorical event feed (divine / political / catastrophe / arcane) |
 | `factions.jsx` | Factions | Secret organization dossiers with redacted fields |
 | `realm-map.jsx` | Map (`#/map`) | Interactive hex-grid map of kingdoms — reads `realms` / `realm_hexes` / `realm_cities` / `realm_rivers` |
 | `houserules.jsx` | House Rules | Mechanical house rule compendium |
-| `planes.jsx` | Planes | Cosmological planes (Feywild, Underdark, Abyss, etc.) |
-| `weave.jsx` | The Weave | Magical system primer |
-| `article.jsx` | Ayael | Static lore article |
-| `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles |
+| `campaign-article.jsx` | Campaign Articles | Campanha 1/2/3 and Rogue1 articles, rendered through `VitralArticle kind="campaign"` (roman-numeral seal instead of a portrait) |
 
 **Removed dead code (2026):** `kingdoms.jsx` and `map.jsx` predated the hex-map rewrite and were removed — `app.jsx`'s router already redirected `kingdoms` → `map` and rendered `RealmMapPage` (from `realm-map.jsx`) for the `map` route, so neither old component was ever reached. Their `<script>` tags in `index.html` and the orphaned `.kingdom-*` CSS block in `styles-extra.css` were removed along with them. See `docs/GUIA-ESTRUTURA-ARTIGOS.md` §9 for the live schema.
 
@@ -229,3 +225,18 @@ These files provide deeper guidance for specific tasks:
 - **Do not refactor the global state pattern** (`window.DB`, `window.Data`, `window.Entities`) without updating every file that references it — there is no module system, so namespace changes break silently.
 - **Script load order matters.** `index.html` loads files in a specific order. If you add a new file, verify it is inserted after its dependencies and before its consumers.
 - **Routing is manual.** To add a new page: add a component to `pages/`, import it in `app.jsx`, add it to the page registry in `app.jsx`, add a nav entry in `Data.topnav`/`Data.moreNav` (`data.jsx`), and map its route to a header section in `NAV_SECTION_OF` (`chrome.jsx`).
+
+
+## Stained-glass redesign (vitral) — page map
+
+All pages use `styles-vitral.css` and components from `vitral.jsx`:
+
+- Home (`portal.jsx`): entrance with the Pantheon rose wheel (`PantheonRose`), Onde paramos, O que você precisa saber (Campaign III summary), Almas, Continente, Portões, Registro.
+- Pantheon: hierarchy filter (`VtFilterBar`), deity cards show the gallery stained glass (`deity-vitral-<id>`), falling back to the oval mirror (`deity-hero-<id>`) or the sigil altar. Editors bulk-upload windows with `VtVitralUploader`.
+- Deity page: `VitralDeityAltar`.
+- PCs / NPCs: gothic header + `VtFilterBar`; articles via `VitralArticle`.
+- Casas: faction banners by relation (`VtBanner`, `vtFactionRelation`; 'Relação' ficha row: Aliada/Neutra/Inimiga), dossier via `VitralArticle kind="faction"`.
+- Crônicas: sessions diary and folio (`sessions.jsx`), timeline with kind filters (`timeline.jsx`) — era events are merged in by title (descriptions and regions), `#/events` redirects to the timeline.
+- Atlas: `realm-map.jsx` with the `.hx-vt` theme layer; the hex map itself is unchanged.
+- Modals: every `.modal-*` dialog is themed in `styles-vitral.css`.
+- `#/article` (old static Ayael page) redirects to `deity:ayael`.

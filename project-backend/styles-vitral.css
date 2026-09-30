@@ -1358,9 +1358,6 @@
 }
 
 /* ── Rosáceas-relicário (divindades, uma por nível) ─────────── */
-.vt-rose { position: relative; aspect-ratio: 1; }
-.vt-rose-hole { position: absolute; border-radius: 50%; overflow: hidden; background: #0b0b0d; }   /* posição inline (VT_ROSES) */
-.vt-rose-hole .vt-deity-sigil-glass { padding: 24%; }
 .vt-portrait--rose { width: 460px; height: 460px; }
 .vt-hero--deity { grid-template-columns: 460px minmax(0, 1fr); align-items: center; }
 .vt-hero--deity > .vt-hero-portrait { align-self: center; }
@@ -1485,83 +1482,6 @@
 .vt-altar-medal > .deity-sigil-render { width: 84%; height: 84%; filter: drop-shadow(0 0 8px rgba(201,165,90,.4)); }
 .vt-altar-medal > .deity-sigil-render:has(.deity-sigil-photo) { width: 100%; height: 100%; }
 
-/* ── Espelho circular (teste, #/pantheon-teste) ────────────────── */
-.vt-mirror--circular { aspect-ratio: 1; }
-.vt-mirror--circular.vt-rose-card { width: 270px; height: 270px; }
-.vt-mirror--circular.vt-portrait--rose { width: 440px; height: 440px; }
-.vt-mirror--circular .vt-altar-medal { width: 54%; }
-.vt-lab-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 48px 64px; padding: 40px 24px 48px; }
-.vt-lab-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.vt-lab-tag { font: 600 11px/1 var(--vt-display); letter-spacing: .28em; text-transform: uppercase; color: var(--vt-gold); opacity: .7; }
-@media (max-width: 900px) {
-  .vt-deity-gallery .vt-mirror--circular.vt-rose-card { width: 190px; height: 190px; }
-  .vt-mirror--circular.vt-portrait--rose { width: 300px; height: 300px; }
-  .vt-lab-row { gap: 32px; padding: 24px 8px 32px; }
-}
-@media (max-width: 900px) {
-  .vt-lab-row .vt-mirror--circular.vt-rose-card { width: 190px; height: 190px; }
-  .vt-lab-row .vt-mirror--oval.vt-rose-card { width: 150px; height: 225px; }
-}
-
-/* ── Emblemas do símbolo sem vitral (teste) ─────────────────────── */
-.vt-emblem { position: relative; display: grid; place-items: center; color: var(--vt-gold); }
-.vt-emblem-sigil { display: grid; place-items: center; }
-.vt-emblem-sigil > .deity-sigil-render { width: 100%; height: 100%; }
-
-/* selo: medalhão cunhado, borda serrilhada de ouro e esmalte na cor do nível */
-.vt-emblem--selo { width: 210px; height: 210px; border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, #d9b770 0 2deg, #7a5f2e 2deg 4deg);
-  box-shadow: 0 14px 30px rgba(0,0,0,.75), 0 0 40px color-mix(in srgb, var(--pane) 25%, transparent); }
-.vt-emblem--selo .vt-emblem-body { width: 88%; height: 88%; border-radius: 50%;
-  display: grid; place-items: center;
-  background: linear-gradient(145deg, #f0d693, #a07c3c 45%, #5e4620);
-  box-shadow: inset 0 2px 2px rgba(255,255,255,.45), inset 0 -3px 4px rgba(0,0,0,.5); }
-.vt-emblem--selo .vt-emblem-sigil { width: 80%; height: 80%; border-radius: 50%;
-  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--pane) 70%, #1a1510), color-mix(in srgb, var(--pane) 25%, #07070a) 75%);
-  box-shadow: inset 0 4px 10px rgba(0,0,0,.8), 0 0 0 2px #3b2c14, 0 1px 0 3px rgba(255,236,190,.25); }
-.vt-emblem--selo .deity-sigil-render { width: 72%; height: 72%; color: #f1d58f;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,.9)) drop-shadow(0 -1px 0 rgba(255,240,200,.35)); }
-
-/* estandarte: flâmula de tecido pendurada numa haste, rabo de andorinha e barra dourada */
-.vt-emblem--estandarte { width: 190px; height: 270px; align-content: start; }
-.vt-emblem-rod { position: relative; z-index: 2; width: 190px; height: 10px; border-radius: 5px;
-  background: linear-gradient(180deg, #f0d693, #8a6a30 60%, #4a3718);
-  box-shadow: 0 3px 6px rgba(0,0,0,.6); }
-.vt-emblem-rod::before, .vt-emblem-rod::after { content: ""; position: absolute; top: -5px; width: 20px; height: 20px;
-  background: radial-gradient(circle at 40% 35%, #f6df9f, #8a6a30 60%, #3a2a10); border-radius: 50%; }
-.vt-emblem-rod::before { left: -8px; } .vt-emblem-rod::after { right: -8px; }
-.vt-emblem--estandarte .vt-emblem-body { width: 160px; height: 250px; margin-top: -4px; padding: 4px;
-  background: linear-gradient(180deg, #d9b770, #7a5f2e);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
-  filter: drop-shadow(0 16px 20px rgba(0,0,0,.7)); }
-.vt-emblem--estandarte .vt-emblem-body::before { content: ""; position: absolute; inset: 4px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
-  background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0 6px, transparent 6px 22px, rgba(255,255,255,.05) 22px 26px, transparent 26px 40px),
-    linear-gradient(180deg, color-mix(in srgb, var(--pane) 75%, #0b0b0d), color-mix(in srgb, var(--pane) 35%, #07070a)); }
-.vt-emblem--estandarte .vt-emblem-body { position: relative; }
-.vt-emblem--estandarte .vt-emblem-sigil { position: absolute; left: 50%; top: 30%; transform: translate(-50%, -50%);
-  width: 110px; height: 110px; }
-.vt-emblem--estandarte .deity-sigil-render { color: #f1d58f;
-  filter: drop-shadow(0 0 1px #3b2c14) drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
-
-/* relevo: tábua de pedra em arco com o símbolo entalhado e folheado a ouro */
-.vt-emblem--relevo { width: 180px; height: 250px; }
-.vt-emblem--relevo .vt-emblem-body { width: 100%; height: 100%;
-  border-radius: 90px 90px 6px 6px;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.08), transparent 60%),
-    repeating-radial-gradient(circle at 70% 80%, rgba(0,0,0,.08) 0 2px, transparent 2px 5px),
-    linear-gradient(180deg, #4a4640, #2b2926 70%, #1c1b19);
-  box-shadow: inset 0 0 0 2px rgba(0,0,0,.6), inset 0 0 0 9px #34312c, inset 0 0 0 10px rgba(255,255,255,.08),
-              inset 0 0 30px rgba(0,0,0,.7), 0 18px 30px rgba(0,0,0,.8);
-  display: grid; place-items: center; }
-.vt-emblem--relevo .vt-emblem-sigil { width: 118px; height: 118px; margin-top: 10px; }
-.vt-emblem--relevo .deity-sigil-render { color: #c9a55a;
-  filter: drop-shadow(0 -1px 0 rgba(0,0,0,.9)) drop-shadow(0 1px 0 rgba(255,255,255,.18)); }
-.vt-emblem-gem { position: absolute; left: 50%; top: 16px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg);
-  background: var(--pane); border: 2px solid #8a6d3b; box-shadow: 0 0 10px var(--pane); }
-
 /* ── Protótipo: o Panteão como rosácea (#/pantheon-rosacea) ─────── */
 .pr-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 0 48px; }
 .pr-rose { position: relative; width: min(920px, 100%); aspect-ratio: 1;
@@ -1617,35 +1537,25 @@
 .pr-lobe-petal { fill: color-mix(in srgb, #3f6a86 40%, #0b0b0d); stroke: #050506; stroke-width: 4; }
 .pr-lobe-bead { fill: #a8854a; stroke: #050506; stroke-width: 3; }
 
-/* ── Vitral completo da divindade (teste, #/deity-vitral-teste) ─── */
+/* ── Vitral completo da divindade (galeria e topo do artigo) ─── */
 .vt-deity-vitral { display: block; height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.8)); }
 .vt-deity-vitral--catedral { width: 400px; }
-.vt-deity-vitral--roseta   { width: 470px; }
 .vt-hero--deity:has(.vt-deity-vitral--catedral) { grid-template-columns: 420px minmax(0, 1fr); }
-.vt-hero--deity:has(.vt-deity-vitral--roseta)   { grid-template-columns: 480px minmax(0, 1fr); }
-.vt-lab-banner { margin: 40px 0 0; padding: 14px 24px; text-align: center;
-  font: 600 12px/1 var(--vt-display); letter-spacing: .3em; text-transform: uppercase; color: var(--vt-gold);
-  border-top: 1px solid rgba(201,165,90,.25); border-bottom: 1px solid rgba(201,165,90,.25);
-  background: linear-gradient(90deg, transparent, rgba(201,165,90,.08), transparent); }
 @container vt (max-width: 1100px) {
   .vt-hero--deity:has(.vt-deity-vitral) { grid-template-columns: 360px minmax(0, 1fr); }
-  .vt-deity-vitral--catedral { width: 330px; } .vt-deity-vitral--roseta { width: 360px; }
+  .vt-deity-vitral--catedral { width: 330px; }
 }
 @container vt (max-width: 760px) {
   .vt-hero--deity:has(.vt-deity-vitral) { grid-template-columns: minmax(0, 1fr); }
-  .vt-deity-vitral--catedral { width: 260px; } .vt-deity-vitral--roseta { width: 320px; }
+  .vt-deity-vitral--catedral { width: 260px; }
 }
-.vt-lab-banner + .vt-article { min-height: 0; }
-.vt-deity-vitral--card.vt-deity-vitral--roseta   { width: 270px; }
 .vt-deity-vitral--card.vt-deity-vitral--catedral { width: 210px; }
 .vt-deity-vitral--card { transition: filter .2s ease; filter: drop-shadow(0 18px 24px rgba(0,0,0,.8)); }
 .vt-deity-card:hover .vt-deity-vitral--card { filter: brightness(1.12) drop-shadow(0 0 22px rgba(232,170,70,.45)); }
 .vt-deity-card:has(.vt-deity-vitral--card) .vt-votive { margin-top: -10px; }
 @media (max-width: 900px) {
-  .vt-deity-vitral--card.vt-deity-vitral--roseta   { width: 190px; }
   .vt-deity-vitral--card.vt-deity-vitral--catedral { width: 150px; }
 }
-.vt-pantheon:has(+ .vt-lab-banner) { min-height: 0; }
 
 /* ════════════════════════════════════════════════════════════════
    Home · a nave da catedral
@@ -1680,8 +1590,6 @@
 .vh-stat-k { font: 600 10px/1 var(--vt-display); letter-spacing: .24em; text-transform: uppercase; color: var(--vt-ink-label); }
 .vh-hero-rose { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px;
   padding: 0; border: 0; background: none; cursor: pointer; }
-.vh-hero-rose .vt-rose { width: 520px; filter: drop-shadow(0 30px 50px rgba(0,0,0,.85)); transition: filter .3s ease; }
-.vh-hero-rose:hover .vt-rose { filter: drop-shadow(0 0 40px rgba(232,180,90,.35)) brightness(1.08); }
 .vh-rose-light { position: absolute; inset: 0;
   background: radial-gradient(circle at 50% 50%, #fff4d2 0, #f0cf7c 18%, #b8873a 42%, #3a2a10 72%, #0b0b0d 100%);
   animation: vh-breathe 6s ease-in-out infinite; }
@@ -1777,7 +1685,6 @@
 
 @media (max-width: 1100px) {
   .vh-hero { grid-template-columns: minmax(0, 1fr) 380px; }
-  .vh-hero-rose .vt-rose { width: 380px; }
   .vh-last { grid-template-columns: 110px minmax(0, 1fr); }
   .vh-last-cast { grid-column: 1 / -1; }
   .vh-gate-label { font-size: 15px; } .vh-gate-sub { display: none; }
@@ -1786,7 +1693,6 @@
   .vh-section { padding: 40px 16px 4px; }
   .vh-hero { grid-template-columns: minmax(0, 1fr); padding: 32px 16px 16px; gap: 24px; }
   .vh-hero-rose { order: -1; }
-  .vh-hero-rose .vt-rose { width: 280px; }
   .vh-lede { font-size: 18px; }
   .vh-stat { min-width: 0; flex: 1 1 28%; padding: 10px 12px 12px; }
   .vh-head-title { font-size: 21px; }
@@ -2163,10 +2069,7 @@
 .vb-field { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; pointer-events: none; }
 .vb-emblem { position: absolute; display: grid; place-items: center; }
 .vb-emblem img { width: 100%; height: 100%; object-fit: contain; }
-.vb--a .vb-emblem img { filter: sepia(.2) saturate(.9) brightness(.92); }
 .vb-initial { font: 700 clamp(40px, 9vw, 120px)/1 var(--vt-display); }
-.vb--a .vb-initial { color: #d9b770; text-shadow: 0 2px 0 #1a120a, 0 0 18px rgba(217,183,112,.35); }
-.vb--b .vb-initial, .vb--c .vb-initial { color: #6a1a14; opacity: .85; }
 .vf-card--banner .vf-banner { width: 240px; }
 .vf-card--banner:hover .vb-cloth { filter: brightness(1.12) drop-shadow(0 0 20px rgba(201,165,90,.35)); }
 .vf-card--banner .vf-stamp { margin-top: -4px; }
@@ -2175,8 +2078,6 @@
 .vf-card--banner { width: 280px; }
 .vf-card--banner .vf-banner { flex: none; width: 240px; }
 .vb-initial { font-size: 88px; }
-.vb--c .vb-initial { font-size: 64px; }
-.vb--c .vb-emblem img { transform: scale(1.25); }
 .vf .vt-lab-row { align-items: flex-start; }
 .vf-card--aliada  { --pane: #3f6a86; }
 .vf-card--neutra  { --pane: #8a8070; }

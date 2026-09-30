@@ -272,47 +272,6 @@ function FactionDetail({ id, onNav }) {
   );
 }
 
-// Teste (#/casas-teste): os três estandartes com as facções reais
-function FactionBannerLab({ onNav }) {
-  const list = Object.values(Entities.factions || {}).filter(f => f && f.name);
-  return (
-    <div className="vt vt-pantheon vf" data-screen-label="Teste · Estandartes">
-      <section className="vt-pantheon-head">
-        <div className="vt-pantheon-head-text">
-          <div className="vt-label">Teste · Casas</div>
-          <h1 className="vt-h1">Estandartes</h1>
-          <p className="vt-pantheon-lede">Os estandartes por relação com o grupo (azul aliada, cinza neutra, preto inimiga), cada um com as duas facções: com brasão (Brotherhood of Hope) e sem imagem (Blackflame, só a inicial).</p>
-        </div>
-      </section>
-      {['aliada', 'neutra', 'inimiga'].map(k => [k, VT_BANNERS[k]]).map(([k, b]) => (
-        <section key={k} className="vt-tier vt-tier--deus">
-          <header className="vt-tier-head">
-            <span className="vt-tier-num">{vtRoman(["aliada","neutra","inimiga"].indexOf(k) + 1)}</span>
-            <div><h2 className="vt-tier-name">{b.label}</h2></div>
-          </header>
-          <div className="vt-lab-row">
-            {list.map(f => <FactionBannerCard key={f.id} f={f} variant={k} onNav={onNav} />)}
-          </div>
-        </section>
-      ))}
-    </div>
-  );
-}
-function FactionBannerCard({ f, variant, onNav }) {
-  const url = useVtSlotUrl('faction-portrait-' + f.id);
-  return (
-    <article className="vt-card vf-card vf-card--banner" onClick={() => onNav('faction:' + f.id)}>
-      <VtBanner variant={variant} url={url} name={f.name} className="vf-banner" />
-      {f.stamp && <span className={'vt-badge vt-badge--stamp vt-badge--stamp-' + (f.stampClass || 'red') + ' vf-stamp'}>{f.stamp}</span>}
-      <div className="vt-votive vf-votive">
-        <span className="vt-votive-gem" aria-hidden="true" />
-        <div className="vt-votive-name">{(f.name || '').trim()}</div>
-        {f.alias && <div className="vt-votive-title">{f.alias}</div>}
-      </div>
-    </article>
-  );
-}
-
 window.Factions = Factions;
-window.FactionBannerLab = FactionBannerLab;
+
 window.FactionDetail = FactionDetail;

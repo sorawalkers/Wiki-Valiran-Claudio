@@ -211,105 +211,7 @@ function Pantheon({ onNav }) {
 window.Pantheon = Pantheon;
 
 // ============================================================
-// Página de teste (#/pantheon-teste): espelho circular × oval
-// ============================================================
-function PantheonLab({ onNav }) {
-  const all = Object.values(Entities.deities).filter(d => d && d.name);
-  // arte de cada uma (reativo: o estado das imagens chega depois do primeiro render)
-  const artUrl = {};
-  all.forEach(d => { artUrl[d.id] = useVtSlotUrl('deity-hero-' + d.id); });
-  const hasArt = d => !!artUrl[d.id];
-  const withArt = all.filter(hasArt), noArt = all.filter(d => !hasArt(d));
-  // as mesmas duas divindades nos dois formatos: uma com arte e uma só com o símbolo (quando houver)
-  const pair = [withArt[0], noArt[0]].filter(Boolean);
-  for (const d of all) { if (pair.length >= 2) break; if (!pair.includes(d)) pair.push(d); }
-  const big = pair;
-  // um de cada nível para os emblemas
-  const trio = ['tita', 'deus', 'ascendido'].map(t => all.find(d => vtDeityTier(d) === t)).filter(Boolean);
-
-  const Card = ({ d, shape }) => (
-    <div className="vt-lab-col">
-      <span className="vt-lab-tag">{shape === 'circular' ? 'Circular' : 'Oval'}</span>
-      <VitralDeityCard deity={d} shape={shape} onClick={() => onNav('deity:' + d.id)} />
-    </div>
-  );
-  const Big = ({ d, shape }) => (
-    <div className="vt-lab-col">
-      <span className="vt-lab-tag">{shape === 'circular' ? 'Circular' : 'Oval'} · {d.name}</span>
-      <div className="vt-portrait-shadow">
-        <VtDeityFrame tier={vtDeityTier(d)} shape={shape} className="vt-portrait vt-portrait--rose" sizes="460px">
-          {hasArt(d)
-            ? <VtFramedImage url={artUrl[d.id]} framing={vtFraming(d)} />
-            : <VtSigilAltar deity={d} tier={vtDeityTier(d)} />}
-        </VtDeityFrame>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="vt vt-pantheon">
-      <section className="vt-tier vt-tier--deus">
-        <header className="vt-tier-head">
-          <span className="vt-tier-num">I <small>/ V</small></span>
-          <div>
-            <h2 className="vt-tier-name">Teste · Galeria</h2>
-            <p className="vt-tier-desc">As mesmas duas divindades no espelho circular e no oval, com placa e domínio.</p>
-          </div>
-        </header>
-        <div className="vt-lab-row">
-          {pair.map(d => <Card key={'c' + d.id} d={d} shape="circular" />)}
-          {pair.map(d => <Card key={'o' + d.id} d={d} shape="oval" />)}
-        </div>
-      </section>
-      {[
-        ['selo', 'Selo cunhado', 'Medalhão de ouro com borda serrilhada; o esmalte do centro leva a cor do nível.'],
-        ['estandarte', 'Estandarte', 'Flâmula bordada pendurada numa haste, no tecido da cor do nível.'],
-        ['relevo', 'Relevo em pedra', 'Tábua de pedra em arco, com o símbolo entalhado e folheado a ouro.'],
-      ].map(([variant, name, desc], i) => (
-        <section key={variant} className="vt-tier vt-tier--deus">
-          <header className="vt-tier-head">
-            <span className="vt-tier-num">{vtRomanNum(i + 2)} <small>/ V</small></span>
-            <div>
-              <h2 className="vt-tier-name">Símbolo · {name}</h2>
-              <p className="vt-tier-desc">{desc}</p>
-            </div>
-          </header>
-          <div className="vt-lab-row">
-            {trio.map(d => (
-              <div key={d.id} className={'vt-card vt-deity-card vt-lab-col vt-deity-card--' + vtDeityTier(d)} onClick={() => onNav('deity:' + d.id)}>
-                <VtSigilEmblem deity={d} tier={vtDeityTier(d)} variant={variant} />
-                <div className="vt-votive">
-                  <span className="vt-votive-gem" aria-hidden="true" />
-                  <div className="vt-votive-name">{d.name}</div>
-                  {d.epithet && <div className="vt-votive-title">{d.epithet}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-      <section className="vt-tier vt-tier--tita">
-        <header className="vt-tier-head">
-          <span className="vt-tier-num">V <small>/ V</small></span>
-          <div>
-            <h2 className="vt-tier-name">Teste · Tamanho do artigo</h2>
-            <p className="vt-tier-desc">A mesma divindade nos dois espelhos, no tamanho do topo da página dela.</p>
-          </div>
-        </header>
-        {big.map(d => (
-          <div key={d.id} className="vt-lab-row">
-            <Big d={d} shape="circular" />
-            <Big d={d} shape="oval" />
-          </div>
-        ))}
-      </section>
-    </div>
-  );
-}
-window.PantheonLab = PantheonLab;
-
-// ============================================================
-// Protótipo (#/pantheon-rosacea): o Panteão como uma rosácea.
+// O Panteão como uma rosácea (roda da entrada da home).
 // Titãs no anel de dentro, Deuses no do meio, Ascendidos nos lóbulos de fora.
 // Coordenadas no viewBox 1000×1000, centro (500,500).
 // ============================================================
@@ -326,8 +228,7 @@ function prSector(rIn, rOut, a0, a1) {
   return `M${x0} ${y0} A${rOut} ${rOut} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${rIn} ${rIn} 0 ${big} 0 ${x3} ${y3} Z`;
 }
 
-// embed: só a roda + a placa (usada na entrada da home), sem cabeçalho nem legenda
-function PantheonRose({ onNav, embed = false }) {
+function PantheonRose({ onNav }) {
   const all = Object.values(Entities.deities).filter(d => d && d.name);
   const [active, setActive] = React.useState(null);
 
@@ -347,7 +248,7 @@ function PantheonRose({ onNav, embed = false }) {
   const tierName = { tita: 'Titã', deus: 'Deus do Panteão', ascendido: 'Ascendido' };
 
   const wheel = (
-      <div className={'pr-wrap' + (embed ? ' pr-wrap--embed' : '')}>
+      <div className="pr-wrap pr-wrap--embed">
         <div className="pr-rose">
           <svg className="pr-glass" viewBox="0 0 1000 1000" aria-hidden="true">
             <defs>
@@ -432,30 +333,8 @@ function PantheonRose({ onNav, embed = false }) {
           <div className="vt-card-sub">{cur ? [tierName[curTier], vtRow(cur, /^dom[ií]nio/i)].filter(Boolean).join(' · ') : ''}</div>
         </div>
 
-        {!embed && (
-        <div className="pr-legend">
-            {rings.map(r => (
-              <span key={r.tier} className={'pr-legend-item pr-legend-item--' + r.tier}>
-                <i />{{ tita: 'Titãs · anel interno', deus: 'Deuses · anel do meio', ascendido: 'Ascendidos · lóbulos' }[r.tier]} ({r.gods.length})
-              </span>
-            ))}
-          </div>
-        )}
       </div>
   );
-  if (embed) return wheel;
-  return (
-    <div className="vt vt-pantheon">
-      <section className="vt-pantheon-head">
-        <div className="vt-pantheon-head-text">
-          <div className="vt-label">Protótipo · Cosmologia</div>
-          <h1 className="vt-h1">A Rosácea do Panteão</h1>
-          <p className="vt-pantheon-lede">Protótipo: os Titãs no coração da janela, os Deuses no anel do meio, os Ascendidos nos lóbulos de fora. Passe o cursor sobre um vidro.</p>
-        </div>
-      </section>
-
-      {wheel}
-    </div>
-  );
+  return wheel;
 }
 window.PantheonRose = PantheonRose;

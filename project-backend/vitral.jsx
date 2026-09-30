@@ -189,14 +189,6 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
   );
 }
 
-// Rosáceas-relicário (divindades), uma por nível. `r` = raio do vão circular em %
-// da caixa (medido no PNG 1920²); o vão fica por baixo do metal, que cobre a borda.
-const VT_ROSES = {
-  tita:      { file: 'rosacea-titas',      r: 28.0 },
-  deus:      { file: 'rosacea-deuses',     r: 27.2 },
-  ascendido: { file: 'rosacea-ascendidos', r: 26.9 },
-};
-
 // Nível da divindade pelo "Tipo" da ficha (mesma regra da página do Panteão).
 function vtDeityTier(d) {
   const t = vtRow(d, /^tipo$/i);
@@ -205,24 +197,15 @@ function vtDeityTier(d) {
   return 'deus';
 }
 
-// Espelho oval (teste): moldura alternativa para as divindades, no lugar das rosáceas.
-// VT_DEITY_SHAPE = 'rosa' volta para as rosáceas por nível.
-const VT_DEITY_SHAPE = 'oval';
-const VT_DEITY_MIRRORS = {
-  oval:     { id: 'espelho-oval',     file: 'espelho-oval',     box: [21.0, 18.2, 20.8, 18.6] },
-  circular: { id: 'espelho-circular', file: 'espelho-circular', box: [20.0, 21.0, 20.2, 22.1] },   // teste
-};
+// Espelho oval: moldura das divindades que ainda não têm vitral (arte em 'deity-hero-<id>').
+const VT_DEITY_MIRROR = { id: 'espelho-oval', file: 'espelho-oval', box: [21.0, 18.2, 20.8, 18.6] };
 
-function VtDeityFrame({ tier, shape = VT_DEITY_SHAPE, className = '', sizes, children }) {
-  const mirror = VT_DEITY_MIRRORS[shape];
-  if (mirror) {
-    return (
-      <VtGothicWindow frame={mirror} className={'vt-mirror vt-mirror--' + shape + ' vt-mirror--' + tier + ' ' + className} sizes={sizes}>
-        {children}
-      </VtGothicWindow>
-    );
-  }
-  return <VtRoseWindow tier={tier} className={className} sizes={sizes}>{children}</VtRoseWindow>;
+function VtDeityFrame({ tier, className = '', sizes, children }) {
+  return (
+    <VtGothicWindow frame={VT_DEITY_MIRROR} className={'vt-mirror vt-mirror--oval vt-mirror--' + tier + ' ' + className} sizes={sizes}>
+      {children}
+    </VtGothicWindow>
+  );
 }
 
 // Altar de vidro: fundo para o símbolo quando a divindade não tem arte.
@@ -265,39 +248,6 @@ function VtSigilAltar({ deity, tier }) {
       <div className="vt-altar-medal">
         <DeitySigilImage deity={deity} size="card" />
       </div>
-    </div>
-  );
-}
-
-// Emblema do símbolo sem vitral (teste): 'selo' (medalhão cunhado), 'estandarte'
-// (flâmula bordada pendurada) ou 'relevo' (tábua de pedra entalhada).
-function VtSigilEmblem({ deity, tier, variant = 'selo' }) {
-  return (
-    <div className={'vt-emblem vt-emblem--' + variant + ' vt-altar--' + tier}>
-      {variant === 'estandarte' && <span className="vt-emblem-rod" aria-hidden="true" />}
-      <div className="vt-emblem-body">
-        <div className="vt-emblem-sigil"><DeitySigilImage deity={deity} size="card" /></div>
-      </div>
-      {variant === 'relevo' && <span className="vt-emblem-gem" aria-hidden="true" />}
-    </div>
-  );
-}
-
-function VtRoseWindow({ tier = 'deus', className = '', sizes = '400px', children }) {
-  const rose = VT_ROSES[tier] || VT_ROSES.deus;
-  const d = rose.r * 2;
-  return (
-    <div className={'vt-rose vt-rose--' + tier + ' ' + className}>
-      <div className="vt-rose-hole" style={{ left: (50 - rose.r) + '%', top: (50 - rose.r) + '%', width: d + '%', height: d + '%' }}>{children}</div>
-      <img
-        className="vt-window-frame"
-        src={vtAsset(rose.file + '.webp')}
-        srcSet={vtAsset(rose.file + '-sm.webp') + ' 480w, ' + vtAsset(rose.file + '.webp') + ' 960w'}
-        sizes={sizes}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-      />
     </div>
   );
 }
@@ -744,7 +694,7 @@ const VT_KINDS = {
   },
 };
 
-function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit, heroVitral }) {
+function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEditor, onEdit }) {
   const K = VT_KINDS[kind] || VT_KINDS.character;
   const isDeity = kind === 'deity';
   const isCampaign = kind === 'campaign';
@@ -826,9 +776,8 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
     </div>
   );
 
-  // Divindade com vitral (o mesmo da galeria, slot 'deity-vitral-<id>'): entra inteiro no lugar
-  // do espelho. heroVitral {file, shape} força um vitral local (páginas de teste).
-  const vitralSrc = heroVitral ? vtAsset(heroVitral.file + '.webp') : (isDeity ? deityVitralUrl : null);
+  // Divindade com vitral (o mesmo da galeria, slot 'deity-vitral-<id>'): entra inteiro no lugar do espelho.
+  const vitralSrc = isDeity ? deityVitralUrl : null;
   const campaignNum = isCampaign ? ((/\b([IVXL]+)\b\s*$/.exec(c.name || '') || [])[1] || '✠') : null;
   const portrait = isFaction ? (
     <div className="vt-hero-portrait vt-hero-portrait--banner">
@@ -843,13 +792,7 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
     </div>
   ) : vitralSrc ? (
     <div className="vt-hero-portrait">
-      <img className={'vt-deity-vitral vt-deity-vitral--' + (heroVitral ? heroVitral.shape : 'catedral')}
-        src={vitralSrc}
-        {...(heroVitral ? {
-          srcSet: vtAsset(heroVitral.file + '-sm.webp') + ' 480w, ' + vtAsset(heroVitral.file + '.webp') + ' 960w',
-          sizes: '(max-width: 900px) 320px, 480px',
-        } : {})}
-        alt={'Vitral de ' + c.name} draggable="false" />
+      <img className="vt-deity-vitral vt-deity-vitral--catedral" src={vitralSrc} alt={'Vitral de ' + c.name} draggable="false" />
     </div>
   ) : (
     <div className="vt-hero-portrait">
@@ -1022,14 +965,10 @@ function VtFilterBar({ groups, onReset, active, children }) {
 }
 
 // ── Estandartes das facções ─────────────────────────────────────
-// Três modelos de bandeira (assets/vitral/estandarte-<k>): o brasão da facção é pintado no
+// Estandartes por relação com o grupo (assets/vitral/estandarte-<aliada|neutra|inimiga>): o brasão da facção é pintado no
 // campo liso, recortado pela máscara '<k>-campo.png'. `box` = onde o brasão fica (em % do estandarte).
 // Nos campos claros o brasão entra em "multiplicar", como tinta sobre o tecido.
 const VT_BANNERS = {
-  a: { label: 'Estandarte de guerra', box: [34, 27, 34, 40], paint: 'normal' },
-  b: { label: 'Estandarte de vitral', box: [34, 24, 34, 49], paint: 'multiply' },
-  c: { label: 'Flâmula',              box: [37, 20, 37, 42], paint: 'multiply' },
-  // por relação com o grupo (azul, cinza, preto)
   aliada:  { label: 'Aliada',  box: [35, 26, 35, 47], paint: 'multiply', pane: '#3f6a86' },
   neutra:  { label: 'Neutra',  box: [35, 26, 35, 47], paint: 'multiply', pane: '#8a8070' },
   inimiga: { label: 'Inimiga', box: [35, 26, 35, 47], paint: 'normal',   pane: '#9a2a24' },
@@ -1045,8 +984,8 @@ function vtFactionRelation(f) {
   return f.stampClass === 'green' ? 'aliada' : 'inimiga';
 }
 
-function VtBanner({ variant = 'a', url, name, className = '', sizes = '280px' }) {
-  const b = VT_BANNERS[variant] || VT_BANNERS.a;
+function VtBanner({ variant = 'neutra', url, name, className = '', sizes = '280px' }) {
+  const b = VT_BANNERS[variant] || VT_BANNERS.neutra;
   const mask = `url('${vtAsset('estandarte-' + variant + '-campo.png')}')`;
   const [l, t, r, bt] = b.box;
   return (
@@ -1211,22 +1150,22 @@ function VtVitralUploader({ deities, onClose }) {
   );
 }
 
-function VitralDeityCard({ deity, tone, shape, vitral, onClick }) {
+function VitralDeityCard({ deity, tone, onClick }) {
   const url = useVtSlotUrl('deity-hero-' + deity.id);
   // vitral completo da divindade (slot próprio, separado da arte do artigo):
   // a moldura já faz parte da imagem, então entra sem espelho por cima.
   const vitralUrl = useVtSlotUrl(VT_DEITY_VITRAL_SLOT + deity.id);
-  const vitralSrc = vitral ? vtAsset(vitral.file + '-sm.webp') : vitralUrl;
+  const vitralSrc = vitralUrl;
   const dominio = vtRow(deity, /^dom[ií]nio/i);
   const tier = tone || vtDeityTier(deity);
   return (
     <article className={'vt-card vt-deity-card vt-deity-card--' + tier} onClick={onClick}>
       {vitralSrc
         ? (
-          <img className={'vt-deity-vitral vt-deity-vitral--card vt-deity-vitral--' + (vitral ? vitral.shape : 'catedral')}
+          <img className="vt-deity-vitral vt-deity-vitral--card vt-deity-vitral--catedral"
             src={vitralSrc} alt={'Vitral de ' + deity.name} loading="lazy" draggable="false" />
         )
-        : (<VtDeityFrame tier={tier} shape={shape} className="vt-rose-card" sizes="280px">
+        : (<VtDeityFrame tier={tier} className="vt-rose-card" sizes="280px">
         {url
           ? <VtFramedImage url={url} framing={vtFraming(deity)} />
           : (
@@ -1414,4 +1353,4 @@ window.VitralFactionCard = VitralFactionCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { VtFilterBar, vtFactionRelation, VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { VtFilterBar, vtFactionRelation, VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
