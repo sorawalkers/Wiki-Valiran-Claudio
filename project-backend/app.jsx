@@ -123,7 +123,7 @@ function App() {
       case 'kingdoms': navigate('map'); return null;
       case 'factions': return <Factions onNav={navigate} />;
       case 'faction': return <FactionDetail id={entity} onNav={navigate} />;
-      case 'events': return <Events key={dbVersion} onNav={navigate} />;
+      case 'events': navigate('timeline'); return null;   // Eventos da era foi incorporado à Linha do Tempo
       case 'characters': return <Characters key={dbVersion} onNav={navigate} />;
       case 'npcs': return <Npcs key={dbVersion} onNav={navigate} />;
       case 'character': return <CharacterDetail key={entity + ':' + dbVersion} id={entity} onNav={navigate} />;
@@ -186,7 +186,6 @@ function App() {
               {id:'article', label:'Artigo'},
               {id:'factions', label:'Facções'},
               {id:'timeline', label:'Timeline'},
-              {id:'events', label:'Eventos'},
               {id:'map', label:'Mapa'},
               {id:'characters', label:'Personae (PC)'},
               {id:'npcs', label:'Personae (NPC)'},

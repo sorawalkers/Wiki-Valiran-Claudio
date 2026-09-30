@@ -157,7 +157,16 @@ function Timeline({ onNav }) {
   const { isEditor } = useAuth();
   const [modal, setModal] = React.useState(null);
   const [filter, setFilter] = React.useState('');
-  const events = Data.timeline || [];
+  // A antiga página "Eventos da era" repetia esta lista com descrição e região: quando o item da
+  // linha do tempo não tem descrição, usa a do evento de mesmo título.
+  const norm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const byTitle = {};
+  (Data.events || []).forEach(ev => { if (ev.title) byTitle[norm(ev.title)] = ev; });
+  const events = (Data.timeline || []).map(e => {
+    if (e.era) return e;
+    const ev = byTitle[norm(e.title)];
+    return ev ? { ...e, desc: e.desc || ev.desc, region: ev.region, target: e.target || ev.target } : e;
+  });
 
   // agrupa por era (os divisores abrem um grupo novo)
   const groups = [];
@@ -182,7 +191,7 @@ function Timeline({ onNav }) {
           <div className="vt-epithet">Fios atados, rompidos e reatados</div>
           <p className="vt-pantheon-lede">
             Da fundação do Império Vranócio ao ano corrente: as eras de Valiran em ordem,
-            cada acontecimento num vidro da cor do que o moveu.
+            cada acontecimento num vidro da cor do que o moveu, com onde aconteceu e o que mudou.
           </p>
         </div>
         {isEditor && (
@@ -228,7 +237,7 @@ function Timeline({ onNav }) {
                       <div className="vtl-meta">
                         <span className="vtl-year">{e.year}</span>
                         {e.label && <span className="vtl-label">{e.label}</span>}
-                        {e.tag && <span className="vtl-tag">{e.tag}</span>}
+                        {(e.region && e.region !== '—' ? e.region : e.tag) && <span className="vtl-tag">{e.region && e.region !== '—' ? e.region : e.tag}</span>}
                         {isEditor && <button className="vt-btn vtl-edit" onClick={() => setModal(e)}>Editar</button>}
                       </div>
                       <h3 className="vtl-title">{e.title}</h3>

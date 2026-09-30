@@ -18,7 +18,6 @@ const Data = {
     { id: 'cronicas', label: 'Crônicas', home: 'sessions', items: [
       { id: 'sessions', label: 'Diário de sessões' },
       { id: 'timeline', label: 'Linha do tempo' },
-      { id: 'events', label: 'Eventos da era' },
       { id: 'campanha3', label: 'Campanha III' },
       { id: 'recent', label: 'Adições recentes' },
     ]},

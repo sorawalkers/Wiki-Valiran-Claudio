@@ -2095,7 +2095,7 @@
 /* ════════════════════════════════════════════════════════════════
    Linha do tempo e Eventos da era
    ════════════════════════════════════════════════════════════════ */
-.vtl, .vev { --pane: #56673a; }
+.vtl { --pane: #56673a; }
 .vtl-filters { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; max-width: 1100px; margin: 8px auto 20px; padding: 0 24px; }
 .vtl-filter { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer;
   border: 1px solid rgba(201,165,90,.2); background: rgba(255,255,255,.02);
@@ -2144,22 +2144,6 @@
 .vtl-event--now .vtl-card { border-color: rgba(233,215,168,.5); box-shadow: 0 0 26px rgba(201,165,90,.25), inset 3px 0 0 #e9d7a8; }
 .vtl-event--now .vtl-node { background: #f1d58f; box-shadow: 0 0 0 3px #050506, 0 0 18px #f1d58f; }
 
-/* eventos: livro-razão por era */
-.vev-search { flex: 0 1 280px; margin-left: 12px; padding: 8px 12px; border: 1px solid rgba(201,165,90,.25); background: #0b0b0d;
-  font: 400 16px/1.2 var(--vt-text); color: var(--vt-ink); }
-.vev-search::placeholder { color: var(--vt-ink-faint); font-style: italic; }
-.vev-count { margin-left: auto; font: italic 400 15px/1 var(--vt-serif); color: var(--vt-ink-faint); }
-.vev-ledger .vh-ledger-list { display: flex; flex-direction: column; }
-.vev-row { display: grid; grid-template-columns: 120px 120px minmax(0, 1fr) 190px; gap: 18px; align-items: baseline;
-  padding: 14px 24px; border-bottom: 1px solid rgba(201,165,90,.1); }
-.vev-row:last-child { border-bottom: 0; }
-.vev-row.is-link { cursor: pointer; }
-.vev-row:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--pane) 14%, transparent), transparent 80%); }
-.vev-row .vtl-edit { grid-column: -2 / -1; justify-self: end; }
-.vev-year { font: 700 17px/1.1 var(--vt-display); color: var(--vt-gold); }
-.vev-title { margin: 0; font: 600 18px/1.25 var(--vt-display); color: var(--vt-ink); }
-.vev-desc { margin: 4px 0 0; font-size: 16px; line-height: 1.45; color: var(--vt-ink-body); }
-.vev-region { text-align: right; font: italic 400 15px/1.3 var(--vt-serif); color: var(--vt-ink-muted); }
 
 @container vt (max-width: 760px) {
   .vtl-track { padding: 8px 16px 24px 34px; }
@@ -2171,11 +2155,4 @@
   .vtl-event--left .vtl-card::after, .vtl-event--right .vtl-card::after { left: -23px; right: auto; width: 22px; }
   .vtl-era { padding: 12px 28px; margin-left: 0; }
   .vtl-era-name { font-size: 15px; }
-  .vev-search { flex-basis: 100%; margin: 6px 0 0; }
-  .vev-row { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 10px; }
-  .vev-year { grid-column: 1; } .vev-cat { grid-column: 2; justify-self: end; }
-  .vev-body { grid-column: 1 / -1; }
-  .vev-region { grid-column: 1 / -1; text-align: left; }
 }
-.vev-ledger { padding: 54px 46px 50px; }
-@container vt (max-width: 760px) { .vev-ledger { padding: 40px 22px 38px; } }

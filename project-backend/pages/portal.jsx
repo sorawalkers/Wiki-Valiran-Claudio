@@ -360,7 +360,7 @@ function Portal({ onNav }) {
   const factions = Object.values(Entities.factions || {}).filter(Boolean);
   const realms   = (Data.realms || []).filter(r => !r.cursed);
   const feed     = (Data.feed || []).slice().sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 6);
-  const total    = deities.length + chars.length + sessions.length + (Data.events || []).length + (Data.timeline || []).filter(e => e.title).length;
+  const total    = deities.length + chars.length + sessions.length + (Data.timeline || []).filter(e => e.title).length;
 
   // última sessão (a lista vem do banco da mais nova para a mais antiga)
   const last = sessions.slice().sort((a, b) => (b.num || 0) - (a.num || 0))[0] || null;
