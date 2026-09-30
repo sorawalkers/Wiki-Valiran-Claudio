@@ -20,9 +20,11 @@ function FactionModal({ faction, onClose }) {
     stampClass: faction?.stampClass ?? '',
     summary:    faction?.summary    ?? '',
     sort_order: faction?.sort_order ?? 0,
+    relation:   faction ? vtFactionRelation(faction) : 'neutra',
   });
+  // a relação é guardada como a linha "Relação" da ficha (editada pelo seletor acima, não na lista)
   const [rows, setRows] = React.useState(
-    (faction?.rows || []).map(r => ({ ...r }))
+    (faction?.rows || []).filter(r => !/^rela[cç][aã]o$/i.test(r.k || '')).map(r => ({ ...r }))
   );
   const [busy, setBusy] = React.useState(false);
   const [err, setErr]   = React.useState('');
@@ -42,10 +44,14 @@ function FactionModal({ faction, onClose }) {
     setBusy(true);
     try {
       const id = form.id || slugify(form.name);
+      const { relation, ...fields } = form;
+      const REL_LABEL = { aliada: 'Aliada', neutra: 'Neutra', inimiga: 'Inimiga' };
       await window.DB.saveFaction({
-        ...form,
+        // mantém o que este formulário não edita (texto, seções, ligações) — antes era apagado ao salvar
+        ...(faction || {}),
+        ...fields,
         id,
-        rows: rows.filter(r => r.k || r.v),
+        rows: [{ k: 'Relação', v: REL_LABEL[relation] || 'Neutra' }, ...rows.filter(r => r.k || r.v)],
       });
       onClose();
     } catch (e) {
@@ -119,6 +125,14 @@ function FactionModal({ faction, onClose }) {
                 <input className="modal-input" value={form.stamp}
                   placeholder="CONFIDENCIAL"
                   onChange={e => set('stamp', e.target.value)} />
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Relação com o grupo</label>
+                <select className="modal-select" value={form.relation} onChange={e => set('relation', e.target.value)}>
+                  <option value="aliada">Aliada (estandarte azul)</option>
+                  <option value="neutra">Neutra (estandarte cinza)</option>
+                  <option value="inimiga">Inimiga (estandarte preto)</option>
+                </select>
               </div>
               <div className="modal-field">
                 <label className="modal-label">Estilo do carimbo</label>
@@ -267,13 +281,13 @@ function FactionBannerLab({ onNav }) {
         <div className="vt-pantheon-head-text">
           <div className="vt-label">Teste · Casas</div>
           <h1 className="vt-h1">Estandartes</h1>
-          <p className="vt-pantheon-lede">Os três modelos de bandeira com cada facção: com brasão (Brotherhood of Hope) e sem imagem (Blackflame, só a inicial).</p>
+          <p className="vt-pantheon-lede">Os estandartes por relação com o grupo (azul aliada, cinza neutra, preto inimiga), cada um com as duas facções: com brasão (Brotherhood of Hope) e sem imagem (Blackflame, só a inicial).</p>
         </div>
       </section>
-      {Object.entries(VT_BANNERS).map(([k, b]) => (
+      {['aliada', 'neutra', 'inimiga'].map(k => [k, VT_BANNERS[k]]).map(([k, b]) => (
         <section key={k} className="vt-tier vt-tier--deus">
           <header className="vt-tier-head">
-            <span className="vt-tier-num">{k.toUpperCase()}</span>
+            <span className="vt-tier-num">{vtRoman(["aliada","neutra","inimiga"].indexOf(k) + 1)}</span>
             <div><h2 className="vt-tier-name">{b.label}</h2></div>
           </header>
           <div className="vt-lab-row">

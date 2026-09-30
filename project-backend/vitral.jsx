@@ -830,7 +830,11 @@ function VitralArticle({ c, kind = 'character', onNav, backTo, backLabel, isEdit
   // do espelho. heroVitral {file, shape} força um vitral local (páginas de teste).
   const vitralSrc = heroVitral ? vtAsset(heroVitral.file + '.webp') : (isDeity ? deityVitralUrl : null);
   const campaignNum = isCampaign ? ((/\b([IVXL]+)\b\s*$/.exec(c.name || '') || [])[1] || '✠') : null;
-  const portrait = isCampaign ? (
+  const portrait = isFaction ? (
+    <div className="vt-hero-portrait vt-hero-portrait--banner">
+      <VtBanner variant={vtFactionRelation(c)} url={portraitUrl} name={c.name} className="vf-hero-banner" sizes="(max-width: 900px) 320px, 480px" />
+    </div>
+  ) : isCampaign ? (
     <div className="vt-hero-portrait vt-hero-portrait--seal">
       <div className="vs-seal vs-seal--campaign">
         <span className="vs-seal-n">{campaignNum}</span>
@@ -998,7 +1002,21 @@ const VT_BANNERS = {
   a: { label: 'Estandarte de guerra', box: [34, 27, 34, 40], paint: 'normal' },
   b: { label: 'Estandarte de vitral', box: [34, 24, 34, 49], paint: 'multiply' },
   c: { label: 'Flâmula',              box: [37, 20, 37, 42], paint: 'multiply' },
+  // por relação com o grupo (azul, cinza, preto)
+  aliada:  { label: 'Aliada',  box: [35, 26, 35, 47], paint: 'multiply', pane: '#3f6a86' },
+  neutra:  { label: 'Neutra',  box: [35, 26, 35, 47], paint: 'multiply', pane: '#8a8070' },
+  inimiga: { label: 'Inimiga', box: [35, 26, 35, 47], paint: 'normal',   pane: '#9a2a24' },
 };
+
+// Relação da facção com o grupo: linha "Relação" da ficha; sem ela, o carimbo verde
+// conta como aliada e os demais como inimiga.
+function vtFactionRelation(f) {
+  const r = String(vtRow({ infobox: { rows: f.rows || f.infobox?.rows || [] } }, /^rela[cç][aã]o/i) || '').toLowerCase();
+  if (/alia/.test(r)) return 'aliada';
+  if (/neutr/.test(r)) return 'neutra';
+  if (/inimi|hostil|advers/.test(r)) return 'inimiga';
+  return f.stampClass === 'green' ? 'aliada' : 'inimiga';
+}
 
 function VtBanner({ variant = 'a', url, name, className = '', sizes = '280px' }) {
   const b = VT_BANNERS[variant] || VT_BANNERS.a;
@@ -1026,13 +1044,10 @@ const VT_FACTION_FRAMING = { x: 50, y: 45, z: 1, fit: 'preencher' };
 // Card de facção (galeria de Casas): janela com a imagem da facção, carimbo e placa
 function VitralFactionCard({ f, onClick, onEdit, isEditor }) {
   const url = useVtSlotUrl('faction-portrait-' + f.id);
+  const rel = vtFactionRelation(f);
   return (
-    <article className="vt-card vf-card" onClick={onClick}>
-      <VtGothicWindow frame={VT_FRAMES[0]} className="vt-card-arch" sizes="240px">
-        {url
-          ? <VtFramedImage url={url} framing={VT_FACTION_FRAMING} />
-          : <div className="vf-crest"><span>{(f.name || '?').trim().charAt(0)}</span></div>}
-      </VtGothicWindow>
+    <article className={'vt-card vf-card vf-card--banner vf-card--' + rel} onClick={onClick}>
+      <VtBanner variant={rel} url={url} name={f.name} className="vf-banner" />
       {f.stamp && <span className={'vt-badge vt-badge--stamp vt-badge--stamp-' + (f.stampClass || 'red') + ' vf-stamp'}>{f.stamp}</span>}
       <div className="vt-votive vf-votive">
         <span className="vt-votive-gem" aria-hidden="true" />
@@ -1372,4 +1387,4 @@ window.VitralFactionCard = VitralFactionCard;
 window.VitralDeityCard = VitralDeityCard;
 window.VitralFramePicker = VitralFramePicker;
 window.VT_FRAMES     = VT_FRAMES;
-Object.assign(window, { VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });
+Object.assign(window, { vtFactionRelation, VtBanner, VT_BANNERS, VT_FACTION_FRAMING, vtRoman, VtPortrait, VitralDeityAltar, VtVitralUploader, vtVitralFileToId, VtRoseWindow, VtGothicWindow, VtDivider, VtArchiveFrame, vtShortCampaign, vtRow, VtSigilEmblem, useVtSlotUrl, VtDeityFrame, VtSigilAltar, VtFramedImage, vtDeityTier, vtFraming });

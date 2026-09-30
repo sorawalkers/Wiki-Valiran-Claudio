@@ -2178,3 +2178,14 @@
 .vb--c .vb-initial { font-size: 64px; }
 .vb--c .vb-emblem img { transform: scale(1.25); }
 .vf .vt-lab-row { align-items: flex-start; }
+.vf-card--aliada  { --pane: #3f6a86; }
+.vf-card--neutra  { --pane: #8a8070; }
+.vf-card--inimiga { --pane: #9a2a24; }
+.vb--inimiga .vb-initial { color: #d9b770; text-shadow: 0 2px 0 #1a120a, 0 0 18px rgba(217,183,112,.35); }
+.vb--inimiga .vb-emblem img { filter: sepia(.15) brightness(.95); }
+.vb--aliada .vb-initial { color: #1f3a4d; opacity: .9; }
+.vb--neutra .vb-initial { color: #3a3a34; opacity: .85; }
+.vt-hero-portrait--banner { display: flex; justify-content: center; }
+.vf-hero-banner { width: 360px; }
+@container vt (max-width: 1100px) { .vf-hero-banner { width: 300px; } }
+@container vt (max-width: 760px)  { .vf-hero-banner { width: 240px; } }
