@@ -2278,3 +2278,80 @@
 .hx-vt .hx-map-wrap { position: sticky; top: 20px; height: min(680px, calc(100vh - 120px)); }
 @media (max-width: 1100px) { .hx-vt .hx-map-wrap { position: relative; top: 0; height: 520px; } }
 @media (max-width: 760px)  { .hx-vt .hx-map-wrap { height: 380px; } }
+
+/* ════════════════════════════════════════════════════════════════
+   Modais (editores, login, formulários) no tema vitral
+   Todas as janelas usam as mesmas classes .modal-*, então o tema vale para todas.
+   ════════════════════════════════════════════════════════════════ */
+.modal-overlay { background: radial-gradient(ellipse at 50% 30%, rgba(40,30,18,.55), rgba(5,5,6,.92) 70%); backdrop-filter: blur(4px); }
+.modal-box {
+  position: relative;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255,255,255,.014) 58px 60px),
+    linear-gradient(170deg, #1b1712 0%, #0d0c0d 45%, #0a0a0b 100%);
+  border: 1px solid rgba(201,165,90,.35);
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #0b0b0d, inset 0 0 0 5px rgba(201,165,90,.18), 0 30px 90px rgba(0,0,0,.8);
+  color: var(--vt-ink);
+}
+.modal-box::before {   /* faixa de vidro colorido no topo, como os painéis */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; z-index: 1;
+  background: repeating-linear-gradient(90deg, #9a2a24 0 64px, #b8873a 64px 112px, #3f6a86 112px 176px, #56673a 176px 224px, #7a5aa8 224px 288px);
+  opacity: .8;
+}
+.modal-head, .modal-header { padding: 30px 34px 20px; border-bottom: 1px solid rgba(201,165,90,.16); position: relative; }
+.modal-head::after, .modal-header::after {   /* losango no meio do filete */
+  content: ""; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
+  background: #0d0c0d; border: 1px solid rgba(201,165,90,.5);
+}
+.modal-eyebrow { font: 600 10px/1 var(--vt-display); letter-spacing: .3em; text-transform: uppercase; color: var(--vt-gold); margin-bottom: 10px; }
+.modal-title { font: 600 26px/1.15 var(--vt-display); letter-spacing: .04em; color: var(--vt-ink); }
+.modal-body { padding: 26px 34px; gap: 20px; }
+.modal-label { font: 600 10px/1 var(--vt-display); letter-spacing: .24em; text-transform: uppercase; color: #a88f5f; }
+.modal-input, .modal-textarea, .modal-select {
+  font: 400 17px/1.45 var(--vt-text); color: var(--vt-ink);
+  background: rgba(5,5,6,.75); border: 1px solid rgba(201,165,90,.2); border-radius: 0; padding: 10px 14px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
+}
+.modal-input:focus, .modal-textarea:focus, .modal-select:focus {
+  border-color: rgba(201,165,90,.6); box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 3px rgba(201,165,90,.12);
+}
+.modal-input::placeholder, .modal-textarea::placeholder { color: var(--vt-ink-faint); font-style: italic; opacity: 1; }
+.modal-select { appearance: none; -webkit-appearance: none; padding-right: 36px;
+  background-image: linear-gradient(45deg, transparent 50%, #c9a55a 50%), linear-gradient(135deg, #c9a55a 50%, transparent 50%);
+  background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%; background-size: 6px 6px; background-repeat: no-repeat; }
+.modal-select option { background: #0d0c0d; color: var(--vt-ink); }
+.modal-hint { font: italic 400 14px/1.35 var(--vt-serif); letter-spacing: 0; color: var(--vt-ink-muted); opacity: 1; }
+.modal-error { font: 400 16px/1.4 var(--vt-text); color: #f0c2b8; background: rgba(90,28,24,.35); border: 1px solid rgba(168,53,43,.6); border-radius: 0; }
+.modal-foot, .modal-footer { padding: 18px 34px 24px; border-top: 1px solid rgba(201,165,90,.16); background: rgba(0,0,0,.25); }
+.modal-box input[type="checkbox"] { accent-color: #c9a55a; }
+
+/* botões dos modais */
+.btn-save, .btn-cancel, .btn-delete, .modal-box .editor-add-btn, .modal-box .editor-del-btn {
+  font: 600 11px/1 var(--vt-display); letter-spacing: .22em; text-transform: uppercase; border-radius: 0; padding: 12px 22px; cursor: pointer;
+}
+.btn-save { color: #1a130a; background: linear-gradient(180deg, #e9cf8c, #b8873a); border: 1px solid #6f5c3a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 4px 14px rgba(0,0,0,.5); }
+.btn-save:hover { opacity: 1; filter: brightness(1.08); }
+.btn-cancel { color: var(--vt-ink-muted); background: transparent; border: 1px solid rgba(201,165,90,.25); }
+.btn-cancel:hover { color: var(--vt-ink); border-color: rgba(201,165,90,.5); }
+.btn-delete { color: #e59a8c; background: transparent; border: 1px solid rgba(168,53,43,.6); }
+.btn-delete:hover { background: rgba(90,28,24,.4); }
+.btn-delete.confirm { background: #5a1c18; color: #fff; border-color: #9a2a24; }
+.modal-box .editor-add-btn { color: var(--vt-gold); background: transparent; border: 1px solid rgba(201,165,90,.4); }
+.modal-box .editor-add-btn:hover { background: rgba(201,165,90,.1); }
+.modal-box .editor-del-btn { color: #e59a8c; background: transparent; border: 1px solid rgba(168,53,43,.45); padding: 8px 12px; opacity: 1; }
+
+/* barra de rolagem discreta dentro dos modais */
+.modal-body::-webkit-scrollbar { width: 8px; }
+.modal-body::-webkit-scrollbar-thumb { background: rgba(201,165,90,.25); }
+.modal-body::-webkit-scrollbar-track { background: transparent; }
+@media (max-width: 760px) {
+  .modal-overlay { padding: 10px; }
+  .modal-head, .modal-header, .modal-body, .modal-foot, .modal-footer { padding-left: 18px; padding-right: 18px; }
+  .modal-field-row { grid-template-columns: 1fr; }
+  .modal-title { font-size: 21px; }
+}
+.modal-box .editor-add-btn::before { content: "+ "; }
+.modal-box .editor-add-btn { padding: 8px 14px; font-size: 10px; }
+.modal-footer { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }

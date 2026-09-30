@@ -203,7 +203,7 @@ function CampaignEditModal({ data, onClose, onSave }) {
             <div style={{ marginTop: 20, borderTop: '1px solid var(--ink-line-soft)', paddingTop: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <label className="modal-label" style={{ margin: 0 }}>Infobox — Linhas</label>
-                <button type="button" className="btn-save" style={{ padding: '4px 12px', fontSize: 12 }} onClick={addRow}>+ Linha</button>
+                <button type="button" className="editor-add-btn" onClick={addRow}>Linha</button>
               </div>
               {form.infoRows.map((r, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto auto', gap: 6, marginBottom: 6, alignItems: 'center' }}>

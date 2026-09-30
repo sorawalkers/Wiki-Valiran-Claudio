@@ -74,9 +74,9 @@ function FactionModal({ faction, onClose }) {
   }
 
   const btnRemove = {
-    background: 'transparent', border: '1px solid var(--wine)',
-    color: 'var(--wine-bright)', borderRadius: 2, padding: '5px 9px',
-    cursor: 'pointer', fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+    background: 'transparent', border: '1px solid rgba(168,53,43,.6)',
+    color: '#e59a8c', borderRadius: 2, padding: '5px 9px',
+    cursor: 'pointer', fontSize: 11, fontFamily: "'Cinzel', serif",
     letterSpacing: '0.1em', flexShrink: 0,
   };
 
@@ -146,7 +146,7 @@ function FactionModal({ faction, onClose }) {
             <div style={{ borderTop: '1px solid var(--ink-line)', paddingTop: 16, marginTop: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span className="modal-label">Linhas do dossiê</span>
-                <button type="button" className="editor-add-btn" style={{ padding: '5px 14px', fontSize: 10 }} onClick={addRow}>+ Linha</button>
+                <button type="button" className="editor-add-btn" style={{ padding: '5px 14px', fontSize: 10 }} onClick={addRow}>Linha</button>
               </div>
               {rows.map((row, i) => (
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
