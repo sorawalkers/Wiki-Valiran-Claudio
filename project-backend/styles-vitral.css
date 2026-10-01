@@ -1240,6 +1240,7 @@
 /* ================================================================
    Panteão — níveis como painéis de vitral, divindades em janelas
    ================================================================ */
+.vt-badge--aspecto   { background: #8a5a12; color: #fff1d6; border-color: #4a2f08; }
 .vt-badge--tita      { background: #4a3366; color: #efe6ff; border-color: #2a1d3a; }
 .vt-badge--deus      { background: var(--vt-gold); color: var(--vt-brass-text); }
 .vt-badge--ascendido { background: #2b5478; color: #e6f0f7; border-color: #16293b; }
@@ -1294,6 +1295,7 @@
   background: repeating-linear-gradient(90deg, var(--pane) 0 64px, #161517 64px 67px, color-mix(in srgb, var(--pane) 55%, #0b0b0d) 67px 110px, #161517 110px 113px);
   opacity: .8;
 }
+.vt-tier--aspecto   { --pane: #d4922a; }
 .vt-tier--tita      { --pane: #7a5aa8; }
 .vt-tier--deus      { --pane: #b8873a; }
 .vt-tier--ascendido { --pane: #3f6a86; }
@@ -1325,6 +1327,7 @@
 }
 .vt-deity-sigil-glass > * { width: 100%; height: auto; aspect-ratio: 1; filter: drop-shadow(0 0 12px rgba(201,165,90,.35)); }
 .vt-deity-sigil-glass img, .vt-deity-sigil-glass svg { width: 100%; height: 100%; object-fit: contain; }
+.vt-deity-card--aspecto   { --pane: #d4922a; }
 .vt-deity-card--tita      { --pane: #7a5aa8; }
 .vt-deity-card--deus      { --pane: #b8873a; }
 .vt-deity-card--ascendido { --pane: #3f6a86; }
@@ -1453,6 +1456,7 @@
 
 /* altar de vidro: símbolo da divindade sem arte, dentro do espelho */
 .vt-altar { position: absolute; inset: 0; background: #0b0b0d; overflow: hidden; }
+.vt-altar--aspecto   { --pane: #d4922a; }
 .vt-altar--tita      { --pane: #7a5aa8; }
 .vt-altar--deus      { --pane: #b8873a; }
 .vt-altar--ascendido { --pane: #3f6a86; }
@@ -1489,6 +1493,7 @@
 .pr-glass { position: absolute; inset: 0; width: 100%; height: 100%; }
 .pr-stone { fill: #17140f; stroke: #8a6d3b; stroke-width: 3; }
 .pr-pane { transition: fill .25s ease; }
+.pr-pane--aspecto   { --pane: #d4922a; }
 .pr-pane--tita      { --pane: #7a5aa8; }
 .pr-pane--deus      { --pane: #b8873a; }
 .pr-pane--ascendido { --pane: #3f6a86; }
@@ -1511,6 +1516,7 @@
   box-shadow: 0 0 0 3px #050506, 0 0 0 5px #a8854a, 0 0 0 8px #050506, inset 0 3px 8px rgba(0,0,0,.7);
   transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
 }
+.pr-med--aspecto   { --pane: #d4922a; }
 .pr-med--tita      { --pane: #7a5aa8; }
 .pr-med--deus      { --pane: #b8873a; }
 .pr-med--ascendido { --pane: #3f6a86; }
@@ -1526,6 +1532,7 @@
   font: 600 11px/1 var(--vt-display); letter-spacing: .22em; text-transform: uppercase; color: var(--vt-ink-body); }
 .pr-legend-item { display: inline-flex; align-items: center; gap: 8px; }
 .pr-legend-item i { width: 10px; height: 10px; transform: rotate(45deg); border: 1px solid #c9a55a; background: var(--pane); }
+.pr-legend-item--aspecto   { --pane: #d4922a; }
 .pr-legend-item--tita      { --pane: #7a5aa8; }
 .pr-legend-item--deus      { --pane: #b8873a; }
 .pr-legend-item--ascendido { --pane: #3f6a86; }
@@ -1536,6 +1543,8 @@
 .pr-lobe { fill: color-mix(in srgb, #3f6a86 26%, #0b0b0d); }
 .pr-lobe-petal { fill: color-mix(in srgb, #3f6a86 40%, #0b0b0d); stroke: #050506; stroke-width: 4; }
 .pr-lobe-bead { fill: #a8854a; stroke: #050506; stroke-width: 3; }
+.pr-sigla { font: 600 15px/1 var(--vt-display); letter-spacing: .14em; fill: #c9a55a; fill-opacity: .7;
+  text-anchor: middle; dominant-baseline: central; }
 
 /* ── Vitral completo da divindade (galeria e topo do artigo) ─── */
 .vt-deity-vitral { display: block; height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,.8)); }
@@ -1746,6 +1755,7 @@
    Artigo de divindade · altar (protótipo)
    ════════════════════════════════════════════════════════════════ */
 .va { --pane: #b8873a; overflow-x: clip; }
+.va--aspecto { --pane: #d4922a; }
 .va--tita { --pane: #7a5aa8; }
 .va--ascendido { --pane: #3f6a86; }
 .va-hero { position: relative; display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 64px; align-items: center;

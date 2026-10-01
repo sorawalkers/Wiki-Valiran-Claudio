@@ -116,30 +116,18 @@ function Pantheon({ onNav }) {
 
   const allDeities = Object.values(Entities.deities).filter(d => d && d.name);
 
-  function getRow(d, key) {
-    const row = (d.infobox?.rows || []).find(r => r.k === key);
-    return row ? row.v : '';
-  }
-
-  const titas = allDeities.filter(d => getRow(d,'Tipo').startsWith('Titã'));
-  const ascendidos = allDeities.filter(d => {
-    const t = getRow(d,'Tipo');
-    return t.includes('Ascendido') || t.includes('Ascendida') || t.includes('Anjo') || t.includes('Pseudo');
-  });
-  const estabelecidos = allDeities.filter(d => {
-    const t = getRow(d,'Tipo');
-    return !t.startsWith('Titã') && !t.includes('Ascendido') && !t.includes('Ascendida') && !t.includes('Anjo') && !t.includes('Pseudo');
-  });
+  const byTier = t => allDeities.filter(d => vtDeityTier(d) === t);
 
   const tiers = [
-    { tone: 'tita',      tier: 'Os Titãs',              tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',   gods: titas },
-    { tone: 'deus',      tier: 'Deuses do Panteão',      tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                    gods: estabelecidos },
-    { tone: 'ascendido', tier: 'Ascendidos & Especiais', tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.', gods: ascendidos },
+    { tone: 'aspecto',   tier: 'Os Aspectos da Realidade', tierDesc: 'A origem de tudo. Os Titãs são fragmentos deles e reivindicam domínios ligados aos seus Aspectos patronos.', gods: byTier('aspecto') },
+    { tone: 'tita',      tier: 'Os Titãs',              tierDesc: 'As divindades primordiais que ergueram o mundo do nada. Hoje, distantes ou inalcançáveis.',   gods: byTier('tita') },
+    { tone: 'deus',      tier: 'Deuses do Panteão',      tierDesc: 'As divindades estabelecidas, veneradas em templos por todo o continente.',                    gods: byTier('deus') },
+    { tone: 'ascendido', tier: 'Ascendidos & Especiais', tierDesc: 'Mortais elevados, anjos caídos e entidades que não se enquadram na hierarquia convencional.', gods: byTier('ascendido') },
   ].filter(t => t.gods.length > 0);
 
   const total = tiers.length;
   const shownTiers = tierFilter === 'todos' ? tiers : tiers.filter(t => t.tone === tierFilter);
-  const TIER_PANE = { tita: '#7a5aa8', deus: '#b8873a', ascendido: '#3f6a86' };
+  const TIER_PANE = { aspecto: '#d4922a', tita: '#7a5aa8', deus: '#b8873a', ascendido: '#3f6a86' };
   const tierOptions = [
     { value: 'todos', label: 'Todos', count: allDeities.length },
     ...tiers.map(t => ({ value: t.tone, label: t.tier.replace(/^Os /, ''), count: t.gods.length, pane: TIER_PANE[t.tone] })),
@@ -211,41 +199,134 @@ function Pantheon({ onNav }) {
 window.Pantheon = Pantheon;
 
 // ============================================================
-// O Panteão como uma rosácea (roda da entrada da home).
-// Titãs no anel de dentro, Deuses no do meio, Ascendidos nos lóbulos de fora.
-// Coordenadas no viewBox 1000×1000, centro (500,500).
+// O Panteão como uma rosácea (roda da entrada da home), posicionada por alinhamento.
+// Bem em cima, Mal embaixo, Lei à esquerda, Caos à direita.
+// Miolo: o núcleo neutro (N não tem direção). Zona 0: os 4 Aspectos nos pontos
+// cardeais. Zonas 1–3: Titãs, Deuses e Ascendidos no setor do seu alinhamento.
+// Coordenadas no viewBox 1000×1000, centro (500,500); ângulos em graus,
+// medidos do topo em sentido horário.
 // ============================================================
+const PR_CORE = 80;                                   // raio do núcleo neutro
 const PR_RINGS = [
-  { tier: 'tita',      rIn: 100, rOut: 205, rMed: 152, minSlots: 6,  maxD: 92 },
-  { tier: 'deus',      rIn: 205, rOut: 355, rMed: 280, minSlots: 16, maxD: 104 },
-  { tier: 'ascendido', rIn: 355, rOut: 468, rMed: 411, minSlots: 12, maxD: 92 },
+  { tier: 'aspecto',   rIn: 80,  rOut: 165, rMed: 122, maxD: 76, sectors: 4 },
+  { tier: 'tita',      rIn: 165, rOut: 270, rMed: 218, maxD: 88, sectors: 8 },
+  { tier: 'deus',      rIn: 270, rOut: 375, rMed: 322, maxD: 92, sectors: 8 },
+  { tier: 'ascendido', rIn: 375, rOut: 468, rMed: 418, maxD: 72, sectors: 8 },
 ];
-const prPolar = (r, a) => [500 + r * Math.cos(a), 500 + r * Math.sin(a)];
+// setores de alinhamento (Zonas 1–3) e eixos dos Aspectos (Zona 0)
+const PR_SECTOR = { NG: 0, CG: 45, CN: 90, CE: 135, NE: 180, LE: 225, LN: 270, LG: 315 };
+const PR_AXIS = { Bem: 0, Caos: 90, Mal: 180, Lei: 270 };
+
+const prPolar = (r, deg) => {
+  const a = deg * Math.PI / 180;
+  return [500 + r * Math.sin(a), 500 - r * Math.cos(a)];
+};
 function prSector(rIn, rOut, a0, a1) {
   const [x0, y0] = prPolar(rOut, a0), [x1, y1] = prPolar(rOut, a1);
   const [x2, y2] = prPolar(rIn, a1), [x3, y3] = prPolar(rIn, a0);
-  const big = a1 - a0 > Math.PI ? 1 : 0;
+  const big = a1 - a0 > 180 ? 1 : 0;
   return `M${x0} ${y0} A${rOut} ${rOut} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${rIn} ${rIn} 0 ${big} 0 ${x3} ${y3} Z`;
+}
+
+// Alinhamento da ficha → sigla ('LG' … 'CE', 'N'). Aceita a sigla ("LG (Leal e Bom)")
+// ou o texto por extenso ("Caótico Bondoso", "Neutra Maligna", "Neutro").
+function prAlignment(d) {
+  const v = vtRow(d, /^alinhamento$/i).trim();
+  const sig = /^(LG|NG|CG|LN|N|CN|LE|NE|CE)\b/.exec(v);
+  if (sig) return sig[1];
+  const w = v.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[\s,/·-]+/).filter(Boolean);
+  if (!w.length) return null;
+  const law = /^lea|^lei/.test(w[0]) ? 'L' : /^caot/.test(w[0]) ? 'C' : /^neutr/.test(w[0]) ? 'N' : null;
+  if (!law) return null;
+  const rest = w.slice(1).join(' ');
+  const ethic = /bondos|\bbo[ma]\b/.test(rest) ? 'G' : /malign|\bma[lu]\b/.test(rest) ? 'E'
+    : (!rest || /neutr|verdadeir/.test(rest)) ? 'N' : null;
+  if (!ethic) return null;
+  return law === 'N' && ethic === 'N' ? 'N' : law + ethic;
+}
+// Eixo de um Aspecto → ângulo ("Bem", "Caos", "Mal", "Lei"/"Ordem").
+function prAxis(d) {
+  const v = vtRow(d, /^alinhamento$/i).trim().toLowerCase();
+  if (/^bem|^luz/.test(v)) return PR_AXIS.Bem;
+  if (/^caos|^destino/.test(v)) return PR_AXIS.Caos;
+  if (/^mal\b|^escurid/.test(v)) return PR_AXIS.Mal;
+  if (/^lei|^ordem|^tempo/.test(v)) return PR_AXIS.Lei;
+  return null;
+}
+
+// Núcleo neutro: o neutro de nível mais alto no centro, os demais ao redor.
+// Isolado aqui para trocar a solução (ex.: uma nona fatia) sem mexer no resto.
+function prNeutralSlots(neutrals) {
+  const order = ['aspecto', 'tita', 'deus', 'ascendido'];
+  const list = [...neutrals].sort((a, b) =>
+    order.indexOf(a.tier) - order.indexOf(b.tier) || a.d.name.localeCompare(b.d.name, 'pt'));
+  if (!list.length) return [];
+  const [head, ...rest] = list;
+  const out = [{ ...head, x: 500, y: 500, size: rest.length ? 64 : 92, core: true }];
+  rest.forEach((g, i) => {
+    const [x, y] = prPolar(56, 90 + i * 360 / rest.length);
+    out.push({ ...g, x, y, size: 36, core: true });
+  });
+  return out;
+}
+
+// Posição de cada divindade na roda; quem não tem alinhamento válido fica de fora.
+function prLayout(all) {
+  const placed = [], neutrals = [];
+  const buckets = new Map();                          // 'tier|ângulo' → divindades
+  all.forEach(d => {
+    const tier = vtDeityTier(d);
+    const ring = PR_RINGS.find(r => r.tier === tier);
+    const angle = tier === 'aspecto' ? prAxis(d) : PR_SECTOR[prAlignment(d)];
+    if (tier !== 'aspecto' && prAlignment(d) === 'N') { neutrals.push({ d, tier }); return; }
+    if (!ring || angle == null) {
+      console.warn('[PantheonRose] alinhamento inválido, fora da roda:', d.id, vtRow(d, /^alinhamento$/i));
+      return;
+    }
+    const key = tier + '|' + angle;
+    if (!buckets.has(key)) buckets.set(key, { ring, angle, gods: [] });
+    buckets.get(key).gods.push(d);
+  });
+  buckets.forEach(({ ring, angle, gods }) => {
+    gods.sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+    const slice = 360 / ring.sectors, n = gods.length;
+    const step = slice / n;                           // 2 no setor → centro ± 11,25°
+    const fit = 2 * ring.rMed * Math.sin(step / 2 * Math.PI / 180) * .82;
+    const size = Math.min(ring.maxD, fit);
+    gods.forEach((d, k) => {
+      const [x, y] = prPolar(ring.rMed, angle + (k - (n - 1) / 2) * step);
+      placed.push({ d, tier: ring.tier, x, y, size });
+    });
+  });
+  const occupied = new Set(buckets.keys());
+  return { placed: placed.concat(prNeutralSlots(neutrals)), occupied };
+}
+
+const PR_TIER_NAME = { aspecto: 'Aspecto da Realidade', tita: 'Titã', deus: 'Deus do Panteão', ascendido: 'Ascendido' };
+
+// vidro vazio: quadrifólia de chumbo
+function PrEmptyGlass({ x, y, R }) {
+  return (
+    <g>
+      <circle cx={x} cy={y} r={R} className="pr-lobe" />
+      {[0, 90, 180, 270].map(k => {
+        const a = k * Math.PI / 180;
+        return <circle key={k} cx={x + R * .38 * Math.cos(a)} cy={y + R * .38 * Math.sin(a)} r={R * .36} className="pr-lobe-petal" />;
+      })}
+      <circle cx={x} cy={y} r={R * .14} className="pr-lobe-bead" />
+      <circle cx={x} cy={y} r={R} className="pr-lead" />
+    </g>
+  );
 }
 
 function PantheonRose({ onNav }) {
   const all = Object.values(Entities.deities).filter(d => d && d.name);
   const [active, setActive] = React.useState(null);
-
-  // distribui cada nível pelas casas do seu anel; casas sobrando ficam como vidro vazio
-  const rings = PR_RINGS.map(ring => {
-    const gods = all.filter(d => vtDeityTier(d) === ring.tier);
-    const slots = Math.max(ring.minSlots, gods.length);
-    const step = (Math.PI * 2) / slots;
-    const start = -Math.PI / 2;                       // primeira casa no topo
-    const at = new Map(gods.map((d, i) => [Math.round(i * slots / gods.length) % slots, d]));
-    const d = Math.min(ring.maxD, 2 * Math.PI * ring.rMed / slots * 0.8);
-    return { ...ring, gods, slots, step, start, at, d };
-  });
+  const { placed, occupied } = prLayout(all);
 
   const cur = active || null;
   const curTier = cur ? vtDeityTier(cur) : null;
-  const tierName = { tita: 'Titã', deus: 'Deus do Panteão', ascendido: 'Ascendido' };
+  const sectorsOf = ring => Array.from({ length: ring.sectors }, (_, i) => i * 360 / ring.sectors);
 
   const wheel = (
       <div className="pr-wrap pr-wrap--embed">
@@ -260,67 +341,55 @@ function PantheonRose({ onNav }) {
             </defs>
             {/* aro de pedra */}
             <circle cx="500" cy="500" r="496" className="pr-stone" />
-            {/* vidros de cada anel, alternando o tom */}
-            {rings.map(ring => Array.from({ length: ring.slots }, (_, i) => {
-              const a0 = ring.start + (i - .5) * ring.step, a1 = a0 + ring.step;
-              return <path key={ring.tier + i} d={prSector(ring.rIn, ring.rOut, a0, a1)}
+            {/* vidros: um por setor de cada anel, alternando o tom */}
+            {PR_RINGS.map(ring => sectorsOf(ring).map((a, i) => {
+              const half = 180 / ring.sectors;
+              return <path key={ring.tier + i} d={prSector(ring.rIn, ring.rOut, a - half, a + half)}
                 className={'pr-pane pr-pane--' + ring.tier + (i % 2 ? ' is-alt' : '') + (curTier === ring.tier ? ' is-lit' : '')} />;
             }))}
-            {/* lóbulos do anel de fora */}
-            {Array.from({ length: rings[2].slots }, (_, i) => {
-              const [x, y] = prPolar(rings[2].rMed, rings[2].start + i * rings[2].step);
-              const R = rings[2].d / 2 + 9;
-              if (rings[2].at.has(i)) return <circle key={'lobe' + i} cx={x} cy={y} r={R} className="pr-lead" />;
-              // lóbulo vazio: vidro com uma quadrifólia de chumbo
-              return (
-                <g key={'lobe' + i}>
-                  <circle cx={x} cy={y} r={R} className="pr-lobe" />
-                  {[0, 1, 2, 3].map(k => {
-                    const [px, py] = [x + R * .38 * Math.cos(k * Math.PI / 2), y + R * .38 * Math.sin(k * Math.PI / 2)];
-                    return <circle key={k} cx={px} cy={py} r={R * .36} className="pr-lobe-petal" />;
-                  })}
-                  <circle cx={x} cy={y} r={R * .14} className="pr-lobe-bead" />
-                  <circle cx={x} cy={y} r={R} className="pr-lead" />
-                </g>
-              );
-            })}
-            {/* chumbo: raios entre as casas */}
-            {rings.map(ring => Array.from({ length: ring.slots }, (_, i) => {
-              const a = ring.start + (i - .5) * ring.step;
-              const [x0, y0] = prPolar(ring.rIn, a), [x1, y1] = prPolar(ring.rOut, a);
-              return <line key={'s' + ring.tier + i} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead" />;
+            {/* setores vazios: vidro com quadrifólia */}
+            {PR_RINGS.map(ring => sectorsOf(ring).map(a => {
+              if (occupied.has(ring.tier + '|' + a)) return null;
+              const [x, y] = prPolar(ring.rMed, a);
+              return <PrEmptyGlass key={'e' + ring.tier + a} x={x} y={y} R={ring.maxD / 2 * .8} />;
+            }))}
+            {/* lóbulos do anel de fora, sob cada Ascendido */}
+            {placed.filter(p => p.tier === 'ascendido' && !p.core).map(p => (
+              <circle key={'lobe' + p.d.id} cx={p.x} cy={p.y} r={p.size / 2 + 9} className="pr-lead" />
+            ))}
+            {/* chumbo: raios entre os setores (fixos, não dependem de quantas divindades há) */}
+            {PR_RINGS.map(ring => sectorsOf(ring).map(a => {
+              const b = a + 180 / ring.sectors;
+              const [x0, y0] = prPolar(ring.rIn, b), [x1, y1] = prPolar(ring.rOut, b);
+              return <line key={'s' + ring.tier + a} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead" />;
             }))}
             {/* chumbo: anéis, com filete dourado */}
-            {[100, 205, 355, 468].map(r => (
+            {[PR_CORE, ...PR_RINGS.map(r => r.rOut)].map(r => (
               <g key={r}>
                 <circle cx="500" cy="500" r={r} className="pr-lead pr-lead--ring" />
                 <circle cx="500" cy="500" r={r} className="pr-gilt" />
               </g>
             ))}
-            {/* miolo: a luz */}
-            <circle cx="500" cy="500" r="97" fill="url(#pr-hub)" className="pr-hub" />
-            {Array.from({ length: 16 }, (_, i) => {
-              const a = i * Math.PI / 8;
-              const [x0, y0] = prPolar(30, a), [x1, y1] = prPolar(97, a);
-              return <line key={'h' + i} x1={x0} y1={y0} x2={x1} y2={y1} className="pr-lead pr-lead--thin" />;
+            {/* núcleo neutro: a luz no centro dos eixos */}
+            <circle cx="500" cy="500" r={PR_CORE - 3} fill="url(#pr-hub)" className="pr-hub" />
+            {/* siglas dos setores, gravadas no aro */}
+            {Object.entries(PR_SECTOR).map(([sig, a]) => {
+              const [x, y] = prPolar(482, a);
+              return <text key={sig} x={x} y={y} className="pr-sigla">{sig}</text>;
             })}
-            <circle cx="500" cy="500" r="30" className="pr-lead pr-lead--ring" fill="#f6e3a8" />
           </svg>
 
           {/* medalhões (HTML por cima do SVG, para os símbolos e o clique) */}
-          {rings.map(ring => [...ring.at.entries()].map(([slot, d]) => {
-            const [x, y] = prPolar(ring.rMed, ring.start + slot * ring.step);
-            return (
-              <button key={d.id}
-                className={'pr-med pr-med--' + ring.tier + (cur && cur.id === d.id ? ' is-active' : '')}
-                style={{ left: (x - ring.d / 2) / 10 + '%', top: (y - ring.d / 2) / 10 + '%', width: ring.d / 10 + '%' }}
-                onMouseEnter={() => setActive(d)} onFocus={() => setActive(d)}
-                onClick={() => onNav('deity:' + d.id)}
-                aria-label={d.name}>
-                <DeitySigilImage deity={d} size="card" />
-              </button>
-            );
-          }))}
+          {placed.map(({ d, tier, x, y, size }) => (
+            <button key={d.id}
+              className={'pr-med pr-med--' + tier + (cur && cur.id === d.id ? ' is-active' : '')}
+              style={{ left: (x - size / 2) / 10 + '%', top: (y - size / 2) / 10 + '%', width: size / 10 + '%' }}
+              onMouseEnter={() => setActive(d)} onFocus={() => setActive(d)}
+              onClick={() => onNav('deity:' + d.id)}
+              aria-label={d.name}>
+              <DeitySigilImage deity={d} size="card" />
+            </button>
+          ))}
         </div>
 
         {/* legenda: a placa votiva mostra o vidro sob o cursor */}
@@ -330,7 +399,7 @@ function PantheonRose({ onNav }) {
             <div className="vt-votive-name">{cur ? cur.name : 'O Panteão de Valiran'}</div>
             <div className="vt-votive-title">{cur ? (cur.epithet || '') : 'Passe o cursor sobre um símbolo'}</div>
           </div>
-          <div className="vt-card-sub">{cur ? [tierName[curTier], vtRow(cur, /^dom[ií]nio/i)].filter(Boolean).join(' · ') : ''}</div>
+          <div className="vt-card-sub">{cur ? [PR_TIER_NAME[curTier], vtRow(cur, /^alinhamento$/i), vtRow(cur, /^dom[ií]nio/i)].filter(Boolean).join(' · ') : ''}</div>
         </div>
 
       </div>

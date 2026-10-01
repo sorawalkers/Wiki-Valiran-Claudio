@@ -192,6 +192,7 @@ function VtGothicWindow({ frame = VT_FRAMES[0], dead = false, className = '', si
 // Nível da divindade pelo "Tipo" da ficha (mesma regra da página do Panteão).
 function vtDeityTier(d) {
   const t = vtRow(d, /^tipo$/i);
+  if (/^aspecto|primordial/i.test(t)) return 'aspecto';
   if (/^tit[ãa]/i.test(t)) return 'tita';
   if (/ascend|anjo|pseudo/i.test(t)) return 'ascendido';
   return 'deus';
@@ -410,11 +411,10 @@ function VtDivider() {
   );
 }
 
-// Badge da divindade pelo "Tipo" da ficha: Titã (violeta), Ascendido/Anjo (cobalto), Deus (dourado).
+// Badge da divindade pelo "Tipo" da ficha: Aspecto (âmbar), Titã (violeta), Ascendido/Anjo (cobalto), Deus (dourado).
 function VtDeityBadge({ d }) {
   const tipo = vtRow(d, /^tipo$/i) || 'Divindade';
-  const cls = /tit[ãa]/i.test(tipo) ? 'tita' : /ascend|anjo|pseudo/i.test(tipo) ? 'ascendido' : 'deus';
-  return <span className={'vt-badge vt-badge--' + cls}>{tipo}</span>;
+  return <span className={'vt-badge vt-badge--' + vtDeityTier(d)}>{tipo}</span>;
 }
 
 function VtBadge({ c, isPC }) {
@@ -1190,7 +1190,7 @@ function VitralDeityCard({ deity, tone, onClick }) {
 // com capitular, Dogmas como tábua de mandamentos, relações divinas por
 // tipo e os fiéis (personagens que citam a divindade).
 // ════════════════════════════════════════════════════════════════
-const VA_TIER_NAME = { tita: 'Titã', deus: 'Divindade', ascendido: 'Ascendido' };
+const VA_TIER_NAME = { aspecto: 'Aspecto da Realidade', tita: 'Titã', deus: 'Divindade', ascendido: 'Ascendido' };
 
 // "Xathyr (inimigo declarado)" → grupo pela palavra entre parênteses
 function vaRelGroup(r) {
