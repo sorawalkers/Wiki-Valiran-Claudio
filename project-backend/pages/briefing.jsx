@@ -291,7 +291,9 @@ function Briefing({ onNav }) {
             {recap.map(r => (
               <article key={r.id} className="vq-recap-block">
                 {(r.title || r.hidden) && <h3 className="vq-recap-title">{r.title} <BriefDraft item={r} /></h3>}
-                {briefParas(r.body).map((p, i) => <p key={i} className={i === 0 && !r.title ? 'va-first' : ''}>{p}</p>)}
+                <div className="vq-recap-text">
+                  {briefParas(r.body).map((p, i) => <p key={i} className={i === 0 ? 'va-first' : ''}>{p}</p>)}
+                </div>
                 <BriefLinks item={r} onNav={onNav} />
                 <BriefEdit item={r} isEditor={isEditor} onEdit={edit} />
               </article>
