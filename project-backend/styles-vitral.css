@@ -2329,8 +2329,7 @@
 .vq-links a::before { content: "→ "; }
 
 /* I · resumo */
-/* Painel emoldurado; em telas largas o texto corre em duas colunas, para ocupar a
-   largura sem virar linhas compridas demais. */
+/* Painel emoldurado, texto em uma coluna na largura toda. */
 .vq-recap { display: flex; flex-direction: column; gap: 18px; }
 .vq-recap-block { position: relative; padding: 30px 36px 28px; --pane: #b8873a;
   border: 1px solid rgba(201,165,90,.22);
@@ -2344,9 +2343,6 @@
 .vq-recap-block p { margin: 0 0 14px; font-size: 19px; line-height: 1.7; color: var(--vt-ink-body); }
 .vq-recap-block p:last-of-type { margin-bottom: 0; }
 .vq-recap-block .vq-links, .vq-recap-block .vq-edit { margin-top: 16px; }
-@container vt (min-width: 1000px) {
-  .vq-recap-text { column-count: 2; column-gap: 56px; column-rule: 1px solid rgba(201,165,90,.16); }
-}
 
 /* II · últimas sessões */
 .vq-sessions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
