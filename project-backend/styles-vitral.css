@@ -2341,7 +2341,7 @@
 .vq-recap-block::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
   background: linear-gradient(90deg, transparent, var(--vt-gold) 20%, var(--vt-gold) 80%, transparent); opacity: .55; }
 .vq-recap-title { margin: 0 0 14px; font: 600 20px/1.2 var(--vt-display); color: var(--vt-ink); }
-.vq-recap-block p { margin: 0 0 14px; font-size: 19px; line-height: 1.7; color: var(--vt-ink-body); break-inside: avoid-column; }
+.vq-recap-block p { margin: 0 0 14px; font-size: 19px; line-height: 1.7; color: var(--vt-ink-body); }
 .vq-recap-block p:last-of-type { margin-bottom: 0; }
 .vq-recap-block .vq-links, .vq-recap-block .vq-edit { margin-top: 16px; }
 @container vt (min-width: 1000px) {
