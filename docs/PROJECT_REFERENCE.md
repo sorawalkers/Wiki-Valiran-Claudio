@@ -95,6 +95,7 @@ Each file is one wiki section, loaded by the router in `app.jsx`.
 | `npcs.jsx` | NPCs | NPC-only directory |
 | `character-detail.jsx` | Character article | Full character profile with infobox and sections |
 | `sessions.jsx` | Session Diary | Campaign session list + individual session view |
+| `briefing.jsx` | O que você precisa saber (`#/briefing`) | Player-facing digest: "Em resumo" (GM text), the last 3 sessions pulled from the diary (summary, keypoints, next), "Panorama" (active fronts with status crítico/em curso/adormecido) and "Mistérios" (open questions with status aberto/com pistas/resolvido; resolved ones collapse). Items live in `briefing_items`; `hidden` items are drafts only editors see |
 | `timeline.jsx` | Timeline | Chronological event line with era markers |
 | `factions.jsx` | Factions | Secret organization dossiers with redacted fields |
 | `realm-map.jsx` | Map (`#/map`) | Interactive hex-grid map of kingdoms — reads `realms` / `realm_hexes` / `realm_cities` / `realm_rivers` |
@@ -118,6 +119,7 @@ Tables live in Supabase (PostgreSQL). The canonical schema is at [`project-backe
 | `events` | Recent-events feed | — |
 | `factions` | Organizations with redacted fields | `rows` |
 | `kingdoms` | **Legacy, unused.** Table and `stats` field remain in the schema — `pages/kingdoms.jsx`, the only component that read it, was removed (see §4). Any existing rows are orphaned data, not rendered anywhere. Dropping the table is a separate decision (data loss); not done as part of the code cleanup. | `stats` |
+| `briefing_items` | "O que você precisa saber" blocks (`kind` = recap/front/mystery). Created by `db/seeds/seed_briefing_schema.sql` | `links` |
 | `houserules` | Mechanical house rules | `paragraphs` |
 | `planes` | Cosmological planes | — |
 | `image_slots` | Persistent image URL mapping | — |

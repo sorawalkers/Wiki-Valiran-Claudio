@@ -7,7 +7,7 @@ const NAV_SECTION_OF = {
   pantheon: 'panteao', deity: 'panteao', article: 'panteao',
   factions: 'casas', faction: 'casas',
   characters: 'almas', character: 'almas', npcs: 'almas', npc: 'almas',
-  sessions: 'cronicas', session: 'cronicas', timeline: 'cronicas', events: 'cronicas',
+  sessions: 'cronicas', session: 'cronicas', briefing: 'cronicas', timeline: 'cronicas', events: 'cronicas',
   recent: 'cronicas', campanha1: 'cronicas', campanha2: 'cronicas', campanha3: 'cronicas', rogue1: 'cronicas',
   map: 'atlas', kingdoms: 'atlas',
   sistema: 'mais',

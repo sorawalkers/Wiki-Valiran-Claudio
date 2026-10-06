@@ -15,6 +15,7 @@ const Data = {
       { id: 'npcs', label: 'Pessoas importantes' },
     ]},
     { id: 'cronicas', label: 'Crônicas', home: 'sessions', items: [
+      { id: 'briefing', label: 'O que você precisa saber' },
       { id: 'sessions', label: 'Diário de sessões' },
       { id: 'timeline', label: 'Linha do tempo' },
       { id: 'campanha3', label: 'Campanha III' },

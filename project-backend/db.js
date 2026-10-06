@@ -71,8 +71,10 @@
     Data.feed       = [];
     Data.kingdoms   = [];
     Data.systemEntries = [];
+    Data.briefing = [];
+    Data.briefingMissing = false;
     Data.realms = [];
-    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, sysRes, realmRes, hexRes, cityRes, riverRes] = await Promise.all([
+    const [sessRes, charRes, deityRes, tlRes, evRes, facRes, hrRes, kingRes, sysRes, realmRes, hexRes, cityRes, riverRes, briefRes] = await Promise.all([
       window.sb.from('sessions').select('*').order('num', { ascending: false }),
       window.sb.from('characters').select('*'),
       window.sb.from('deities').select('*'),
@@ -86,6 +88,7 @@
       window.sb.from('realm_hexes').select('*'),
       window.sb.from('realm_cities').select('*'),
       window.sb.from('realm_rivers').select('*'),
+      window.sb.from('briefing_items').select('*').order('sort_order'),
     ]);
 
     if (sessRes.data && sessRes.data.length > 0) {
@@ -250,6 +253,26 @@
         created_at: e.created_at || null,
         updated_at: e.updated_at || null,
       }));
+    }
+
+    // "O que você precisa saber" — tabela criada por db/seeds/seed_briefing_schema.sql
+    if (briefRes && !briefRes.error && briefRes.data) {
+      Data.briefing = briefRes.data.map(b => ({
+        _id:         b.id,
+        id:          b.id,
+        kind:        b.kind,
+        title:       b.title || '',
+        body:        b.body || '',
+        status:      b.status || null,
+        links:       Array.isArray(b.links) ? b.links : [],
+        session_num: b.session_num ?? null,
+        hidden:      !!b.hidden,
+        sort_order:  b.sort_order || 0,
+        created_at:  b.created_at || null,
+        updated_at:  b.updated_at || null,
+      }));
+    } else if (briefRes && briefRes.error) {
+      Data.briefingMissing = true;
     }
 
     if (realmRes.data && hexRes.data && cityRes.data) {
@@ -675,6 +698,31 @@
     await loadAll();
   }
 
+  async function saveBriefingItem(data) {
+    const num = parseInt(data.session_num);
+    const payload = {
+      id:          data.id,
+      kind:        data.kind,
+      title:       data.title || null,
+      body:        data.body || null,
+      status:      data.status || null,
+      links:       data.links || [],
+      session_num: Number.isFinite(num) ? num : null,
+      hidden:      !!data.hidden,
+      sort_order:  parseInt(data.sort_order) || 0,
+      updated_at:  new Date().toISOString(),
+    };
+    const res = await window.sb.from('briefing_items').upsert(payload, { onConflict: 'id' });
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
+  async function deleteBriefingItem(id) {
+    const res = await window.sb.from('briefing_items').delete().eq('id', id);
+    if (res.error) throw res.error;
+    await loadAll();
+  }
+
   window.DB = {
     loadAll,
     saveSession, deleteSession,
@@ -686,6 +734,7 @@
     saveHouseRule, deleteHouseRule,
     saveKingdom, deleteKingdom,
     saveSystemEntry, deleteSystemEntry,
+    saveBriefingItem, deleteBriefingItem,
     saveCampaignArticle,
     loadRealms, saveRealm, deleteRealm,
     saveHex, removeHex,
