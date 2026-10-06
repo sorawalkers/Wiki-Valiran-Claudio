@@ -3,6 +3,13 @@
 // ============================================================
 // Session modal (create / edit)
 // ============================================================
+// Loot pode vir como string ou objeto ({ text } / { name }); no formulário vira uma linha por item.
+function lootToText(loot) {
+  return (loot ?? []).filter(Boolean)
+    .map(l => typeof l === 'string' ? l : (l.text || l.name || JSON.stringify(l)))
+    .join('\n');
+}
+
 function SessionModal({ session, onClose }) {
   const isEdit = !!session?._id;
   const [form, setForm] = React.useState({
@@ -17,6 +24,11 @@ function SessionModal({ session, onClose }) {
     places: (session?.places ?? []).join('\n'),
     narrative: (session?.narrative ?? []).join('\n\n'),
     keypoints: (session?.keypoints ?? []).map(k => (k.danger ? '!' : '') + k.text).join('\n'),
+    duration: session?.duration ?? '',
+    session_xp: session?.session_xp ?? '',
+    loot: lootToText(session?.loot),
+    next: session?.next ?? '',
+    gmnote: session?.gmnote ?? '',
     _id: session?._id,
   });
   const [busy, setBusy] = React.useState(false);
@@ -43,6 +55,10 @@ function SessionModal({ session, onClose }) {
         places: form.places.split('\n').map(s => s.trim()).filter(Boolean),
         narrative: form.narrative.split('\n\n').map(s => s.trim()).filter(Boolean),
         keypoints: parseKeypoints(form.keypoints),
+        // Se o loot não foi mexido, mantém o array original (preserva itens em formato de objeto).
+        loot: form.loot === lootToText(session?.loot)
+          ? (session?.loot ?? [])
+          : form.loot.split('\n').map(s => s.trim()).filter(Boolean),
       });
       onClose();
     } catch (e) {
@@ -122,6 +138,30 @@ function SessionModal({ session, onClose }) {
               <label className="modal-label">Pontos-chave</label>
               <textarea className="modal-textarea" rows={4} value={form.keypoints} onChange={e => set('keypoints', e.target.value)} placeholder={"Käthryn jurou silêncio\n!Tannis: corrupção grau II"} />
               <span className="modal-hint">Um por linha. Prefixe com ! para marcar como perigo.</span>
+            </div>
+            <div className="modal-field-row">
+              <div className="modal-field">
+                <label className="modal-label">Duração</label>
+                <input className="modal-input" value={form.duration} onChange={e => set('duration', e.target.value)} placeholder="4h30" />
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Experiência</label>
+                <input className="modal-input" value={form.session_xp} onChange={e => set('session_xp', e.target.value)} placeholder="XP ganho na sessão" />
+              </div>
+            </div>
+            <div className="modal-field">
+              <label className="modal-label">Espólio</label>
+              <textarea className="modal-textarea" rows={3} value={form.loot} onChange={e => set('loot', e.target.value)} placeholder={"Adaga de prata\n120 peças de ouro"} />
+              <span className="modal-hint">Um item por linha.</span>
+            </div>
+            <div className="modal-field">
+              <label className="modal-label">Próxima sessão</label>
+              <textarea className="modal-textarea" rows={2} value={form.next} onChange={e => set('next', e.target.value)} placeholder="Gancho para a próxima sessão" />
+            </div>
+            <div className="modal-field">
+              <label className="modal-label">Nota do mestre</label>
+              <textarea className="modal-textarea" rows={4} value={form.gmnote} onChange={e => set('gmnote', e.target.value)} placeholder="Visível apenas para editores" />
+              <span className="modal-hint">Só aparece para quem é editor.</span>
             </div>
             {err && <div className="modal-error">{err}</div>}
           </div>
