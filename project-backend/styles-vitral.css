@@ -2329,7 +2329,7 @@
 .vq-links a::before { content: "→ "; }
 
 /* I · resumo */
-.vq-recap { display: flex; flex-direction: column; gap: 28px; max-width: 78ch; }
+.vq-recap { display: flex; flex-direction: column; gap: 28px; }
 .vq-recap-title { margin: 0 0 10px; font: 600 20px/1.2 var(--vt-display); color: var(--vt-ink); }
 .vq-recap p { margin: 0 0 14px; font-size: 20px; line-height: 1.7; color: var(--vt-ink-body); }
 
